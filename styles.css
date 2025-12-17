@@ -38,11 +38,14 @@ body {
 /* HERO */
 .hero {
   position: relative;
+  height: 60vh;
+  overflow: hidden;
 }
 
-.hero-img {
+.hero img {
   width: 100%;
-  display: block;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero-text {
@@ -66,8 +69,8 @@ body {
 /* ENTRY GRID */
 .entry-grid {
   display: grid;
-  gap: 16px;
-  padding: 16px;
+  gap: 20px;
+  padding: 20px 16px;
 }
 
 .entry-card {
@@ -76,12 +79,22 @@ body {
   padding: 16px;
 }
 
-.entry-card img {
+/* CARD IMAGE CROPPING */
+.card-image {
   width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
   border-radius: 16px;
   margin-bottom: 12px;
 }
 
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* CARD CONTENT */
 .entry-card h2 {
   margin: 0 0 6px;
 }
