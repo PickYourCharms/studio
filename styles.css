@@ -1,1 +1,112 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0a0a0a;
+}
+
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.9);
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.cart-icon {
+  font-size: 18px;
+}
+
+/* HERO */
+.hero {
+  padding: 48px 16px 32px;
+}
+
+.hero h1 {
+  font-size: 32px;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* ENTRY GRID */
+.entry-grid {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.entry-card {
+  padding: 20px;
+  border-radius: 24px;
+  background: #f9f9f9;
+}
+
+.entry-card h2 {
+  margin: 0 0 6px;
+}
+
+.entry-card p {
+  margin: 0 0 12px;
+  color: #666;
+}
+
+.entry-card button {
+  border: none;
+  background: #000;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.entry-card.highlight {
+  border: 1px solid #000;
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 12px;
+  background: #dcfce7;
+  color: #15803d;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+/* READYMADE */
+.ready-made {
+  padding: 24px 16px 40px;
+}
+
+.secondary-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid #000;
+  font-size: 14px;
+  cursor: pointer;
+}
 
