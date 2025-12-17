@@ -9,14 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=1.0.4">
+  <link rel="stylesheet" href="styles.css?v=1.0.6">
 </head>
 
 <body>
 
 <header class="navbar">
   <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
-  <div class="cart-icon hidden">🛍️</div>
 </header>
 
 <section class="hero">
@@ -30,7 +29,8 @@
 
 <section class="entry-grid">
 
-  <div class="entry-card interactive">
+  <!-- Bracelet -->
+  <div class="entry-card premium">
     <div class="card-image">
       <img src="assets/home/model_bracelet_mobile.png" loading="lazy">
     </div>
@@ -40,7 +40,8 @@
     <button>I want to build this →</button>
   </div>
 
-  <div class="entry-card interactive">
+  <!-- Earrings -->
+  <div class="entry-card premium">
     <div class="card-image">
       <img src="assets/home/model_earring_mobile.png" loading="lazy">
     </div>
@@ -50,18 +51,19 @@
     <button>Let’s start →</button>
   </div>
 
-  <div class="entry-card interactive highlight">
+  <!-- Combo -->
+  <div class="entry-card premium combo">
     <div class="card-image">
       <img src="assets/home/model_combo_mobile.png" loading="lazy">
       <span class="badge">Save 10%</span>
     </div>
     <h2>Combo</h2>
-    <p>Bracelet + Earrings.</p>
+    <p class="combo-subtext">Better together</p>
     <button>I want it all →</button>
   </div>
 
-  <!-- CURATED TEASER -->
-  <div class="entry-card interactive curated-card">
+  <!-- Curated -->
+  <div class="entry-card curated">
     <div class="card-image">
       <img src="assets/home/curated_teaser.png" loading="lazy">
     </div>
