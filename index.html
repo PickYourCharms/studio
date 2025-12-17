@@ -5,101 +5,72 @@
   <title>PickYourCharms</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- CSS (versioned to avoid cache issues) -->
-  <link rel="stylesheet" href="styles.css?v=1.0.3" />
+  <link rel="stylesheet" href="styles.css?v=1.0.4">
 </head>
 
 <body>
 
-  <!-- NAVBAR -->
-  <header class="navbar">
-    <img 
-      src="assets/home/PYC_LOGO_TEXT.png" 
-      alt="PickYourCharms"
-      class="logo-img"
-      loading="eager"
-    />
-    <div class="cart-icon hidden">🛍️</div>
-  </header>
+<header class="navbar">
+  <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  <div class="cart-icon hidden">🛍️</div>
+</header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <img 
-      src="assets/home/banner_vertical.png" 
-      alt="PickYourCharms Banner"
-      loading="eager"
-      fetchpriority="high"
-    />
-    <div class="hero-overlay"></div>
+<section class="hero">
+  <img src="assets/home/banner_vertical.png" loading="eager" fetchpriority="high">
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
+    <p>Create a piece that means something.</p>
+  </div>
+</section>
 
-    <div class="hero-text">
-      <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
-      <p>Create a piece that means something.</p>
+<section class="entry-grid">
+
+  <div class="entry-card interactive">
+    <div class="card-image">
+      <img src="assets/home/model_bracelet_mobile.png" loading="lazy">
     </div>
-  </section>
+    <h2>Bracelet</h2>
+    <p>Build it charm by charm.</p>
+    <span class="price-hint">Starting from Rs. 249</span>
+    <button>I want to build this →</button>
+  </div>
 
-  <!-- PRODUCT ENTRY -->
-  <section class="entry-grid">
-
-    <div class="entry-card">
-      <div class="card-image">
-        <img 
-          src="assets/home/model_bracelet_mobile.png" 
-          alt="Bracelet"
-          loading="lazy"
-        />
-      </div>
-      <h2>Bracelet</h2>
-      <p>Build it charm by charm.</p>
-      <span class="price-hint">Starting from Rs. 249</span>
-      <button>I want to build this →</button>
+  <div class="entry-card interactive">
+    <div class="card-image">
+      <img src="assets/home/model_earring_mobile.png" loading="lazy">
     </div>
+    <h2>Earrings</h2>
+    <p>Style both ears your way.</p>
+    <span class="price-hint">Starting from Rs. 199</span>
+    <button>Let’s start →</button>
+  </div>
 
-    <div class="entry-card">
-      <div class="card-image">
-        <img 
-          src="assets/home/model_earring_mobile.png" 
-          alt="Earrings"
-          loading="lazy"
-        />
-      </div>
-      <h2>Earrings</h2>
-      <p>Style both ears your way.</p>
-      <span class="price-hint">Starting from Rs. 199</span>
-      <button>Let’s start →</button>
+  <div class="entry-card interactive highlight">
+    <div class="card-image">
+      <img src="assets/home/model_combo_mobile.png" loading="lazy">
+      <span class="badge">Save 10%</span>
     </div>
+    <h2>Combo</h2>
+    <p>Bracelet + Earrings.</p>
+    <button>I want it all →</button>
+  </div>
 
-    <div class="entry-card highlight">
-      <div class="card-image">
-        <img 
-          src="assets/home/model_combo_mobile.png" 
-          alt="Combo"
-          loading="lazy"
-        />
-        <span class="badge">Save 10%</span>
-      </div>
-      <h2>Combo</h2>
-      <p>Bracelet + Earrings.</p>
-      <span class="price-hint">Better together</span>
-      <button>I want it all →</button>
+  <!-- CURATED TEASER -->
+  <div class="entry-card interactive curated-card">
+    <div class="card-image">
+      <img src="assets/home/curated_teaser.png" loading="lazy">
     </div>
-
-  </section>
-
-  <!-- CURATED -->
-  <section class="curated">
-    <h3>Curated Pieces</h3>
+    <h2>Curated Pieces</h2>
     <p>Designed by us, for days you don’t want to decide.</p>
-    <button class="secondary-btn">
-      Explore curated designs →
-    </button>
-  </section>
+    <button class="secondary-btn">Explore curated designs →</button>
+  </div>
 
-  <script src="app.js"></script>
+</section>
+
 </body>
 </html>
