@@ -79,7 +79,7 @@ body {
   transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* INTERACTIVE MOTION */
+/* INTERACTIVE MOTION (ALL CARDS) */
 .entry-card.interactive:active {
   transform: translateY(-2px);
 }
@@ -100,14 +100,9 @@ body {
   transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Image zoom only for interactive cards */
+/* Image zoom for all interactive cards */
 .entry-card.interactive:active .card-image img {
   transform: scale(1.02);
-}
-
-/* Curated stays calmer */
-.curated-card:active {
-  transform: translateY(-1px);
 }
 
 /* COMBO BADGE */
@@ -130,6 +125,11 @@ body {
 .entry-card p {
   margin: 0 0 10px;
   color: #666;
+}
+
+.combo-title {
+  font-weight: 600;
+  color: #444;
 }
 
 .combo-subtext {
