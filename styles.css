@@ -1,0 +1,104 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0a0a0a;
+}
+
+/* HEADER */
+.builder-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.85);
+}
+
+.builder-header h1 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* PRICE PILL */
+.price-pill {
+  background: #000;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: right;
+  min-width: 90px;
+}
+
+.premium-label {
+  font-size: 11px;
+  margin-top: 4px;
+  color: #dcfce7;
+}
+
+.hidden {
+  display: none;
+}
+
+/* BUILDER */
+.builder-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+#builderCanvas {
+  width: 340px;
+  height: 340px;
+  position: relative;
+}
+
+#braceletBase {
+  width: 100%;
+  height: 100%;
+}
+
+/* MASTER PHYSICS LAYER (1000x1000) */
+#charmLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1000px;
+  height: 1000px;
+  transform: scale(0.34);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+/* CHARM */
+.charm {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  pointer-events: none;
+}
+
+/* CHARM TRAY */
+.charm-tray {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px;
+}
+
+.charm-tray img {
+  width: 100%;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #f9f9f9;
+}

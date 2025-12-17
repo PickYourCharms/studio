@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PickYourCharms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- BUILDER HEADER -->
+  <header class="builder-header">
+    <h1>Build My Bracelet</h1>
+
+    <div class="price-pill">
+      ₹<span id="priceValue">249</span>
+      <div id="premiumLabel" class="premium-label hidden">
+        Includes premium charm ✨
+      </div>
+    </div>
+  </header>
+
+  <!-- BUILDER CANVAS -->
+  <main class="builder-container">
+    <div id="builderCanvas">
+      <img
+        id="braceletBase"
+        src="assets/bases/bracelet_base_gold.png"
+        alt="Bracelet Base"
+      />
+      <div id="charmLayer"></div>
+    </div>
+  </main>
+
+  <!-- CHARM TRAY -->
+  <section class="charm-tray" id="charmTray"></section>
+
+  <script src="app.js"></script>
+</body>
+</html>
