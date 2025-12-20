@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Build My Bracelet</title>
-  <link rel="stylesheet" href="builder.css"/>
+  <link rel="stylesheet" href="builder.css" />
 </head>
 <body>
 
@@ -15,14 +15,14 @@
 
 <main class="builder-container">
 
+  <!-- CANVAS -->
   <div class="canvas-wrapper">
     <div id="bracelet-canvas">
       <img
-        id="bracelet-base"
         src="assets/bases/bracelet_base_gold.png"
+        class="bracelet-base"
         alt="Bracelet Base"
       />
-      <!-- charms injected here -->
     </div>
   </div>
 
@@ -30,12 +30,13 @@
     Tap a charm to add • ✕ to remove
   </p>
 
+  <!-- TRAY -->
   <div class="charm-tray">
-    <img src="assets/charms/3DBowRibbon_Charm_Gold.png" data-id="bow" />
-    <img src="assets/charms/EvilEye_Charm_Gold.png" data-id="eye" />
-    <img src="assets/charms/LetterA_Charm_Gold.png" data-id="a" />
-    <img src="assets/charms/NorthStar_Charm_Gold.png" data-id="star" />
-    <img src="assets/charms/RedCherry_Charm_Gold.png" data-id="cherry" />
+    <img class="charm-item" data-file="3DBowRibbon_Charm_Gold.png" src="assets/charms/3DBowRibbon_Charm_Gold.png" />
+    <img class="charm-item" data-file="EvilEye_Charm_Gold.png" src="assets/charms/EvilEye_Charm_Gold.png" />
+    <img class="charm-item" data-file="LetterA_Charm_Gold.png" src="assets/charms/LetterA_Charm_Gold.png" />
+    <img class="charm-item" data-file="NorthStar_Charm_Gold.png" src="assets/charms/NorthStar_Charm_Gold.png" />
+    <img class="charm-item" data-file="RedCherry_Charm_Gold.png" src="assets/charms/RedCherry_Charm_Gold.png" />
   </div>
 
 </main>
