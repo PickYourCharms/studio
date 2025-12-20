@@ -19,11 +19,6 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* BLOCK LONG PRESS (FIX 4) */
-img, .charm {
-  -webkit-user-drag: none;
-  user-select: none;
-}
 img {
   pointer-events: auto;
 }
@@ -317,8 +312,6 @@ function loadTray(){
   CHARMS[metal].forEach(file=>{
     const img=document.createElement('img');
     img.src='assets/charms/'+file;
-    img.oncontextmenu = e => e.preventDefault(); // FIX 4
-    img.ontouchstart = e => e.preventDefault();
     img.onclick=()=>addCharm(file);
     tray.appendChild(img);
   });
@@ -382,9 +375,6 @@ function render(){
 
     const img=document.createElement('img');
     img.src='assets/charms/'+file;
-    img.oncontextmenu = e => e.preventDefault(); // FIX 4
-    img.ontouchstart = e => e.preventDefault();
-
     w.appendChild(img);
     w.onclick=()=>{charms.splice(i,1);render()};
     canvas.appendChild(w);
