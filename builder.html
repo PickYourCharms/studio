@@ -6,203 +6,270 @@
 <title>Build My Bracelet</title>
 
 <style>
-:root{
-  --gold:#d4a441;
-  --bg1:#fffdfa;
-  --bg2:#f6f2ea;
-  --text:#111;
-  --muted:#777;
-  --ease:cubic-bezier(.2,.8,.2,1);
+/* =========================
+   GLOBAL
+   ========================= */
+* {
+  -webkit-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
-body{
-  margin:0;
-  padding:16px;
-  font-family:system-ui,-apple-system,sans-serif;
-  background:linear-gradient(180deg,var(--bg1),var(--bg2));
-  color:var(--text);
-  text-align:center;
+body {
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, #fffdfa, #f5f1e9);
+  text-align: center;
+  color: #111;
 }
 
-/* HEADER */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:14px;
-  margin-bottom:6px;
-}
-.header button{
-  background:none;
-  border:none;
-  cursor:pointer;
+/* =========================
+   HEADER
+   ========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* TITLE */
-h2{margin:6px 0 10px}
-
-/* METAL TOGGLE */
-.toggle{
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  margin-bottom:14px;
-}
-.toggle button{
-  padding:8px 18px;
-  border-radius:999px;
-  border:1px solid #ddd;
-  background:#fff;
-  cursor:pointer;
-  transition:.2s var(--ease);
-}
-.toggle button.active{
-  background:#000;
-  color:#fff;
-  border-color:#000;
+.header button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-/* CANVAS */
-.canvas{
-  position:relative;
-  width:min(92vw,380px);
-  aspect-ratio:1/1;
-  margin:0 auto;
-}
-.bracelet{
-  position:absolute;
-  width:72%;
-  height:72%;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-  transition:opacity .25s var(--ease);
+/* =========================
+   TITLE
+   ========================= */
+h2 {
+  margin: 10px 0 12px;
 }
 
-/* PRICE PILL */
-.price-pill{
-  position:absolute;
-  top:10%;
-  right:8%;
-  padding:6px 12px;
-  font-size:13px;
-  border-radius:999px;
-  background:rgba(255,255,255,.85);
-  backdrop-filter:blur(8px);
-  box-shadow:0 8px 22px rgba(0,0,0,.12);
-  opacity:0;
-  transform:translateY(6px);
-  transition:.25s var(--ease);
-}
-.price-pill.show{
-  opacity:1;
-  transform:translateY(0);
+/* =========================
+   METAL TOGGLE
+   ========================= */
+.toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
-/* CHARMS */
-.charm{
-  position:absolute;
-  cursor:pointer;
-  transform-origin:top center;
-  animation:pop .18s var(--ease);
-}
-@keyframes pop{
-  from{opacity:0;transform:scale(.92)}
-  to{opacity:1;transform:scale(1)}
-}
-.charm img{
-  width:46px;
-  display:block;
-  pointer-events:none;
+.toggle button {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* HELPER */
-.helper{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--muted);
+.toggle button.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
-/* TRAY */
-.tray{
-  display:flex;
-  justify-content:center;
-  gap:16px;
-  margin-top:18px;
-  padding:10px 0;
-}
-.tray img{
-  width:44px;
-  cursor:pointer;
-  transition:transform .15s var(--ease);
-}
-.tray img:active{
-  transform:scale(.92);
+/* =========================
+   CANVAS
+   ========================= */
+.canvas {
+  position: relative;
+  width: min(92vw, 380px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
 }
 
-/* PREMIUM NOTE */
-.premium-note{
-  font-size:13px;
-  margin-top:6px;
-  color:#444;
-  opacity:0;
-  transition:.3s ease;
-}
-.premium-note.show{opacity:1}
-
-/* CTA */
-.cta{
-  position:fixed;
-  bottom:14px;
-  left:14px;
-  right:14px;
-  padding:16px;
-  border-radius:999px;
-  background:#000;
-  color:#fff;
-  font-size:16px;
-  border:none;
-  cursor:pointer;
-  opacity:0;
-  transform:translateY(12px);
-  transition:.25s var(--ease);
-}
-.cta.show{
-  opacity:1;
-  transform:translateY(0);
+.bracelet {
+  position: absolute;
+  width: 72%;
+  height: 72%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 
-/* BOTTOM SHEET */
-.sheet{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  display:none;
-  align-items:flex-end;
+/* =========================
+   PRICE PILL
+   ========================= */
+.price-pill {
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.25s ease;
 }
-.sheet.show{display:flex}
-.sheet-content{
-  background:#fff;
-  width:100%;
-  padding:20px;
-  border-radius:18px 18px 0 0;
-  text-align:left;
+
+.price-pill.show {
+  opacity: 1;
+  transform: translateY(0);
 }
-.sheet-actions{
-  display:flex;
-  gap:10px;
-  margin-top:14px;
+
+/* =========================
+   CHARMS
+   ========================= */
+.charm {
+  position: absolute;
+  cursor: pointer;
+  transform-origin: top center;
+  animation: pop 0.18s cubic-bezier(.2,.8,.2,1);
 }
-.sheet-actions button{
-  flex:1;
-  padding:12px;
-  border-radius:999px;
-  border:none;
-  cursor:pointer;
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
 }
-.cancel{background:#f2f2f2}
-.confirm{background:#000;color:#fff}
+
+.charm img {
+  width: 46px;
+  pointer-events: none;
+}
+
+/* =========================
+   HELPER
+   ========================= */
+.helper {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #777;
+}
+
+/* =========================
+   PREMIUM NOTE
+   ========================= */
+.premium-note {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #333;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.premium-note.show {
+  opacity: 1;
+}
+
+/* =========================
+   TRAY
+   ========================= */
+.tray-wrapper {
+  margin-top: 18px;
+  padding: 14px 0;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.tray {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.tray img {
+  width: 44px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.tray img:active {
+  transform: scale(0.9);
+}
+
+/* =========================
+   RESET
+   ========================= */
+.reset-row {
+  display: flex;
+  justify-content: flex-end;
+  width: min(92vw, 380px);
+  margin: 10px auto 0;
+}
+
+.reset-row button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #777;
+  cursor: pointer;
+}
+
+/* =========================
+   CTA
+   ========================= */
+.cta {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  padding: 16px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.25s ease;
+}
+
+.cta.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================
+   BOTTOM SHEET
+   ========================= */
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  align-items: flex-end;
+}
+
+.sheet.show {
+  display: flex;
+}
+
+.sheet-content {
+  background: #fff;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  text-align: left;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sheet-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel { background: #f2f2f2; }
+.confirm { background: #000; color: #fff; }
 </style>
 </head>
 
@@ -210,90 +277,193 @@ h2{margin:6px 0 10px}
 
 <div class="header">
   <button onclick="history.back()">← Back</button>
-  <button onclick="openReset('reset')">Reset</button>
 </div>
 
 <h2>Build My Bracelet</h2>
 
 <div class="toggle">
-  <button id="goldBtn" class="active" onclick="requestMetal('gold')">Gold</button>
-  <button id="silverBtn" onclick="requestMetal('silver')">Silver</button>
+  <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
+  <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
 </div>
 
 <div class="canvas" id="canvas">
   <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
-  <div id="price" class="price-pill"></div>
+  <div id="pricePill" class="price-pill"></div>
 </div>
 
 <div class="helper">Tap a charm to add • Tap charm to remove</div>
 <div id="premiumNote" class="premium-note">✨ Premium charm added</div>
 
-<div class="tray">
-  <img src="assets/charms/3DBowRibbon_Charm_Gold.png" onclick="addCharm(this.src,false)">
-  <img src="assets/charms/EvilEye_Charm_Gold.png" onclick="addCharm(this.src,true)">
-  <img src="assets/charms/LetterA_Charm_Gold.png" onclick="addCharm(this.src,false)">
-  <img src="assets/charms/NorthStar_Charm_Gold.png" onclick="addCharm(this.src,false)">
-  <img src="assets/charms/RedCherry_Charm_Gold.png" onclick="addCharm(this.src,false)">
+<div class="tray-wrapper">
+  <div class="tray" id="tray">
+    <!-- injected by JS -->
+  </div>
 </div>
 
-<button id="cta" class="cta">Love it · Add to Bag 👜</button>
+<div class="reset-row">
+  <button onclick="softReset()">Reset</button>
+</div>
+
+<button id="cta" class="cta">Love it · Add to Bag</button>
 
 <!-- BOTTOM SHEET -->
 <div id="sheet" class="sheet">
   <div class="sheet-content">
-    <strong id="sheetTitle"></strong>
-    <p id="sheetText" style="margin:6px 0;color:#666"></p>
+    <strong>Switch metal?</strong>
+    <p style="color:#666;margin:6px 0">
+      Your current bracelet will be cleared.
+    </p>
     <div class="sheet-actions">
       <button class="cancel" onclick="closeSheet()">Cancel</button>
-      <button class="confirm" onclick="confirmAction()">Confirm</button>
+      <button class="confirm" onclick="confirmMetalSwitch()">Switch & Reset</button>
     </div>
   </div>
 </div>
 
 <script>
-/* LOCKED PHYSICS */
-const PHYSICS={size:46,anchorX:23,anchorY:6,attachOffset:2};
-const SLOTS={
-  1:[90],2:[70,110],3:[60,90,120],4:[45,75,105,135],5:[40,65,90,115,140]
+/* =========================
+   CONFIG
+   ========================= */
+const BASE_PRICE = 249;
+const EXTRA_CHARM_PRICE = 50;
+const PREMIUM_EXTRA = 80;
+
+const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
+
+const SLOT_ANGLES = {
+  1:[90],
+  2:[70,110],
+  3:[60,90,120],
+  4:[45,75,105,135],
+  5:[40,65,90,115,140]
 };
 
-let charms=[];
-let metal='gold';
-let pendingAction=null;
-let premiumShown=false;
+/* =========================
+   STATE
+   ========================= */
+let metal = 'gold';
+let charms = [];
+let pendingMetal = null;
 
-const canvas=document.getElementById('canvas');
-const bracelet=document.getElementById('bracelet');
-const priceEl=document.getElementById('price');
-const cta=document.getElementById('cta');
+/* =========================
+   DOM
+   ========================= */
+const canvas = document.getElementById('canvas');
+const bracelet = document.getElementById('bracelet');
+const tray = document.getElementById('tray');
+const pricePill = document.getElementById('pricePill');
+const cta = document.getElementById('cta');
+const premiumNote = document.getElementById('premiumNote');
+const sheet = document.getElementById('sheet');
 
-function addCharm(src,isPremium){
+/* =========================
+   CHARM SOURCES (EXACT FILENAMES)
+   ========================= */
+const CHARM_FILES = {
+  gold: [
+    { src:'assets/charms/3DBowRibbon_Charm_Gold.png', premium:false },
+    { src:'assets/charms/EvilEye_Charm_Gold.png', premium:true },
+    { src:'assets/charms/LetterA_Charm_Gold.png', premium:false },
+    { src:'assets/charms/NorthStar_Charm_Gold.png', premium:false },
+    { src:'assets/charms/RedCherry_Charm_Gold.png', premium:false }
+  ],
+  silver: [
+    { src:'assets/charms/3DBowRibbon_Charm_Silver.png', premium:false },
+    { src:'assets/charms/EvilEye_Charm_Silver.png', premium:true },
+    { src:'assets/charms/LetterA_Charm_Silver.png', premium:false },
+    { src:'assets/charms/NorthStar_Charm_Silver.png', premium:false },
+    { src:'assets/charms/RedCherry_Charm_Silver.png', premium:false }
+  ]
+};
+
+/* =========================
+   INIT
+   ========================= */
+loadTray();
+
+/* =========================
+   FUNCTIONS
+   ========================= */
+function loadTray(){
+  tray.innerHTML='';
+  CHARM_FILES[metal].forEach(c=>{
+    const img=document.createElement('img');
+    img.src=c.src;
+    img.onclick=()=>addCharm(c);
+    tray.appendChild(img);
+  });
+}
+
+function addCharm(charm){
   if(charms.length>=5) return;
-  charms.push({src,isPremium});
-  render();
-  if(isPremium&&!premiumShown){
-    premiumShown=true;
-    document.getElementById('premiumNote').classList.add('show');
-    setTimeout(()=>document.getElementById('premiumNote').classList.remove('show'),1500);
+  charms.push(charm);
+  if(charm.premium){
+    premiumNote.classList.add('show');
+    setTimeout(()=>premiumNote.classList.remove('show'),1200);
   }
+  render();
+}
+
+function softReset(){
+  charms=[];
+  render();
+}
+
+function switchMetal(m){
+  if(m===metal) return;
+  pendingMetal=m;
+  sheet.classList.add('show');
+}
+
+function confirmMetalSwitch(){
+  metal=pendingMetal;
+  charms=[];
+  bracelet.style.opacity=0;
+  setTimeout(()=>{
+    bracelet.src=`assets/bases/bracelet_base_${metal}.png`;
+    bracelet.style.opacity=1;
+  },200);
+
+  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
+  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+
+  loadTray();
+  closeSheet();
+  render();
+}
+
+function closeSheet(){
+  sheet.classList.remove('show');
+}
+
+function calculatePrice(){
+  let total=BASE_PRICE;
+  if(charms.length>1){
+    total+=(charms.length-1)*EXTRA_CHARM_PRICE;
+  }
+  charms.forEach(c=>{
+    if(c.premium) total+=PREMIUM_EXTRA;
+  });
+  return total;
 }
 
 function render(){
-  document.querySelectorAll('.charm').forEach(c=>c.remove());
+  document.querySelectorAll('.charm').forEach(el=>el.remove());
+
   if(charms.length===0){
-    priceEl.classList.remove('show');
+    pricePill.classList.remove('show');
     cta.classList.remove('show');
     return;
   }
 
-  priceEl.textContent=`Rs. ${499 + charms.length*40 + charms.filter(c=>c.isPremium).length*60}`;
-  priceEl.classList.add('show');
+  pricePill.textContent=`Rs. ${calculatePrice()}`;
+  pricePill.classList.add('show');
   cta.classList.add('show');
 
-  const r=canvas.getBoundingClientRect();
-  const cx=r.width/2, cy=r.height/2;
-  const radius=r.width*.36;
-  const angles=SLOTS[charms.length];
+  const rect=canvas.getBoundingClientRect();
+  const cx=rect.width/2, cy=rect.height/2;
+  const radius=rect.width*0.36;
+  const angles=SLOT_ANGLES[charms.length];
 
   charms.forEach((c,i)=>{
     const a=angles[angles.length-1-i];
@@ -315,36 +485,6 @@ function render(){
     w.onclick=()=>{charms.splice(i,1);render()};
     canvas.appendChild(w);
   });
-}
-
-/* RESET / METAL */
-function requestMetal(m){
-  if(m===metal) return;
-  pendingAction={type:'metal',value:m};
-  openSheet('Switch metal?','Your current bracelet will be cleared.');
-}
-function openReset(){
-  pendingAction={type:'reset'};
-  openSheet('Reset bracelet?','This will remove all charms.');
-}
-function openSheet(t,txt){
-  sheetTitle.textContent=t;
-  sheetText.textContent=txt;
-  sheet.classList.add('show');
-}
-function closeSheet(){sheet.classList.remove('show')}
-function confirmAction(){
-  if(pendingAction.type==='metal'){
-    metal=pendingAction.value;
-    bracelet.style.opacity=0;
-    setTimeout(()=>{
-      bracelet.src=`assets/bases/bracelet_base_${metal}.png`;
-      bracelet.style.opacity=1;
-    },200);
-    document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
-    document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
-  }
-  charms=[];premiumShown=false;render();closeSheet();
 }
 </script>
 
