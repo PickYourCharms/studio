@@ -6,9 +6,6 @@
 <title>Build My Bracelet</title>
 
 <style>
-/* =========================
-   BASE
-========================= */
 body {
   margin: 0;
   padding: 14px;
@@ -19,16 +16,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-img {
-  pointer-events: auto;
-}
-img:active {
-  pointer-events: auto;
-}
-
-/* =========================
-   HEADER
-========================= */
+/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
@@ -42,16 +30,12 @@ img:active {
   cursor: pointer;
 }
 
-/* =========================
-   TITLE
-========================= */
+/* TITLE */
 h2 {
   margin: 8px 0 10px;
 }
 
-/* =========================
-   METAL TOGGLE
-========================= */
+/* METAL TOGGLE */
 .metal-toggle {
   display: flex;
   justify-content: center;
@@ -73,42 +57,35 @@ h2 {
   border-color: #000;
 }
 
-/* =========================
-   BUILDER CARD (FIX 1)
-========================= */
+/* BUILDER */
 .builder-surface {
   background: #ffffff;
   border-radius: 26px;
-  padding: 10px 12px 18px; /* reduced top padding */
+  padding: 10px 12px 18px;
   margin: 0 auto;
   max-width: 420px;
   box-shadow: 0 18px 40px rgba(0,0,0,0.06);
 }
 
-/* =========================
-   CANVAS
-========================= */
 .canvas {
   position: relative;
   width: 100%;
   max-width: 360px;
   aspect-ratio: 1 / 1;
-  margin: -6px auto 0; /* pulls builder upward */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: -6px auto 0;
 }
 
 .bracelet {
   position: absolute;
   width: 72%;
   height: 72%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
-/* =========================
-   PRICE PILL
-========================= */
+/* PRICE */
 .price-pill {
   position: absolute;
   top: 6%;
@@ -128,9 +105,7 @@ h2 {
   transform: translateY(0);
 }
 
-/* =========================
-   CHARMS
-========================= */
+/* CHARMS */
 .charm {
   position: absolute;
   cursor: pointer;
@@ -141,9 +116,7 @@ h2 {
   width: 46px;
 }
 
-/* =========================
-   RESET (FIX 3)
-========================= */
+/* RESET */
 .reset-row {
   text-align: right;
   margin: 6px auto 10px;
@@ -158,18 +131,13 @@ h2 {
   cursor: pointer;
 }
 
-/* =========================
-   HELPER
-========================= */
+/* HELPER */
 .helper {
-  margin-top: 4px;
   font-size: 13px;
   color: #777;
 }
 
-/* =========================
-   TRAY CARD (FIX 2)
-========================= */
+/* TRAY */
 .tray-surface {
   background: #ffffff;
   border-radius: 22px;
@@ -190,9 +158,7 @@ h2 {
   cursor: pointer;
 }
 
-/* =========================
-   CTA
-========================= */
+/* CTA */
 .cta {
   position: fixed;
   bottom: 14px;
@@ -208,12 +174,53 @@ h2 {
   opacity: 0;
   transform: translateY(12px);
   transition: all 0.25s ease;
-  z-index: 20;
 }
 
 .cta.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  width: 86%;
+  max-width: 320px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.primary {
+  background: #000;
+  color: #fff;
+}
+
+.secondary {
+  background: #eee;
 }
 </style>
 </head>
@@ -227,8 +234,8 @@ h2 {
 <h2>Build My Bracelet</h2>
 
 <div class="metal-toggle">
-  <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
-  <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
+  <button id="goldBtn" class="active" onclick="onMetalClick('gold')">Gold</button>
+  <button id="silverBtn" onclick="onMetalClick('silver')">Silver</button>
 </div>
 
 <div class="builder-surface">
@@ -238,7 +245,7 @@ h2 {
   </div>
 
   <div class="reset-row">
-    <button onclick="requestReset()">Reset</button>
+    <button onclick="onResetClick()">Reset</button>
   </div>
 
   <div class="helper">Tap a charm to add • Tap charm to remove</div>
@@ -250,13 +257,20 @@ h2 {
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
 
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <div id="modalText"></div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="primary" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <script>
-/* =========================
-   CONFIG (UNCHANGED)
-========================= */
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
-
 const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
 
 const SLOT_ANGLES = {
@@ -267,24 +281,6 @@ const SLOT_ANGLES = {
   5:[40,65,90,115,140]
 };
 
-/* =========================
-   STATE
-========================= */
-let metal = 'gold';
-let charms = [];
-
-/* =========================
-   DOM
-========================= */
-const canvas = document.getElementById('canvas');
-const bracelet = document.getElementById('bracelet');
-const tray = document.getElementById('tray');
-const pricePill = document.getElementById('pricePill');
-const cta = document.getElementById('cta');
-
-/* =========================
-   CHARMS
-========================= */
 const CHARMS = {
   gold: [
     '3DBowRibbon_Charm_Gold.png',
@@ -302,11 +298,21 @@ const CHARMS = {
   ]
 };
 
+let metal = 'gold';
+let charms = [];
+let pendingAction = null;
+
+const canvas = document.getElementById('canvas');
+const bracelet = document.getElementById('bracelet');
+const tray = document.getElementById('tray');
+const pricePill = document.getElementById('pricePill');
+const cta = document.getElementById('cta');
+const modal = document.getElementById('modal');
+const modalText = document.getElementById('modalText');
+const modalConfirm = document.getElementById('modalConfirm');
+
 loadTray();
 
-/* =========================
-   FUNCTIONS
-========================= */
 function loadTray(){
   tray.innerHTML='';
   CHARMS[metal].forEach(file=>{
@@ -323,26 +329,6 @@ function addCharm(file){
   render();
 }
 
-function requestReset(){
-  if(charms.length===0) return;
-  charms=[];
-  render();
-}
-
-function switchMetal(next){
-  if(next===metal) return;
-  if(charms.length>0) return; // logic already correct
-  metal=next;
-  bracelet.src='assets/bases/bracelet_base_'+metal+'.png';
-  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
-  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
-  loadTray();
-}
-
-function calculatePrice(){
-  return BASE_PRICE + Math.max(0, charms.length-1)*EXTRA_CHARM_PRICE;
-}
-
 function render(){
   document.querySelectorAll('.charm').forEach(el=>el.remove());
 
@@ -352,7 +338,7 @@ function render(){
     return;
   }
 
-  pricePill.textContent='Rs. '+calculatePrice();
+  pricePill.textContent='Rs. '+(BASE_PRICE + (charms.length-1)*EXTRA_CHARM_PRICE);
   pricePill.classList.add('show');
   cta.classList.add('show');
 
@@ -379,6 +365,57 @@ function render(){
     w.onclick=()=>{charms.splice(i,1);render()};
     canvas.appendChild(w);
   });
+}
+
+/* ===== FIX 1 ===== */
+function onMetalClick(next){
+  if(next===metal) return;
+  if(charms.length>0){
+    showModal(
+      'Switching metal will reset your design.',
+      ()=>{
+        charms=[];
+        metal=next;
+        updateMetal();
+      }
+    );
+  } else {
+    metal=next;
+    updateMetal();
+  }
+}
+
+/* ===== FIX 2 ===== */
+function onResetClick(){
+  if(charms.length===0) return;
+  showModal(
+    'Reset bracelet design?',
+    ()=>{
+      charms=[];
+      render();
+    }
+  );
+}
+
+function updateMetal(){
+  bracelet.src='assets/bases/bracelet_base_'+metal+'.png';
+  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
+  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+  loadTray();
+  render();
+}
+
+/* MODAL */
+function showModal(text,confirmFn){
+  modalText.textContent=text;
+  modalConfirm.onclick=()=>{
+    closeModal();
+    confirmFn();
+  };
+  modal.style.display='flex';
+}
+function closeModal(){
+  modal.style.display='none';
 }
 </script>
 
