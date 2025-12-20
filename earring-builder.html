@@ -6,21 +6,30 @@
 <title>Style My Earrings</title>
 
 <style>
+/* =========================
+   GLOBAL
+   ========================= */
 body {
   margin: 0;
   padding: 14px;
   font-family: system-ui, -apple-system, sans-serif;
   background: #f6f3ec;
-  text-align: center;
   color: #111;
+  text-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* HEADER */
+h2 {
+  margin: 8px 0 10px;
+}
+
+/* =========================
+   HEADER
+   ========================= */
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .header button {
@@ -30,12 +39,9 @@ body {
   cursor: pointer;
 }
 
-/* TITLE */
-h2 {
-  margin: 10px 0 12px;
-}
-
-/* METAL TOGGLE */
+/* =========================
+   METAL TOGGLE
+   ========================= */
 .metal-toggle {
   display: flex;
   justify-content: center;
@@ -57,9 +63,11 @@ h2 {
   border-color: #000;
 }
 
-/* BUILDER SURFACE */
+/* =========================
+   BUILDER SURFACE
+   ========================= */
 .builder-surface {
-  background: #ffffff;
+  background: #fff;
   border-radius: 26px;
   padding: 14px 12px 18px;
   margin: 0 auto;
@@ -67,33 +75,38 @@ h2 {
   box-shadow: 0 18px 40px rgba(0,0,0,0.06);
 }
 
-/* CANVAS */
+/* =========================
+   CANVAS
+   ========================= */
 .canvas {
   position: relative;
   width: 100%;
   max-width: 360px;
-  aspect-ratio: 1 / 1.2;
+  height: 360px;
   margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 22px;
 }
 
-/* HOOKS */
+/* =========================
+   HOOKS
+   ========================= */
 .hook {
-  position: relative;
-  width: 42%;
+  position: absolute;
+  top: 0;
+  width: 40%;
   pointer-events: none;
 }
 
-.hook img {
-  width: 100%;
-  height: auto;
-  display: block;
+.hook.left {
+  left: 6%;
 }
 
-/* CHARMS */
+.hook.right {
+  right: 6%;
+}
+
+/* =========================
+   CHARM
+   ========================= */
 .charm {
   position: absolute;
   cursor: pointer;
@@ -101,13 +114,16 @@ h2 {
 }
 
 .charm img {
-  width: 42px;
+  display: block;
+  pointer-events: none;
 }
 
-/* PRICE */
+/* =========================
+   PRICE PILL
+   ========================= */
 .price-pill {
   position: absolute;
-  top: 6%;
+  top: 8%;
   right: 6%;
   padding: 6px 14px;
   border-radius: 999px;
@@ -124,11 +140,12 @@ h2 {
   transform: translateY(0);
 }
 
-/* RESET */
+/* =========================
+   RESET
+   ========================= */
 .reset-row {
   text-align: right;
-  margin: 6px auto 10px;
-  max-width: 360px;
+  margin-top: 6px;
 }
 
 .reset-row button {
@@ -139,15 +156,20 @@ h2 {
   cursor: pointer;
 }
 
-/* HELPER */
+/* =========================
+   HELPER
+   ========================= */
 .helper {
   font-size: 13px;
   color: #777;
+  margin-top: 6px;
 }
 
-/* TRAY */
+/* =========================
+   TRAY
+   ========================= */
 .tray-surface {
-  background: #ffffff;
+  background: #fff;
   border-radius: 22px;
   padding: 14px 10px;
   margin: 14px auto 90px;
@@ -166,7 +188,9 @@ h2 {
   cursor: pointer;
 }
 
-/* CTA */
+/* =========================
+   CTA
+   ========================= */
 .cta {
   position: fixed;
   bottom: 14px;
@@ -189,7 +213,9 @@ h2 {
   transform: translateY(0);
 }
 
-/* MODAL */
+/* =========================
+   MODAL
+   ========================= */
 .modal {
   position: fixed;
   inset: 0;
@@ -248,15 +274,9 @@ h2 {
 
 <div class="builder-surface">
   <div class="canvas" id="canvas">
-    <div class="price-pill" id="pricePill"></div>
-
-    <div class="hook" id="leftHook">
-      <img id="leftHookImg" src="assets/bases/LeftHook_gold.png">
-    </div>
-
-    <div class="hook" id="rightHook">
-      <img id="rightHookImg" src="assets/bases/RightHook_gold.png">
-    </div>
+    <img id="leftHook" class="hook left" />
+    <img id="rightHook" class="hook right" />
+    <div id="pricePill" class="price-pill"></div>
   </div>
 
   <div class="reset-row">
@@ -272,7 +292,6 @@ h2 {
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-card">
     <div id="modalText"></div>
@@ -284,16 +303,35 @@ h2 {
 </div>
 
 <script>
-/* ================= CONFIG ================= */
+/* =========================
+   PRICING (TEMP, SHEET LATER)
+   ========================= */
 const BASE_PRICE = 249;
-const PREMIUM_DELTA = 100;
+const PREMIUM_DIFF = 80;
 
-/* Single tuning panel */
+/* =========================
+   PHYSICS – ONLY TUNING ZONE
+   ========================= */
 const EARRING_PHYSICS = {
-  charmSize: 42,
-  anchorX: 200,
-  anchorY: 520,
-  charmOffsetY: 4
+  hookScale: 0.9,        // resize hook
+  charmSize: 44,        // charm size
+  anchorX: 105,         // half of hook width
+  anchorY: 520,         // bottom loop Y
+  charmOffsetY: 2       // hug distance
+};
+
+/* =========================
+   FILE MAPS (EXACT NAMES)
+   ========================= */
+const HOOKS = {
+  gold: {
+    left: 'assets/bases/LeftHook_gold.png',
+    right: 'assets/bases/RightHook_gold.png'
+  },
+  silver: {
+    left: 'assets/bases/LeftHook_silver.png',
+    right: 'assets/bases/RightHook_silver.png'
+  }
 };
 
 const CHARMS = {
@@ -313,23 +351,39 @@ const CHARMS = {
   ]
 };
 
-/* ================= STATE ================= */
-let metal = 'gold';
-let charms = { left: null, right: null };
-let pendingAction = null;
+const PREMIUM_CHARMS = [
+  'NorthStar'
+];
 
-/* ================= DOM ================= */
-const tray = document.getElementById('tray');
+/* =========================
+   STATE
+   ========================= */
+let metal = 'gold';
+let leftCharm = null;
+let rightCharm = null;
+
+/* =========================
+   ELEMENTS
+   ========================= */
+const canvas = document.getElementById('canvas');
 const leftHook = document.getElementById('leftHook');
 const rightHook = document.getElementById('rightHook');
-const leftHookImg = document.getElementById('leftHookImg');
-const rightHookImg = document.getElementById('rightHookImg');
+const tray = document.getElementById('tray');
 const pricePill = document.getElementById('pricePill');
 const cta = document.getElementById('cta');
+const modal = document.getElementById('modal');
+const modalText = document.getElementById('modalText');
+const modalConfirm = document.getElementById('modalConfirm');
 
+/* =========================
+   INIT
+   ========================= */
+updateHooks();
 loadTray();
 
-/* ================= FUNCTIONS ================= */
+/* =========================
+   CORE LOGIC
+   ========================= */
 function loadTray() {
   tray.innerHTML = '';
   CHARMS[metal].forEach(file => {
@@ -341,84 +395,101 @@ function loadTray() {
 }
 
 function addCharm(file) {
-  if (!charms.left) {
-    charms.left = file;
-  } else if (!charms.right) {
-    charms.right = file;
+  if (!leftCharm) {
+    leftCharm = file;
+  } else if (!rightCharm) {
+    rightCharm = file;
   } else {
-    charms.right = file;
+    return;
   }
   render();
 }
 
 function removeCharm(side) {
-  charms[side] = null;
+  if (side === 'left') leftCharm = null;
+  if (side === 'right') rightCharm = null;
   render();
 }
 
 function render() {
   document.querySelectorAll('.charm').forEach(el => el.remove());
 
-  const active = [charms.left, charms.right].filter(Boolean).length;
+  let premiumCount = 0;
 
-  if (active === 0) {
-    pricePill.classList.remove('show');
-    cta.classList.remove('show');
-    return;
+  if (leftCharm) {
+    placeCharm(leftCharm, 'left');
+    if (isPremium(leftCharm)) premiumCount++;
+  }
+  if (rightCharm) {
+    placeCharm(rightCharm, 'right');
+    if (isPremium(rightCharm)) premiumCount++;
   }
 
-  pricePill.textContent = 'Rs. ' + (BASE_PRICE + premiumCount() * PREMIUM_DELTA);
-  pricePill.classList.add('show');
-
-  if (active === 2) cta.classList.add('show');
-  else cta.classList.remove('show');
-
-  if (charms.left) attachCharm(leftHook, charms.left, 'left');
-  if (charms.right) attachCharm(rightHook, charms.right, 'right');
+  if (leftCharm && rightCharm) {
+    pricePill.textContent = 'Rs. ' + (BASE_PRICE + premiumCount * PREMIUM_DIFF);
+    pricePill.classList.add('show');
+    cta.classList.add('show');
+  } else {
+    pricePill.classList.remove('show');
+    cta.classList.remove('show');
+  }
 }
 
-function attachCharm(hookEl, file, side) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'charm';
+function placeCharm(file, side) {
+  const hookRect = (side === 'left' ? leftHook : rightHook).getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
 
-  wrapper.style.left = '50%';
-  wrapper.style.top = '88%';
-  wrapper.style.transform = 'translate(-50%,0)';
+  const x = hookRect.left - canvasRect.left + EARRING_PHYSICS.anchorX;
+  const y = hookRect.top - canvasRect.top + EARRING_PHYSICS.anchorY + EARRING_PHYSICS.charmOffsetY;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'charm';
+  wrap.style.left = (x - EARRING_PHYSICS.charmSize / 2) + 'px';
+  wrap.style.top = y + 'px';
 
   const img = document.createElement('img');
   img.src = 'assets/charms/' + file;
-  wrapper.appendChild(img);
+  img.style.width = EARRING_PHYSICS.charmSize + 'px';
 
-  wrapper.onclick = () => removeCharm(side);
-  hookEl.appendChild(wrapper);
+  wrap.appendChild(img);
+  wrap.onclick = () => removeCharm(side);
+  canvas.appendChild(wrap);
 }
 
-function premiumCount() {
-  return 0; // placeholder for later sheet logic
+function isPremium(file) {
+  return PREMIUM_CHARMS.some(p => file.includes(p));
 }
 
-/* ===== METAL SWITCH ===== */
+/* =========================
+   METAL / RESET
+   ========================= */
 function onMetalClick(next) {
   if (next === metal) return;
-
-  if (charms.left || charms.right) {
-    showModal(
-      'Switching metal will reset your design.',
-      () => {
-        charms = { left: null, right: null };
-        metal = next;
-        updateMetal();
-      }
-    );
+  if (leftCharm || rightCharm) {
+    showModal('Switching metal will reset your design.', () => {
+      leftCharm = rightCharm = null;
+      metal = next;
+      updateHooks();
+    });
   } else {
     metal = next;
-    updateMetal();
+    updateHooks();
   }
 }
 
-function updateMetal() {
-  leftHookImg.src = `assets/bases/LeftHook_${metal}.png`;
-  rightHookImg.src = `assets/bases/RightHook_${metal}.png`;
+function onResetClick() {
+  if (!leftCharm && !rightCharm) return;
+  showModal('Reset earring design?', () => {
+    leftCharm = rightCharm = null;
+    render();
+  });
+}
+
+function updateHooks() {
+  leftHook.src = HOOKS[metal].left;
+  rightHook.src = HOOKS[metal].right;
+  leftHook.style.transform = `scale(${EARRING_PHYSICS.hookScale})`;
+  rightHook.style.transform = `scale(${EARRING_PHYSICS.hookScale})`;
 
   document.getElementById('goldBtn').classList.toggle('active', metal === 'gold');
   document.getElementById('silverBtn').classList.toggle('active', metal === 'silver');
@@ -427,24 +498,9 @@ function updateMetal() {
   render();
 }
 
-/* ===== RESET ===== */
-function onResetClick() {
-  if (!charms.left && !charms.right) return;
-
-  showModal(
-    'Reset earring design?',
-    () => {
-      charms = { left: null, right: null };
-      render();
-    }
-  );
-}
-
-/* ===== MODAL ===== */
-const modal = document.getElementById('modal');
-const modalText = document.getElementById('modalText');
-const modalConfirm = document.getElementById('modalConfirm');
-
+/* =========================
+   MODAL
+   ========================= */
 function showModal(text, confirmFn) {
   modalText.textContent = text;
   modalConfirm.onclick = () => {
