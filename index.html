@@ -9,72 +9,74 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css?v=1.1.0">
+  <link rel="stylesheet" href="styles.css?v=2.0">
 </head>
 
 <body>
 
+<!-- NAV -->
 <header class="navbar">
-  <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" />
 </header>
 
-<section class="hero">
-  <img src="assets/home/banner_vertical.png" loading="eager" fetchpriority="high">
-  <div class="hero-overlay"></div>
-  <div class="hero-text">
-    <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
-    <p>Create a piece that means something.</p>
-  </div>
+<!-- HOME (LOCKED) -->
+<section id="home">
+  <section class="hero">
+    <img src="assets/home/banner_vertical.png" loading="eager">
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
+      <p>Create a piece that means something.</p>
+    </div>
+  </section>
+
+  <section class="entry-grid">
+    <div class="entry-card interactive" onclick="openBuilder()">
+      <div class="card-image">
+        <img src="assets/home/model_bracelet_mobile.png">
+      </div>
+      <h2>Bracelet</h2>
+      <p>Build it charm by charm.</p>
+      <span class="price-hint">Starting from Rs. 249</span>
+      <button class="primary-btn">I want to build this →</button>
+    </div>
+  </section>
 </section>
 
-<section class="entry-grid">
+<!-- BRACELET BUILDER -->
+<section id="builder" class="hidden">
 
-  <!-- Bracelet -->
-  <div class="entry-card interactive">
-    <div class="card-image">
-      <img src="assets/home/model_bracelet_mobile.png" loading="lazy">
-    </div>
-    <h2>Bracelet</h2>
-    <p>Build it charm by charm.</p>
-    <span class="price-hint">Starting from Rs. 249</span>
-    <button class="primary-btn">I want to build this →</button>
+  <div class="builder-header">
+    <button onclick="goHome()">←</button>
+    <h2>Build My Bracelet</h2>
   </div>
 
-  <!-- Earrings -->
-  <div class="entry-card interactive">
-    <div class="card-image">
-      <img src="assets/home/model_earring_mobile.png" loading="lazy">
+  <div class="builder-canvas-wrapper">
+    <div class="builder-canvas">
+
+      <!-- Bracelet Base -->
+      <img 
+        src="assets/charms/bracelet_base_gold.png"
+        class="bracelet-base"
+      />
+
+      <!-- Charms -->
+      <div class="charm-layer" id="charmLayer"></div>
+
     </div>
-    <h2>Earrings</h2>
-    <p>Style both ears your way.</p>
-    <span class="price-hint">Starting from Rs. 199</span>
-    <button class="primary-btn">Let’s start →</button>
   </div>
 
-  <!-- Combo -->
-  <div class="entry-card interactive combo-card">
-  <div class="card-image">
-    <img src="assets/home/model_combo_mobile.png" loading="lazy">
-    <span class="combo-badge">SAVE 10% ✨</span>
-  </div>
-  <h2>Combo</h2>
-  <p>Bracelet + Earrings</p>
-  <span class="price-hint">Better together</span>
-  <button class="primary-btn">I want it all →</button>
-</div>
-
-  <!-- Curated -->
-  <div class="entry-card interactive curated-card">
-    <div class="card-image">
-      <img src="assets/home/curated_teaser.png" loading="lazy">
-    </div>
-    <h2>Curated Pieces</h2>
-    <p>Designed by us, for days you don’t want to decide.</p>
-    <button class="secondary-btn">Explore curated designs →</button>
+  <!-- Charm Tray -->
+  <div class="charm-tray">
+    <img src="assets/charms/3DBowRibbon_Charm_Gold.png" onclick="addCharm(0)">
+    <img src="assets/charms/EvilEye_Charm_Gold.png" onclick="addCharm(1)">
+    <img src="assets/charms/LetterA_Charm_Gold.png" onclick="addCharm(2)">
+    <img src="assets/charms/NorthStar_Charm_Gold.png" onclick="addCharm(3)">
+    <img src="assets/charms/RedCherry_Charm_Gold.png" onclick="addCharm(4)">
   </div>
 
 </section>
 
+<script src="app.js?v=2.0"></script>
 </body>
 </html>
-
