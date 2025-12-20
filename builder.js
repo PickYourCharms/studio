@@ -1,71 +1,78 @@
 const canvas = document.getElementById("bracelet-canvas");
-const trayCharms = document.querySelectorAll("[data-charm]");
+const tray = document.querySelector(".charm-tray");
 
-let placedCharms = [];
+const centerX = 130;
+const centerY = 130;
+const radius = 95;
 
-/**
- * Recalculate positions for charms
- * Lower arc only
- * Perfect symmetry
- */
-function layoutCharms() {
-  const total = placedCharms.length;
-  if (total === 0) return;
+let selectedCharms = [];
 
-  const centerX = 140;
-  const centerY = 140;
-  const radius = 110;
+/* --------- CORE MATH --------- */
 
-  // Angles for LOWER arc only
-  const startAngle = Math.PI + Math.PI / 6;
-  const endAngle = 2 * Math.PI - Math.PI / 6;
+function getAngles(count) {
+  if (count === 1) return [Math.PI / 2];
 
-  const angles =
-    total === 1
-      ? [(startAngle + endAngle) / 2]
-      : Array.from({ length: total }, (_, i) =>
-          startAngle + (i / (total - 1)) * (endAngle - startAngle)
-        );
+  const start = Math.PI * 0.75; // left lower
+  const end = Math.PI * 0.25;   // right lower
+  const step = (start - end) / (count - 1);
 
-  placedCharms.forEach((charm, index) => {
+  return Array.from({ length: count }, (_, i) => start - i * step);
+}
+
+function polarToXY(angle) {
+  return {
+    x: centerX + radius * Math.cos(angle),
+    y: centerY + radius * Math.sin(angle)
+  };
+}
+
+/* --------- RENDER --------- */
+
+function renderCharms() {
+  document.querySelectorAll(".charm").forEach(el => el.remove());
+
+  const angles = getAngles(selectedCharms.length);
+
+  selectedCharms.forEach((charm, index) => {
     const angle = angles[index];
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
+    const pos = polarToXY(angle);
 
-    charm.el.style.left = `${x - 22}px`;
-    charm.el.style.top = `${y - 22}px`;
-    charm.el.style.transform = `rotate(${angle + Math.PI / 2}rad)`;
+    const wrapper = document.createElement("div");
+    wrapper.className = "charm";
+    wrapper.style.left = `${pos.x}px`;
+    wrapper.style.top = `${pos.y}px`;
+    wrapper.style.transform = `
+      translate(-50%, -50%)
+      rotate(${(angle - Math.PI / 2) * -1}rad)
+    `;
+
+    const img = document.createElement("img");
+    img.src = charm.src;
+
+    const remove = document.createElement("div");
+    remove.className = "remove-btn";
+    remove.innerText = "×";
+    remove.onclick = () => {
+      selectedCharms.splice(index, 1);
+      renderCharms();
+    };
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(remove);
+    canvas.appendChild(wrapper);
   });
 }
 
-/**
- * Add charm
- */
-trayCharms.forEach((img) => {
-  img.addEventListener("click", () => {
-    if (placedCharms.length >= 5) return;
+/* --------- ADD CHARM --------- */
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "canvas-charm";
+tray.addEventListener("click", e => {
+  if (e.target.tagName !== "IMG") return;
+  if (selectedCharms.length >= 5) return;
 
-    const charmImg = document.createElement("img");
-    charmImg.src = img.src;
-
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "remove-btn";
-    removeBtn.innerText = "×";
-
-    removeBtn.onclick = () => {
-      canvas.removeChild(wrapper);
-      placedCharms = placedCharms.filter((c) => c.el !== wrapper);
-      layoutCharms();
-    };
-
-    wrapper.appendChild(charmImg);
-    wrapper.appendChild(removeBtn);
-    canvas.appendChild(wrapper);
-
-    placedCharms.push({ el: wrapper });
-    layoutCharms();
+  selectedCharms.push({
+    id: e.target.dataset.id,
+    src: e.target.src
   });
+
+  renderCharms();
 });
