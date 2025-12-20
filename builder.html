@@ -6,74 +6,57 @@
 <title>Build My Bracelet</title>
 
 <style>
-  :root {
-    --text: #111;
-    --muted: #777;
-    --border: #e6e6e6;
-    --accent: #000;
-    --surface: #fafafa;
-  }
-
   body {
     margin: 0;
-    padding: 16px 14px 120px;
+    padding: 16px;
     font-family: system-ui, -apple-system, sans-serif;
     background: #fff;
-    color: var(--text);
     text-align: center;
   }
 
   /* ================= HEADER ================= */
   .topbar {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    max-width: 420px;
-    margin: 0 auto 10px;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 8px;
   }
 
-  .topbar button {
-    background: none;
-    border: none;
-    font-size: 14px;
+  .topbar span {
     cursor: pointer;
+    color: #555;
   }
 
   h2 {
-    margin: 6px 0 12px;
-    font-size: 18px;
+    margin: 10px 0 14px;
+    font-size: 20px;
   }
 
   /* ================= METAL TOGGLE ================= */
   .metal-toggle {
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .metal-toggle button {
-    padding: 6px 14px;
     border-radius: 999px;
-    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border: 1px solid #ddd;
     background: #fff;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .metal-toggle .active {
-    background: var(--accent);
+    background: #000;
     color: #fff;
-    border-color: var(--accent);
+    border-color: #000;
   }
 
   /* ================= CANVAS ================= */
-  .canvas-wrap {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 18px 0 10px;
-    margin-bottom: 8px;
-  }
-
   .canvas {
     position: relative;
     width: min(92vw, 360px);
@@ -91,28 +74,25 @@
     pointer-events: none;
   }
 
+  /* ================= CHARMS ================= */
   .charm {
     position: absolute;
     cursor: pointer;
     user-select: none;
     transform-origin: top center;
-    animation: pop 140ms ease-out;
   }
 
   .charm img {
     display: block;
+    width: 46px;
+    height: auto;
     pointer-events: none;
   }
 
-  @keyframes pop {
-    from { opacity: 0; transform: scale(.96); }
-    to   { opacity: 1; transform: scale(1); }
-  }
-
   .hint {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 8px;
+    margin: 10px 0 14px;
+    font-size: 14px;
+    color: #666;
   }
 
   /* ================= TRAY ================= */
@@ -120,18 +100,20 @@
     display: flex;
     justify-content: center;
     gap: 14px;
-    margin-top: 16px;
+    margin-bottom: 18px;
   }
 
   .tray img {
     width: 44px;
+    height: auto;
     cursor: pointer;
   }
 
   /* ================= PRICE ================= */
   .price {
-    margin: 14px 0 18px;
-    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 70px;
+    color: #111;
   }
 
   /* ================= CTA ================= */
@@ -140,110 +122,59 @@
     left: 0;
     right: 0;
     bottom: 16px;
-    display: flex;
+    display: none;
     justify-content: center;
   }
 
   .cta button {
     width: min(92vw, 360px);
-    padding: 16px;
+    padding: 14px;
     border-radius: 999px;
     border: none;
     background: #000;
     color: #fff;
-    font-size: 15px;
+    font-size: 16px;
     cursor: pointer;
-  }
-
-  .cta button:disabled {
-    opacity: .35;
-    cursor: not-allowed;
-  }
-
-  /* ================= MODAL ================= */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-content {
-    background: #fff;
-    border-radius: 16px;
-    padding: 18px;
-    width: 86%;
-    max-width: 320px;
-    text-align: center;
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-  }
-
-  .modal-actions button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    background: #fff;
-  }
-
-  .modal-actions .danger {
-    background: #000;
-    color: #fff;
-    border-color: #000;
   }
 </style>
 </head>
 
 <body>
 
+<!-- ================= TOP BAR ================= -->
 <div class="topbar">
-  <button onclick="history.back()">← Back</button>
-  <strong>Build My Bracelet</strong>
-  <button onclick="confirmReset()">Reset</button>
+  <span onclick="history.back()">← Back</span>
+  <span onclick="resetBuilder()">Reset</span>
 </div>
 
+<h2>Build My Bracelet</h2>
+
+<!-- ================= METAL TOGGLE ================= -->
 <div class="metal-toggle">
   <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
   <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
 </div>
 
-<div class="canvas-wrap">
-  <div class="canvas" id="canvas">
-    <img id="braceletBase" class="bracelet"
-      src="assets/bases/bracelet_base_gold.png" />
-  </div>
+<!-- ================= CANVAS ================= -->
+<div class="canvas" id="canvas">
+  <img id="braceletBase"
+       src="assets/bases/bracelet_base_gold.png"
+       class="bracelet"
+       alt="Bracelet base" />
 </div>
 
-<div class="hint">Tap to personalise your bracelet</div>
+<div class="hint">Tap a charm to add • Tap charm to remove</div>
 
+<!-- ================= TRAY ================= -->
 <div class="tray" id="tray"></div>
 
-<div class="price" id="priceText">Bracelet total · Rs. 249</div>
-
-<div class="cta">
-  <button id="ctaBtn" disabled>Love it — Add this bracelet ✨</button>
+<div class="price" id="priceText">
+  Start by choosing a charm
 </div>
 
-<!-- RESET / METAL MODAL -->
-<div class="modal" id="confirmModal">
-  <div class="modal-content">
-    <strong>Start fresh?</strong>
-    <p style="font-size:13px;color:#666">
-      Your current design will be cleared.
-    </p>
-    <div class="modal-actions">
-      <button onclick="closeModal()">Cancel</button>
-      <button class="danger" onclick="hardReset()">Reset</button>
-    </div>
-  </div>
+<!-- ================= CTA ================= -->
+<div class="cta">
+  <button id="ctaBtn">Love it · Add to Bag 🛍️</button>
 </div>
 
 <script>
@@ -256,27 +187,15 @@ const CHARM_PHYSICS = {
   attachOffset: 2
 };
 
+/* ================= SLOT ANGLES ================= */
 const SLOT_ANGLES = {
   1: [90],
-  2: [70,110],
-  3: [60,90,120],
-  4: [45,75,105,135],
-  5: [40,65,90,115,140]
+  2: [70, 110],
+  3: [60, 90, 120],
+  4: [45, 75, 105, 135],
+  5: [40, 65, 90, 115, 140]
 };
 
-/* ================= STATE ================= */
-const canvas = document.getElementById('canvas');
-const tray = document.getElementById('tray');
-const braceletBase = document.getElementById('braceletBase');
-const priceText = document.getElementById('priceText');
-const ctaBtn = document.getElementById('ctaBtn');
-const modal = document.getElementById('confirmModal');
-
-let charms = [];
-let metal = 'gold';
-let pendingMetal = null;
-
-/* ================= DATA ================= */
 const CHARMS = [
   '3DBowRibbon_Charm',
   'EvilEye_Charm',
@@ -285,108 +204,35 @@ const CHARMS = [
   'RedCherry_Charm'
 ];
 
+let metal = 'gold';
+let charms = [];
+
+const canvas = document.getElementById('canvas');
+const tray = document.getElementById('tray');
+const priceText = document.getElementById('priceText');
+const cta = document.querySelector('.cta');
+const braceletBase = document.getElementById('braceletBase');
+
 /* ================= INIT ================= */
 renderTray();
 
-/* ================= ACTIONS ================= */
-function addCharm(src) {
-  if (charms.length >= 5) return;
-  charms.push(src);
-  render();
-}
-
-function removeCharm(i) {
-  charms.splice(i,1);
-  render();
-}
-
-function render() {
-  document.querySelectorAll('.charm').forEach(c => c.remove());
-  if (!charms.length) {
-    updatePrice();
-    return;
-  }
-
-  const rect = canvas.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
-  const radius = rect.width * 0.36;
-  const angles = SLOT_ANGLES[charms.length];
-
-  charms.forEach((src, i) => {
-    const angle = angles[angles.length - 1 - i];
-    const rad = angle * Math.PI / 180;
-
-    const x = cx + radius * Math.cos(rad);
-    const y = cy + radius * Math.sin(rad) + CHARM_PHYSICS.attachOffset;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'charm';
-    wrap.style.left = (x - CHARM_PHYSICS.anchorX) + 'px';
-    wrap.style.top  = (y - CHARM_PHYSICS.anchorY) + 'px';
-    wrap.style.transform =
-      `rotate(${angle - 90}deg) scale(${CHARM_PHYSICS.scale})`;
-
-    const img = document.createElement('img');
-    img.src = src;
-    img.style.width = CHARM_PHYSICS.size + 'px';
-
-    wrap.appendChild(img);
-    wrap.onclick = () => removeCharm(i);
-    canvas.appendChild(wrap);
-  });
-
-  updatePrice();
-}
-
-function updatePrice() {
-  const total = 249 + Math.max(0, charms.length - 1) * 80;
-  priceText.textContent = `Bracelet total · Rs. ${total}`;
-  ctaBtn.disabled = charms.length === 0;
-}
-
 /* ================= METAL SWITCH ================= */
-function switchMetal(to) {
-  if (to === metal) return;
+function switchMetal(nextMetal) {
+  if (nextMetal === metal) return;
 
-  if (charms.length) {
-    pendingMetal = to;
-    modal.style.display = 'flex';
-    return;
+  if (charms.length > 0) {
+    if (!confirm('Switching metal will reset your bracelet. Continue?')) return;
+    charms = [];
+    render();
   }
-  applyMetal(to);
-}
 
-function applyMetal(to) {
-  metal = to;
-  document.getElementById('goldBtn').classList.toggle('active', to==='gold');
-  document.getElementById('silverBtn').classList.toggle('active', to==='silver');
+  metal = nextMetal;
+  braceletBase.src = `assets/bases/bracelet_base_${metal}.png`;
 
-  braceletBase.src =
-    `assets/bases/bracelet_base_${to}.png`;
+  document.getElementById('goldBtn').classList.toggle('active', metal === 'gold');
+  document.getElementById('silverBtn').classList.toggle('active', metal === 'silver');
 
-  charms = [];
   renderTray();
-  render();
-}
-
-function confirmReset() {
-  if (!charms.length) return;
-  pendingMetal = null;
-  modal.style.display = 'flex';
-}
-
-function hardReset() {
-  modal.style.display = 'none';
-  charms = [];
-  if (pendingMetal) applyMetal(pendingMetal);
-  pendingMetal = null;
-  render();
-}
-
-function closeModal() {
-  modal.style.display = 'none';
-  pendingMetal = null;
 }
 
 /* ================= TRAY ================= */
@@ -398,6 +244,71 @@ function renderTray() {
     img.onclick = () => addCharm(img.src);
     tray.appendChild(img);
   });
+}
+
+/* ================= ADD / REMOVE ================= */
+function addCharm(src) {
+  if (charms.length >= 5) return;
+  charms.push(src);
+  render();
+}
+
+function removeCharm(index) {
+  charms.splice(index, 1);
+  render();
+}
+
+/* ================= RESET ================= */
+function resetBuilder() {
+  if (charms.length === 0) return;
+  if (!confirm('Clear your bracelet design?')) return;
+  charms = [];
+  render();
+}
+
+/* ================= RENDER ================= */
+function render() {
+  document.querySelectorAll('.charm').forEach(el => el.remove());
+
+  if (charms.length === 0) {
+    priceText.textContent = 'Start by choosing a charm';
+    cta.style.display = 'none';
+    return;
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+  const radius = rect.width * 0.36;
+  const angles = SLOT_ANGLES[charms.length];
+
+  charms.forEach((src, i) => {
+    const angleDeg = angles[angles.length - 1 - i];
+    const rad = angleDeg * Math.PI / 180;
+
+    const x = cx + radius * Math.cos(rad);
+    const y = cy + radius * Math.sin(rad) + CHARM_PHYSICS.attachOffset;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'charm';
+    wrapper.style.left = `${x - CHARM_PHYSICS.anchorX}px`;
+    wrapper.style.top = `${y - CHARM_PHYSICS.anchorY}px`;
+    wrapper.style.transform = `
+      rotate(${angleDeg - 90}deg)
+      scale(${CHARM_PHYSICS.scale})
+    `;
+
+    const img = document.createElement('img');
+    img.src = src;
+    wrapper.appendChild(img);
+    wrapper.onclick = () => removeCharm(i);
+
+    canvas.appendChild(wrapper);
+  });
+
+  const total = 249 + Math.max(0, charms.length - 1) * 80;
+  priceText.textContent = `Your bracelet · Rs. ${total}`;
+  cta.style.display = 'flex';
 }
 </script>
 
