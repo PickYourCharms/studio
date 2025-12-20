@@ -15,7 +15,7 @@
   }
 
   h2 {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   /* =========================
@@ -23,7 +23,7 @@
      ========================= */
   .canvas {
     position: relative;
-    width: min(92vw, 380px);
+    width: min(92vw, 360px);
     aspect-ratio: 1 / 1;
     margin: 0 auto;
   }
@@ -33,8 +33,8 @@
      ========================= */
   .bracelet {
     position: absolute;
-    width: 72%;
-    height: 72%;
+    width: 78%;
+    height: 78%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -42,22 +42,24 @@
   }
 
   /* =========================
-     CHARMS ON CANVAS
+     CHARMS
      ========================= */
   .charm {
     position: absolute;
-    width: 42px;
-    height: 42px;
     cursor: pointer;
     user-select: none;
-    transform-origin: center;
+    transform-origin: top center;
   }
 
-  /* =========================
-     INSTRUCTION
-     ========================= */
+  .charm img {
+    display: block;
+    width: 42px;
+    height: auto;
+    pointer-events: none;
+  }
+
   .hint {
-    margin-top: 10px;
+    margin-top: 8px;
     font-size: 14px;
     color: #666;
   }
@@ -68,13 +70,13 @@
   .tray {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 14px;
     margin-top: 18px;
   }
 
   .tray img {
     width: 44px;
-    height: 44px;
+    height: auto;
     cursor: pointer;
   }
 </style>
@@ -103,60 +105,81 @@
 </div>
 
 <script>
-  const canvas = document.getElementById("canvas");
-  let charms = [];
+/* =========================
+   GLOBAL CHARM PHYSICS
+   (YOUR ONLY TUNING PANEL)
+   ========================= */
+const CHARM_PHYSICS = {
+  size: 42,
+  anchorX: 21,
+  anchorY: 6,
+  scale: 0.9,
+  attachOffset: 10
+};
 
-  function addCharm(src) {
-    if (charms.length >= 5) return;
+/* =========================
+   GEOMETRY (LOCKED)
+   ========================= */
+const SLOT_ANGLES = {
+  1: [90],
+  2: [70, 110],
+  3: [60, 90, 120],
+  4: [50, 80, 100, 130],
+  5: [40, 65, 90, 115, 140]
+};
 
-    // CENTER-OUT insertion (LOCKED LOGIC)
-    if (charms.length === 0) {
-      charms.push(src);
-    } else {
-      const middle = Math.floor(charms.length / 2);
-      charms.splice(middle + 1, 0, src);
-    }
+const canvas = document.getElementById('canvas');
+let charms = [];
 
-    render();
-  }
+function addCharm(src) {
+  if (charms.length >= 5) return;
+  charms.push(src);
+  render();
+}
 
-  function removeCharm(index) {
-    charms.splice(index, 1);
-    render();
-  }
+function removeCharm(index) {
+  charms.splice(index, 1);
+  render();
+}
 
-  function render() {
+function render() {
   document.querySelectorAll('.charm').forEach(el => el.remove());
   if (charms.length === 0) return;
 
-  const slots = POSITION_MAP[charms.length];
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
 
-  const stepRadius = BRACELET_RADIUS;
+  const radius = rect.width * 0.36;
+  const angles = SLOT_ANGLES[charms.length];
 
-  charms.forEach((symbol, i) => {
-    const angleDeg = POSITIONS[slots[i]];
+  charms.forEach((src, i) => {
+    const angleDeg = angles[angles.length - 1 - i];
     const rad = angleDeg * Math.PI / 180;
 
-    const x = CENTER_X + stepRadius * Math.cos(rad);
-    const y = CENTER_Y + stepRadius * Math.sin(rad) + ATTACH_OFFSET;
+    const chainX = cx + radius * Math.cos(rad);
+    const chainY = cy + radius * Math.sin(rad) + CHARM_PHYSICS.attachOffset;
 
-    const charm = document.createElement('div');
-    charm.className = 'charm';
-    charm.textContent = symbol;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'charm';
 
-    charm.style.left = `${x - 18}px`;
-    charm.style.top = `${y - 18}px`;
+    wrapper.style.left = `${chainX - CHARM_PHYSICS.anchorX}px`;
+    wrapper.style.top  = `${chainY - CHARM_PHYSICS.anchorY}px`;
+    wrapper.style.transform = `
+      rotate(${angleDeg - 90}deg)
+      scale(${CHARM_PHYSICS.scale})
+    `;
 
-    // orientation (left charms tilt left, right tilt right)
-    charm.style.transform = `rotate(${angleDeg - 270}deg)`;
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = CHARM_PHYSICS.size + 'px';
 
-    charm.onclick = () => removeCharm(i);
-    canvas.appendChild(charm);
+    wrapper.appendChild(img);
+    wrapper.onclick = () => removeCharm(i);
+
+    canvas.appendChild(wrapper);
   });
 }
-
-}
-
 </script>
 
 </body>
