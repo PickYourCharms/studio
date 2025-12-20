@@ -7,38 +7,31 @@
 
 <style>
 /* =========================
-   THEME
-========================= */
-:root {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --text: #111;
-  --muted: #777;
-  --accent: #000;
-  --pill: rgba(0,0,0,0.04);
-  --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
-  --shadow-hover: 0 14px 40px rgba(0,0,0,0.12);
+   GLOBAL
+   ========================= */
+* {
+  -webkit-user-drag: none;
+  user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
-
-* { box-sizing: border-box; }
 
 body {
   margin: 0;
   padding: 16px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: linear-gradient(180deg, #fffdfa, #f5f1e9);
   text-align: center;
+  color: #111;
 }
 
 /* =========================
    HEADER
-========================= */
+   ========================= */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
 }
 
 .header button {
@@ -50,61 +43,46 @@ body {
 
 /* =========================
    TITLE
-========================= */
+   ========================= */
 h2 {
-  margin: 10px 0 14px;
-  font-size: 22px;
+  margin: 10px 0 12px;
 }
 
 /* =========================
    METAL TOGGLE
-========================= */
-.metal-toggle {
-  display: inline-flex;
-  gap: 6px;
-  background: var(--pill);
-  padding: 4px;
-  border-radius: 999px;
-  margin-bottom: 16px;
+   ========================= */
+.toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
-.metal-toggle button {
-  padding: 8px 16px;
+.toggle button {
+  padding: 8px 18px;
   border-radius: 999px;
-  border: none;
+  border: 1px solid #ddd;
+  background: #fff;
   cursor: pointer;
-  background: transparent;
-  color: var(--muted);
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
-.metal-toggle button.active {
-  background: var(--accent);
+.toggle button.active {
+  background: #000;
   color: #fff;
+  border-color: #000;
 }
 
 /* =========================
    CANVAS
-========================= */
-.canvas-wrap {
-  position: relative;
-  margin: 0 auto 14px;
-  background: var(--surface);
-  border-radius: 28px;
-  padding: 20px;
-  box-shadow: var(--shadow-soft);
-}
-
+   ========================= */
 .canvas {
   position: relative;
-  width: min(92vw, 360px);
+  width: min(92vw, 380px);
   aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
 
-/* =========================
-   BRACELET
-========================= */
 .bracelet {
   position: absolute;
   width: 72%;
@@ -113,46 +91,25 @@ h2 {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-}
-
-/* =========================
-   CHARMS
-========================= */
-.charm {
-  position: absolute;
-  cursor: pointer;
-  transform-origin: top center;
-  animation: popIn .25s ease;
-}
-
-@keyframes popIn {
-  from { transform: scale(.85) rotate(var(--r)); opacity: 0; }
-  to   { transform: scale(1) rotate(var(--r)); opacity: 1; }
-}
-
-.charm img {
-  display: block;
-  width: 46px;
-  pointer-events: none;
-  -webkit-user-drag: none;
-  user-select: none;
+  transition: opacity 0.25s ease;
 }
 
 /* =========================
    PRICE PILL
-========================= */
+   ========================= */
 .price-pill {
   position: absolute;
-  right: 14px;
-  top: 14px;
-  background: #fff;
-  padding: 8px 14px;
+  top: 6%;
+  right: 6%;
+  padding: 6px 14px;
   border-radius: 999px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
   font-size: 14px;
-  box-shadow: var(--shadow-soft);
   opacity: 0;
-  transform: translateY(-6px);
-  transition: all .2s ease;
+  transform: translateY(6px);
+  transition: all 0.25s ease;
 }
 
 .price-pill.show {
@@ -161,22 +118,58 @@ h2 {
 }
 
 /* =========================
-   HINT
-========================= */
-.hint {
+   CHARMS
+   ========================= */
+.charm {
+  position: absolute;
+  cursor: pointer;
+  transform-origin: top center;
+  animation: pop 0.18s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.charm img {
+  width: 46px;
+  pointer-events: none;
+}
+
+/* =========================
+   HELPER
+   ========================= */
+.helper {
+  margin-top: 8px;
   font-size: 13px;
-  color: var(--muted);
-  margin: 10px 0 14px;
+  color: #777;
+}
+
+/* =========================
+   PREMIUM NOTE
+   ========================= */
+.premium-note {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #333;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.premium-note.show {
+  opacity: 1;
 }
 
 /* =========================
    TRAY
-========================= */
-.tray-wrap {
-  background: var(--surface);
-  border-radius: 22px;
-  padding: 16px;
-  box-shadow: var(--shadow-soft);
+   ========================= */
+.tray-wrapper {
+  margin-top: 18px;
+  padding: 14px 0;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
 .tray {
@@ -186,36 +179,97 @@ h2 {
 }
 
 .tray img {
-  width: 46px;
+  width: 44px;
   cursor: pointer;
-  transition: transform .18s ease;
+  transition: transform 0.15s ease;
 }
 
 .tray img:active {
-  transform: scale(.92);
+  transform: scale(0.9);
+}
+
+/* =========================
+   RESET
+   ========================= */
+.reset-row {
+  display: flex;
+  justify-content: flex-end;
+  width: min(92vw, 380px);
+  margin: 10px auto 0;
+}
+
+.reset-row button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #777;
+  cursor: pointer;
 }
 
 /* =========================
    CTA
-========================= */
+   ========================= */
 .cta {
-  margin-top: 18px;
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  padding: 16px;
+  border-radius: 999px;
   background: #000;
   color: #fff;
-  padding: 18px;
-  border-radius: 999px;
+  border: none;
   font-size: 16px;
+  cursor: pointer;
   opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
-  transition: all .25s ease;
+  transform: translateY(12px);
+  transition: all 0.25s ease;
 }
 
 .cta.show {
   opacity: 1;
-  pointer-events: auto;
   transform: translateY(0);
 }
+
+/* =========================
+   BOTTOM SHEET
+   ========================= */
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  align-items: flex-end;
+}
+
+.sheet.show {
+  display: flex;
+}
+
+.sheet-content {
+  background: #fff;
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  text-align: left;
+}
+
+.sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.sheet-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel { background: #f2f2f2; }
+.confirm { background: #000; color: #fff; }
 </style>
 </head>
 
@@ -223,194 +277,214 @@ h2 {
 
 <div class="header">
   <button onclick="history.back()">← Back</button>
-  <button onclick="handleReset()">Reset</button>
 </div>
 
 <h2>Build My Bracelet</h2>
 
-<div class="metal-toggle">
+<div class="toggle">
   <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
   <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
 </div>
 
-<div class="canvas-wrap">
-  <div class="price-pill" id="pricePill">Rs. 249</div>
+<div class="canvas" id="canvas">
+  <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
+  <div id="pricePill" class="price-pill"></div>
+</div>
 
-  <div class="canvas" id="canvas">
-    <img id="braceletBase"
-      src="assets/bases/bracelet_base_gold.png"
-      class="bracelet" />
+<div class="helper">Tap a charm to add • Tap charm to remove</div>
+<div id="premiumNote" class="premium-note">✨ Premium charm added</div>
+
+<div class="tray-wrapper">
+  <div class="tray" id="tray">
+    <!-- injected by JS -->
   </div>
 </div>
 
-<div class="hint">Tap a charm to add • Tap charm to remove</div>
-
-<div class="tray-wrap">
-  <div class="tray" id="tray"></div>
+<div class="reset-row">
+  <button onclick="softReset()">Reset</button>
 </div>
 
-<div class="cta" id="cta">Love it · Add to Bag 🛍️</div>
+<button id="cta" class="cta">Love it · Add to Bag</button>
+
+<!-- BOTTOM SHEET -->
+<div id="sheet" class="sheet">
+  <div class="sheet-content">
+    <strong>Switch metal?</strong>
+    <p style="color:#666;margin:6px 0">
+      Your current bracelet will be cleared.
+    </p>
+    <div class="sheet-actions">
+      <button class="cancel" onclick="closeSheet()">Cancel</button>
+      <button class="confirm" onclick="confirmMetalSwitch()">Switch & Reset</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* =========================
-   STATE
-========================= */
-let metal = 'gold';
-let charms = [];
+   CONFIG
+   ========================= */
+const BASE_PRICE = 249;
+const EXTRA_CHARM_PRICE = 50;
+const PREMIUM_EXTRA = 80;
 
-const PRICING = {
-  base: 249,
-  charm: 80,
-  premiumExtra: 50
-};
-
-const PREMIUM = ['LetterA'];
-
-/* =========================
-   PHYSICS (LOCKED)
-========================= */
-const CHARM_PHYSICS = {
-  size: 46,
-  anchorX: 23,
-  anchorY: 6,
-  scale: 1,
-  attachOffset: 2
-};
+const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
 
 const SLOT_ANGLES = {
-  1: [90],
-  2: [70,110],
-  3: [60,90,120],
-  4: [45,75,105,135],
-  5: [40,65,90,115,140]
+  1:[90],
+  2:[70,110],
+  3:[60,90,120],
+  4:[45,75,105,135],
+  5:[40,65,90,115,140]
 };
 
 /* =========================
-   FILE MAP (NO MAGIC)
-========================= */
-const CHARMS = {
-  gold: [
-    '3DBowRibbon_Charm_Gold.png',
-    'EvilEye_Charm_Gold.png',
-    'LetterA_Charm_Gold.png',
-    'NorthStar_Charm_Gold.png',
-    'RedCherry_Charm_Gold.png'
-  ],
-  silver: [
-    '3DBowRibbon_Charm_Silver.png',
-    'EvilEye_Charm_Silver.png',
-    'LetterA_Charm_Silver.png',
-    'NorthStar_Charm_Silver.png',
-    'RedCherry_Charm_Silver.png'
-  ]
-};
+   STATE
+   ========================= */
+let metal = 'gold';
+let charms = [];
+let pendingMetal = null;
 
+/* =========================
+   DOM
+   ========================= */
 const canvas = document.getElementById('canvas');
+const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
 const pricePill = document.getElementById('pricePill');
 const cta = document.getElementById('cta');
-const baseImg = document.getElementById('braceletBase');
+const premiumNote = document.getElementById('premiumNote');
+const sheet = document.getElementById('sheet');
+
+/* =========================
+   CHARM SOURCES (EXACT FILENAMES)
+   ========================= */
+const CHARM_FILES = {
+  gold: [
+    { src:'assets/charms/3DBowRibbon_Charm_Gold.png', premium:false },
+    { src:'assets/charms/EvilEye_Charm_Gold.png', premium:true },
+    { src:'assets/charms/LetterA_Charm_Gold.png', premium:false },
+    { src:'assets/charms/NorthStar_Charm_Gold.png', premium:false },
+    { src:'assets/charms/RedCherry_Charm_Gold.png', premium:false }
+  ],
+  silver: [
+    { src:'assets/charms/3DBowRibbon_Charm_Silver.png', premium:false },
+    { src:'assets/charms/EvilEye_Charm_Silver.png', premium:true },
+    { src:'assets/charms/LetterA_Charm_Silver.png', premium:false },
+    { src:'assets/charms/NorthStar_Charm_Silver.png', premium:false },
+    { src:'assets/charms/RedCherry_Charm_Silver.png', premium:false }
+  ]
+};
 
 /* =========================
    INIT
-========================= */
-renderTray();
-updatePrice();
+   ========================= */
+loadTray();
 
 /* =========================
    FUNCTIONS
-========================= */
-function renderTray() {
-  tray.innerHTML = '';
-  CHARMS[metal].forEach(file => {
-    const img = document.createElement('img');
-    img.src = `assets/charms/${file}`;
-    img.onclick = () => addCharm(file);
+   ========================= */
+function loadTray(){
+  tray.innerHTML='';
+  CHARM_FILES[metal].forEach(c=>{
+    const img=document.createElement('img');
+    img.src=c.src;
+    img.onclick=()=>addCharm(c);
     tray.appendChild(img);
   });
 }
 
-function addCharm(file) {
-  if (charms.length >= 5) return;
-  charms.push(file);
+function addCharm(charm){
+  if(charms.length>=5) return;
+  charms.push(charm);
+  if(charm.premium){
+    premiumNote.classList.add('show');
+    setTimeout(()=>premiumNote.classList.remove('show'),1200);
+  }
   render();
 }
 
-function removeCharm(i) {
-  charms.splice(i,1);
+function softReset(){
+  charms=[];
   render();
 }
 
-function render() {
-  document.querySelectorAll('.charm').forEach(el => el.remove());
-  if (!charms.length) {
-    cta.classList.remove('show');
+function switchMetal(m){
+  if(m===metal) return;
+  pendingMetal=m;
+  sheet.classList.add('show');
+}
+
+function confirmMetalSwitch(){
+  metal=pendingMetal;
+  charms=[];
+  bracelet.style.opacity=0;
+  setTimeout(()=>{
+    bracelet.src=`assets/bases/bracelet_base_${metal}.png`;
+    bracelet.style.opacity=1;
+  },200);
+
+  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
+  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+
+  loadTray();
+  closeSheet();
+  render();
+}
+
+function closeSheet(){
+  sheet.classList.remove('show');
+}
+
+function calculatePrice(){
+  let total=BASE_PRICE;
+  if(charms.length>1){
+    total+=(charms.length-1)*EXTRA_CHARM_PRICE;
+  }
+  charms.forEach(c=>{
+    if(c.premium) total+=PREMIUM_EXTRA;
+  });
+  return total;
+}
+
+function render(){
+  document.querySelectorAll('.charm').forEach(el=>el.remove());
+
+  if(charms.length===0){
     pricePill.classList.remove('show');
-    updatePrice();
+    cta.classList.remove('show');
     return;
   }
 
-  const rect = canvas.getBoundingClientRect();
-  const cx = rect.width/2;
-  const cy = rect.height/2;
-  const radius = rect.width*0.36;
-  const angles = SLOT_ANGLES[charms.length];
-
-  charms.forEach((file,i) => {
-    const angle = angles[angles.length-1-i];
-    const rad = angle*Math.PI/180;
-
-    const x = cx + radius*Math.cos(rad);
-    const y = cy + radius*Math.sin(rad) + CHARM_PHYSICS.attachOffset;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'charm';
-    wrap.style.left = `${x-CHARM_PHYSICS.anchorX}px`;
-    wrap.style.top  = `${y-CHARM_PHYSICS.anchorY}px`;
-    wrap.style.setProperty('--r', `${angle-90}deg`);
-    wrap.style.transform = `rotate(${angle-90}deg)`;
-
-    const img = document.createElement('img');
-    img.src = `assets/charms/${file}`;
-    img.style.width = CHARM_PHYSICS.size+'px';
-
-    wrap.onclick = ()=>removeCharm(i);
-    wrap.appendChild(img);
-    canvas.appendChild(wrap);
-  });
-
-  cta.classList.add('show');
+  pricePill.textContent=`Rs. ${calculatePrice()}`;
   pricePill.classList.add('show');
-  updatePrice();
-}
+  cta.classList.add('show');
 
-function updatePrice() {
-  let total = PRICING.base;
-  charms.forEach(f=>{
-    total += PRICING.charm;
-    if (f.includes('LetterA')) total += PRICING.premiumExtra;
+  const rect=canvas.getBoundingClientRect();
+  const cx=rect.width/2, cy=rect.height/2;
+  const radius=rect.width*0.36;
+  const angles=SLOT_ANGLES[charms.length];
+
+  charms.forEach((c,i)=>{
+    const a=angles[angles.length-1-i];
+    const rad=a*Math.PI/180;
+    const x=cx+radius*Math.cos(rad);
+    const y=cy+radius*Math.sin(rad)+PHYSICS.attachOffset;
+
+    const w=document.createElement('div');
+    w.className='charm';
+    w.style.left=`${x-PHYSICS.anchorX}px`;
+    w.style.top=`${y-PHYSICS.anchorY}px`;
+    w.style.transform=`rotate(${a-90}deg)`;
+
+    const img=document.createElement('img');
+    img.src=c.src;
+    img.style.width=PHYSICS.size+'px';
+
+    w.appendChild(img);
+    w.onclick=()=>{charms.splice(i,1);render()};
+    canvas.appendChild(w);
   });
-  pricePill.textContent = `Rs. ${total}`;
-}
-
-function switchMetal(m) {
-  if (metal === m) return;
-  if (charms.length && !confirm('Switching metal will reset your design. Continue?')) return;
-
-  metal = m;
-  charms = [];
-  document.getElementById('goldBtn').classList.toggle('active', m==='gold');
-  document.getElementById('silverBtn').classList.toggle('active', m==='silver');
-  baseImg.src = `assets/bases/bracelet_base_${m}.png`;
-  renderTray();
-  render();
-}
-
-function handleReset() {
-  if (!charms.length) return;
-  if (!confirm('Reset your bracelet?')) return;
-  charms=[];
-  render();
 }
 </script>
 
