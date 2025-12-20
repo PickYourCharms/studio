@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Build My Bracelet – PickYourCharms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="builder-body">
+
+<!-- HEADER -->
+<header class="builder-header">
+  <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+  <h1>Build My Bracelet</h1>
+</header>
+
+<!-- CANVAS -->
+<section class="builder-canvas-wrapper">
+  <div class="builder-canvas" id="builderCanvas">
+
+    <!-- Bracelet base -->
+    <img
+      src="assets/bases/bracelet_base_gold.png"
+      class="bracelet-base"
+      id="braceletBase"
+      alt="Bracelet base"
+    />
+
+    <!-- Charm layer -->
+    <div class="charm-layer" id="charmLayer"></div>
+
+  </div>
+</section>
+
+<!-- CHARM TRAY -->
+<section class="charm-tray">
+  <button class="charm-btn" data-charm="3DBowRibbon_Charm_Gold.png">
+    <img src="assets/charms/3DBowRibbon_Charm_Gold.png">
+  </button>
+
+  <button class="charm-btn" data-charm="EvilEye_Charm_Gold.png">
+    <img src="assets/charms/EvilEye_Charm_Gold.png">
+  </button>
+
+  <button class="charm-btn" data-charm="LetterA_Charm_Gold.png">
+    <img src="assets/charms/LetterA_Charm_Gold.png">
+  </button>
+
+  <button class="charm-btn" data-charm="NorthStar_Charm_Gold.png">
+    <img src="assets/charms/NorthStar_Charm_Gold.png">
+  </button>
+
+  <button class="charm-btn" data-charm="RedCherry_Charm_Gold.png">
+    <img src="assets/charms/RedCherry_Charm_Gold.png">
+  </button>
+</section>
+
+<script src="builder.js"></script>
+</body>
+</html>
