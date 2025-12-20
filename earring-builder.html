@@ -301,10 +301,17 @@ function loadTray(){
 
 /* ADD / REMOVE */
 function addCharm(file){
-  if(!charms.left) charms.left=file;
-  else if(!charms.right) charms.right=file;
+  // LEFT FIRST, THEN RIGHT — ALWAYS
+  if (!charms.left) {
+    charms.left = file;
+  } else if (!charms.right) {
+    charms.right = file;
+  } else {
+    return; // both hooks filled, do nothing
+  }
   render();
 }
+
 
 function render(){
   document.querySelectorAll('.charm').forEach(e=>e.remove());
