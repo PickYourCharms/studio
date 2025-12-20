@@ -313,23 +313,20 @@ function addCharm(file){
 }
 
 
-function render(){
-  document.querySelectorAll('.charm').forEach(e=>e.remove());
+function render() {
+  document.querySelectorAll('.charm').forEach(el => el.remove());
 
-  const count=(charms.left?1:0)+(charms.right?1:0);
-  if(count===0){
-    pricePill.classList.remove('show');
-    cta.classList.remove('show');
-    return;
+  // LEFT MUST RENDER FIRST
+  if (charms.left) {
+    renderCharm('left');
   }
 
-  pricePill.textContent='Rs. '+BASE_PRICE;
-  pricePill.classList.add('show');
-  cta.classList.add('show');
-
-  drawCharm('left');
-  drawCharm('right');
+  // RIGHT MUST RENDER SECOND
+  if (charms.right) {
+    renderCharm('right');
+  }
 }
+
 
 function drawCharm(side){
   if(!charms[side]) return;
