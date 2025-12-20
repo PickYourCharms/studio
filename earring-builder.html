@@ -280,6 +280,8 @@ const canvas = document.getElementById('canvas');
 const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
+const cta = document.getElementById('cta');
+
 
 loadTray();
 
@@ -312,6 +314,13 @@ function render() {
 
   if (charms.left) drawCharm('left');
   if (charms.right) drawCharm('right');
+
+  // CTA visibility logic (THIS WAS MISSING)
+  if (charms.left && charms.right) {
+    cta.classList.add('show');
+  } else {
+    cta.classList.remove('show');
+  }
 }
 
 /* DRAW */
