@@ -1,46 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Build My Bracelet</title>
-  <link rel="stylesheet" href="builder.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Build My Bracelet</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    background: #ffffff;
+    color: #111;
+  }
+
+  header {
+    padding: 16px;
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+  }
+
+  .canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 24px 0;
+  }
+
+  #bracelet-canvas {
+    position: relative;
+    width: 360px;
+    height: 360px;
+  }
+
+  #bracelet-base {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 300px;
+    height: 300px;
+    left: 30px;
+    top: 30px;
+    pointer-events: none;
+  }
+
+  .charm {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    transform-origin: center center;
+    transition: all 0.25s ease;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background: #000;
+    color: #fff;
+    font-size: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .hint {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .tray {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px;
+    border-top: 1px solid #eee;
+  }
+
+  .tray img {
+    width: 56px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+
+  .tray img:active {
+    transform: scale(0.92);
+  }
+</style>
 </head>
+
 <body>
 
-<header class="builder-header">
-  <button class="back-btn" onclick="history.back()">←</button>
-  <h1>Build My Bracelet</h1>
-</header>
+<header>← Build My Bracelet</header>
 
-<main class="builder-container">
-
-  <!-- CANVAS -->
-  <div class="canvas-wrapper">
-    <div id="bracelet-canvas">
-      <img
-        src="assets/bases/bracelet_base_gold.png"
-        class="bracelet-base"
-        alt="Bracelet Base"
-      />
-    </div>
+<div class="canvas-wrapper">
+  <div id="bracelet-canvas">
+    <img id="bracelet-base" src="assets/bases/bracelet_base_gold.png" />
   </div>
+</div>
 
-  <p class="hint-text">
-    Tap a charm to add • ✕ to remove
-  </p>
+<div class="hint">Tap a charm to add • × to remove</div>
 
-  <!-- TRAY -->
-  <div class="charm-tray">
-    <img class="charm-item" data-file="3DBowRibbon_Charm_Gold.png" src="assets/charms/3DBowRibbon_Charm_Gold.png" />
-    <img class="charm-item" data-file="EvilEye_Charm_Gold.png" src="assets/charms/EvilEye_Charm_Gold.png" />
-    <img class="charm-item" data-file="LetterA_Charm_Gold.png" src="assets/charms/LetterA_Charm_Gold.png" />
-    <img class="charm-item" data-file="NorthStar_Charm_Gold.png" src="assets/charms/NorthStar_Charm_Gold.png" />
-    <img class="charm-item" data-file="RedCherry_Charm_Gold.png" src="assets/charms/RedCherry_Charm_Gold.png" />
-  </div>
+<div class="tray">
+  <img src="assets/charms/3DBowRibbon_Charm_Gold.png" onclick="addCharm(this.src)">
+  <img src="assets/charms/EvilEye_Charm_Gold.png" onclick="addCharm(this.src)">
+  <img src="assets/charms/LetterA_Charm_Gold.png" onclick="addCharm(this.src)">
+  <img src="assets/charms/NorthStar_Charm_Gold.png" onclick="addCharm(this.src)">
+  <img src="assets/charms/RedCherry_Charm_Gold.png" onclick="addCharm(this.src)">
+</div>
 
-</main>
+<script>
+  const canvas = document.getElementById("bracelet-canvas");
+  const charms = [];
 
-<script src="builder.js"></script>
+  const CENTER = 180;
+  const RADIUS = 135;
+  const CHARM_OFFSET = -18;
+  const MAX = 5;
+
+  function addCharm(src) {
+    if (charms.length >= MAX) return;
+
+    charms.push({ src });
+    render();
+  }
+
+  function removeCharm(index) {
+    charms.splice(index, 1);
+    render();
+  }
+
+  function render() {
+    document.querySelectorAll(".charm").forEach(el => el.remove());
+
+    const count = charms.length;
+    if (count === 0) return;
+
+    const startAngle = 200;
+    const endAngle = 340;
+    const step = count === 1 ? 0 : (endAngle - startAngle) / (count - 1);
+
+    charms.forEach((item, i) => {
+      const angle = (count === 1 ? 270 : startAngle + step * i) * Math.PI / 180;
+
+      const x = CENTER + RADIUS * Math.cos(angle);
+      const y = CENTER + RADIUS * Math.sin(angle) + CHARM_OFFSET;
+
+      const charm = document.createElement("div");
+      charm.className = "charm";
+      charm.style.left = `${x - 24}px`;
+      charm.style.top = `${y - 24}px`;
+      charm.style.transform = `rotate(${angle * 180 / Math.PI + 90}deg)`;
+
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.style.width = "100%";
+
+      const remove = document.createElement("div");
+      remove.className = "remove-btn";
+      remove.innerText = "×";
+      remove.onclick = () => removeCharm(i);
+
+      charm.appendChild(img);
+      charm.appendChild(remove);
+      canvas.appendChild(charm);
+    });
+  }
+</script>
+
 </body>
 </html>
