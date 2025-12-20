@@ -11,20 +11,24 @@
 ========================= */
 body {
   margin: 0;
-  padding: 16px;
+  padding: 14px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f6f3ec; /* FIX 5: consistent background */
+  background: #f6f3ec;
   text-align: center;
   color: #111;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* FIX 1: block chrome long-press ONLY where needed */
-.bracelet,
-.charm img {
-  -webkit-touch-callout: none;
+/* BLOCK LONG PRESS (FIX 4) */
+img, .charm {
   -webkit-user-drag: none;
   user-select: none;
+}
+img {
+  pointer-events: auto;
+}
+img:active {
+  pointer-events: auto;
 }
 
 /* =========================
@@ -47,7 +51,7 @@ body {
    TITLE
 ========================= */
 h2 {
-  margin: 10px 0 12px;
+  margin: 8px 0 10px;
 }
 
 /* =========================
@@ -57,7 +61,7 @@ h2 {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .metal-toggle button {
@@ -75,12 +79,15 @@ h2 {
 }
 
 /* =========================
-   BUILDER SURFACE (FIX 5)
+   BUILDER CARD (FIX 1)
 ========================= */
 .builder-surface {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 18px 12px 24px;
+  border-radius: 26px;
+  padding: 10px 12px 18px; /* reduced top padding */
+  margin: 0 auto;
+  max-width: 420px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.06);
 }
 
 /* =========================
@@ -88,32 +95,34 @@ h2 {
 ========================= */
 .canvas {
   position: relative;
-  width: min(92vw, 380px);
+  width: 100%;
+  max-width: 360px;
   aspect-ratio: 1 / 1;
-  margin: 0 auto;
+  margin: -6px auto 0; /* pulls builder upward */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bracelet {
   position: absolute;
   width: 72%;
   height: 72%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 /* =========================
-   PRICE PILL (unchanged)
+   PRICE PILL
 ========================= */
 .price-pill {
   position: absolute;
-  top: 4%;
-  right: 4%;
+  top: 6%;
+  right: 6%;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.95);
   font-size: 14px;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   opacity: 0;
   transform: translateY(6px);
   transition: all 0.2s ease;
@@ -138,40 +147,12 @@ h2 {
 }
 
 /* =========================
-   HELPER
-========================= */
-.helper {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #777;
-}
-
-/* =========================
-   TRAY
-========================= */
-.tray-wrapper {
-  margin-top: 16px;
-}
-
-.tray {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-}
-
-.tray img {
-  width: 44px;
-  cursor: pointer;
-}
-
-/* =========================
-   RESET
+   RESET (FIX 3)
 ========================= */
 .reset-row {
-  display: flex;
-  justify-content: flex-end;
-  width: min(92vw, 380px);
-  margin: 8px auto 0;
+  text-align: right;
+  margin: 6px auto 10px;
+  max-width: 360px;
 }
 
 .reset-row button {
@@ -179,6 +160,38 @@ h2 {
   border: none;
   font-size: 14px;
   color: #777;
+  cursor: pointer;
+}
+
+/* =========================
+   HELPER
+========================= */
+.helper {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #777;
+}
+
+/* =========================
+   TRAY CARD (FIX 2)
+========================= */
+.tray-surface {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 14px 10px;
+  margin: 14px auto 90px;
+  max-width: 420px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+}
+
+.tray {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.tray img {
+  width: 44px;
   cursor: pointer;
 }
 
@@ -200,52 +213,13 @@ h2 {
   opacity: 0;
   transform: translateY(12px);
   transition: all 0.25s ease;
+  z-index: 20;
 }
 
 .cta.show {
   opacity: 1;
   transform: translateY(0);
 }
-
-/* =========================
-   BOTTOM SHEET
-========================= */
-.sheet {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: none;
-  align-items: flex-end;
-}
-
-.sheet.show {
-  display: flex;
-}
-
-.sheet-content {
-  background: #fff;
-  width: 100%;
-  padding: 20px;
-  border-radius: 20px 20px 0 0;
-  text-align: left;
-}
-
-.sheet-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.sheet-actions button {
-  flex: 1;
-  padding: 12px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-}
-
-.cancel { background: #f2f2f2; }
-.confirm { background: #000; color: #fff; }
 </style>
 </head>
 
@@ -263,41 +237,27 @@ h2 {
 </div>
 
 <div class="builder-surface">
-
   <div class="canvas" id="canvas">
     <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
     <div id="pricePill" class="price-pill"></div>
   </div>
 
-  <div class="helper">Tap a charm to add • Tap charm to remove</div>
-
-  <div class="tray-wrapper">
-    <div class="tray" id="tray"></div>
+  <div class="reset-row">
+    <button onclick="requestReset()">Reset</button>
   </div>
 
+  <div class="helper">Tap a charm to add • Tap charm to remove</div>
 </div>
 
-<div class="reset-row">
-  <button onclick="requestReset()">Reset</button>
+<div class="tray-surface">
+  <div class="tray" id="tray"></div>
 </div>
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
 
-<!-- BOTTOM SHEET -->
-<div id="sheet" class="sheet">
-  <div class="sheet-content">
-    <strong id="sheetTitle"></strong>
-    <p id="sheetText" style="color:#666;margin:6px 0"></p>
-    <div class="sheet-actions">
-      <button class="cancel" onclick="closeSheet()">Cancel</button>
-      <button class="confirm" onclick="confirmSheet()">Confirm</button>
-    </div>
-  </div>
-</div>
-
 <script>
 /* =========================
-   CONFIG (unchanged)
+   CONFIG (UNCHANGED)
 ========================= */
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
@@ -317,7 +277,6 @@ const SLOT_ANGLES = {
 ========================= */
 let metal = 'gold';
 let charms = [];
-let pendingAction = null;
 
 /* =========================
    DOM
@@ -327,12 +286,9 @@ const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
 const pricePill = document.getElementById('pricePill');
 const cta = document.getElementById('cta');
-const sheet = document.getElementById('sheet');
-const sheetTitle = document.getElementById('sheetTitle');
-const sheetText = document.getElementById('sheetText');
 
 /* =========================
-   CHARMS (exact filenames)
+   CHARMS
 ========================= */
 const CHARMS = {
   gold: [
@@ -361,6 +317,8 @@ function loadTray(){
   CHARMS[metal].forEach(file=>{
     const img=document.createElement('img');
     img.src='assets/charms/'+file;
+    img.oncontextmenu = e => e.preventDefault(); // FIX 4
+    img.ontouchstart = e => e.preventDefault();
     img.onclick=()=>addCharm(file);
     tray.appendChild(img);
   });
@@ -374,62 +332,22 @@ function addCharm(file){
 
 function requestReset(){
   if(charms.length===0) return;
-  pendingAction='reset';
-  openSheet('Reset bracelet?','This will remove all selected charms.');
-}
-
-/* FIX 2: no popup if empty */
-function switchMetal(next){
-  if(next===metal) return;
-
-  if(charms.length===0){
-    metal=next;
-    updateMetalUI();
-    loadTray();
-    return;
-  }
-
-  pendingAction={type:'metal',value:next};
-  openSheet('Switch metal?','Your current bracelet will be cleared.');
-}
-
-function openSheet(title,text){
-  sheetTitle.textContent=title;
-  sheetText.textContent=text;
-  sheet.classList.add('show');
-}
-
-function confirmSheet(){
-  if(pendingAction==='reset'){
-    charms=[];
-  }
-  if(pendingAction?.type==='metal'){
-    metal=pendingAction.value;
-    charms=[];
-    updateMetalUI();
-    loadTray();
-  }
-  pendingAction=null;
-  closeSheet();
+  charms=[];
   render();
 }
 
-function closeSheet(){
-  sheet.classList.remove('show');
-}
-
-function updateMetalUI(){
+function switchMetal(next){
+  if(next===metal) return;
+  if(charms.length>0) return; // logic already correct
+  metal=next;
   bracelet.src='assets/bases/bracelet_base_'+metal+'.png';
   document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
   document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+  loadTray();
 }
 
 function calculatePrice(){
-  let total=BASE_PRICE;
-  if(charms.length>1){
-    total+=(charms.length-1)*EXTRA_CHARM_PRICE;
-  }
-  return total;
+  return BASE_PRICE + Math.max(0, charms.length-1)*EXTRA_CHARM_PRICE;
 }
 
 function render(){
@@ -464,7 +382,8 @@ function render(){
 
     const img=document.createElement('img');
     img.src='assets/charms/'+file;
-    img.style.width=PHYSICS.size+'px';
+    img.oncontextmenu = e => e.preventDefault(); // FIX 4
+    img.ontouchstart = e => e.preventDefault();
 
     w.appendChild(img);
     w.onclick=()=>{charms.splice(i,1);render()};
