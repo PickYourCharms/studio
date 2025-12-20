@@ -126,38 +126,35 @@
   }
 
   function render() {
-  document.querySelectorAll(".charm").forEach(el => el.remove());
+  document.querySelectorAll('.charm').forEach(el => el.remove());
   if (charms.length === 0) return;
 
-  const rect = canvas.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
+  const slots = POSITION_MAP[charms.length];
 
-  const radius = rect.width * 0.36;
-  const attachOffset = 8;
+  const stepRadius = BRACELET_RADIUS;
 
-  const activeSlots = POSITION_MAP[charms.length];
-
-  charms.forEach((src, i) => {
-    const angleDeg = POSITIONS[activeSlots[i]];
+  charms.forEach((symbol, i) => {
+    const angleDeg = POSITIONS[slots[i]];
     const rad = angleDeg * Math.PI / 180;
 
-    const x = cx + radius * Math.cos(rad);
-    const y = cy + radius * Math.sin(rad) + attachOffset;
+    const x = CENTER_X + stepRadius * Math.cos(rad);
+    const y = CENTER_Y + stepRadius * Math.sin(rad) + ATTACH_OFFSET;
 
-    const img = document.createElement("img");
-    img.src = src;
-    img.className = "charm";
+    const charm = document.createElement('div');
+    charm.className = 'charm';
+    charm.textContent = symbol;
 
-    img.style.left = `${x - 21}px`;
-    img.style.top = `${y - 21}px`;
+    charm.style.left = `${x - 18}px`;
+    charm.style.top = `${y - 18}px`;
 
-    // Correct orientation (left tilt / right tilt)
-    img.style.transform = `rotate(${angleDeg - 270}deg)`;
+    // orientation (left charms tilt left, right tilt right)
+    charm.style.transform = `rotate(${angleDeg - 270}deg)`;
 
-    img.onclick = () => removeCharm(i);
-    canvas.appendChild(img);
+    charm.onclick = () => removeCharm(i);
+    canvas.appendChild(charm);
   });
+}
+
 }
 
 </script>
