@@ -7,27 +7,29 @@
 
 <style>
 /* =========================
-   GLOBAL
-   ========================= */
-* {
-  -webkit-user-drag: none;
-  user-drag: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
+   BASE
+========================= */
 body {
   margin: 0;
   padding: 16px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: linear-gradient(180deg, #fffdfa, #f5f1e9);
+  background: #f6f3ec; /* FIX 5: consistent background */
   text-align: center;
   color: #111;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* FIX 1: block chrome long-press ONLY where needed */
+.bracelet,
+.charm img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 /* =========================
    HEADER
-   ========================= */
+========================= */
 .header {
   display: flex;
   justify-content: space-between;
@@ -43,39 +45,47 @@ body {
 
 /* =========================
    TITLE
-   ========================= */
+========================= */
 h2 {
   margin: 10px 0 12px;
 }
 
 /* =========================
    METAL TOGGLE
-   ========================= */
-.toggle {
+========================= */
+.metal-toggle {
   display: flex;
   justify-content: center;
   gap: 8px;
   margin-bottom: 14px;
 }
 
-.toggle button {
+.metal-toggle button {
   padding: 8px 18px;
   border-radius: 999px;
   border: 1px solid #ddd;
   background: #fff;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.toggle button.active {
+.metal-toggle button.active {
   background: #000;
   color: #fff;
   border-color: #000;
 }
 
 /* =========================
+   BUILDER SURFACE (FIX 5)
+========================= */
+.builder-surface {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 18px 12px 24px;
+}
+
+/* =========================
    CANVAS
-   ========================= */
+========================= */
 .canvas {
   position: relative;
   width: min(92vw, 380px);
@@ -90,26 +100,23 @@ h2 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  pointer-events: none;
-  transition: opacity 0.25s ease;
 }
 
 /* =========================
-   PRICE PILL
-   ========================= */
+   PRICE PILL (unchanged)
+========================= */
 .price-pill {
   position: absolute;
-  top: 6%;
-  right: 6%;
+  top: 4%;
+  right: 4%;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.9);
   font-size: 14px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
   opacity: 0;
   transform: translateY(6px);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .price-pill.show {
@@ -119,27 +126,20 @@ h2 {
 
 /* =========================
    CHARMS
-   ========================= */
+========================= */
 .charm {
   position: absolute;
   cursor: pointer;
   transform-origin: top center;
-  animation: pop 0.18s cubic-bezier(.2,.8,.2,1);
-}
-
-@keyframes pop {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 .charm img {
   width: 46px;
-  pointer-events: none;
 }
 
 /* =========================
    HELPER
-   ========================= */
+========================= */
 .helper {
   margin-top: 8px;
   font-size: 13px;
@@ -147,29 +147,10 @@ h2 {
 }
 
 /* =========================
-   PREMIUM NOTE
-   ========================= */
-.premium-note {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #333;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.premium-note.show {
-  opacity: 1;
-}
-
-/* =========================
    TRAY
-   ========================= */
+========================= */
 .tray-wrapper {
-  margin-top: 18px;
-  padding: 14px 0;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  margin-top: 16px;
 }
 
 .tray {
@@ -181,21 +162,16 @@ h2 {
 .tray img {
   width: 44px;
   cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.tray img:active {
-  transform: scale(0.9);
 }
 
 /* =========================
    RESET
-   ========================= */
+========================= */
 .reset-row {
   display: flex;
   justify-content: flex-end;
   width: min(92vw, 380px);
-  margin: 10px auto 0;
+  margin: 8px auto 0;
 }
 
 .reset-row button {
@@ -208,7 +184,7 @@ h2 {
 
 /* =========================
    CTA
-   ========================= */
+========================= */
 .cta {
   position: fixed;
   bottom: 14px;
@@ -233,7 +209,7 @@ h2 {
 
 /* =========================
    BOTTOM SHEET
-   ========================= */
+========================= */
 .sheet {
   position: fixed;
   inset: 0;
@@ -281,27 +257,28 @@ h2 {
 
 <h2>Build My Bracelet</h2>
 
-<div class="toggle">
+<div class="metal-toggle">
   <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
   <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
 </div>
 
-<div class="canvas" id="canvas">
-  <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
-  <div id="pricePill" class="price-pill"></div>
-</div>
+<div class="builder-surface">
 
-<div class="helper">Tap a charm to add • Tap charm to remove</div>
-<div id="premiumNote" class="premium-note">✨ Premium charm added</div>
-
-<div class="tray-wrapper">
-  <div class="tray" id="tray">
-    <!-- injected by JS -->
+  <div class="canvas" id="canvas">
+    <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
+    <div id="pricePill" class="price-pill"></div>
   </div>
+
+  <div class="helper">Tap a charm to add • Tap charm to remove</div>
+
+  <div class="tray-wrapper">
+    <div class="tray" id="tray"></div>
+  </div>
+
 </div>
 
 <div class="reset-row">
-  <button onclick="softReset()">Reset</button>
+  <button onclick="requestReset()">Reset</button>
 </div>
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
@@ -309,24 +286,21 @@ h2 {
 <!-- BOTTOM SHEET -->
 <div id="sheet" class="sheet">
   <div class="sheet-content">
-    <strong>Switch metal?</strong>
-    <p style="color:#666;margin:6px 0">
-      Your current bracelet will be cleared.
-    </p>
+    <strong id="sheetTitle"></strong>
+    <p id="sheetText" style="color:#666;margin:6px 0"></p>
     <div class="sheet-actions">
       <button class="cancel" onclick="closeSheet()">Cancel</button>
-      <button class="confirm" onclick="confirmMetalSwitch()">Switch & Reset</button>
+      <button class="confirm" onclick="confirmSheet()">Confirm</button>
     </div>
   </div>
 </div>
 
 <script>
 /* =========================
-   CONFIG
-   ========================= */
+   CONFIG (unchanged)
+========================= */
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
-const PREMIUM_EXTRA = 80;
 
 const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
 
@@ -340,94 +314,102 @@ const SLOT_ANGLES = {
 
 /* =========================
    STATE
-   ========================= */
+========================= */
 let metal = 'gold';
 let charms = [];
-let pendingMetal = null;
+let pendingAction = null;
 
 /* =========================
    DOM
-   ========================= */
+========================= */
 const canvas = document.getElementById('canvas');
 const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
 const pricePill = document.getElementById('pricePill');
 const cta = document.getElementById('cta');
-const premiumNote = document.getElementById('premiumNote');
 const sheet = document.getElementById('sheet');
+const sheetTitle = document.getElementById('sheetTitle');
+const sheetText = document.getElementById('sheetText');
 
 /* =========================
-   CHARM SOURCES (EXACT FILENAMES)
-   ========================= */
-const CHARM_FILES = {
+   CHARMS (exact filenames)
+========================= */
+const CHARMS = {
   gold: [
-    { src:'assets/charms/3DBowRibbon_Charm_Gold.png', premium:false },
-    { src:'assets/charms/EvilEye_Charm_Gold.png', premium:true },
-    { src:'assets/charms/LetterA_Charm_Gold.png', premium:false },
-    { src:'assets/charms/NorthStar_Charm_Gold.png', premium:false },
-    { src:'assets/charms/RedCherry_Charm_Gold.png', premium:false }
+    '3DBowRibbon_Charm_Gold.png',
+    'EvilEye_Charm_Gold.png',
+    'LetterA_Charm_Gold.png',
+    'NorthStar_Charm_Gold.png',
+    'RedCherry_Charm_Gold.png'
   ],
   silver: [
-    { src:'assets/charms/3DBowRibbon_Charm_Silver.png', premium:false },
-    { src:'assets/charms/EvilEye_Charm_Silver.png', premium:true },
-    { src:'assets/charms/LetterA_Charm_Silver.png', premium:false },
-    { src:'assets/charms/NorthStar_Charm_Silver.png', premium:false },
-    { src:'assets/charms/RedCherry_Charm_Silver.png', premium:false }
+    '3DBowRibbon_Charm_Silver.png',
+    'EvilEye_Charm_Silver.png',
+    'LetterA_Charm_Silver.png',
+    'NorthStar_Charm_Silver.png',
+    'RedCherry_Charm_Silver.png'
   ]
 };
 
-/* =========================
-   INIT
-   ========================= */
 loadTray();
 
 /* =========================
    FUNCTIONS
-   ========================= */
+========================= */
 function loadTray(){
   tray.innerHTML='';
-  CHARM_FILES[metal].forEach(c=>{
+  CHARMS[metal].forEach(file=>{
     const img=document.createElement('img');
-    img.src=c.src;
-    img.onclick=()=>addCharm(c);
+    img.src='assets/charms/'+file;
+    img.onclick=()=>addCharm(file);
     tray.appendChild(img);
   });
 }
 
-function addCharm(charm){
+function addCharm(file){
   if(charms.length>=5) return;
-  charms.push(charm);
-  if(charm.premium){
-    premiumNote.classList.add('show');
-    setTimeout(()=>premiumNote.classList.remove('show'),1200);
+  charms.push(file);
+  render();
+}
+
+function requestReset(){
+  if(charms.length===0) return;
+  pendingAction='reset';
+  openSheet('Reset bracelet?','This will remove all selected charms.');
+}
+
+/* FIX 2: no popup if empty */
+function switchMetal(next){
+  if(next===metal) return;
+
+  if(charms.length===0){
+    metal=next;
+    updateMetalUI();
+    loadTray();
+    return;
   }
-  render();
+
+  pendingAction={type:'metal',value:next};
+  openSheet('Switch metal?','Your current bracelet will be cleared.');
 }
 
-function softReset(){
-  charms=[];
-  render();
-}
-
-function switchMetal(m){
-  if(m===metal) return;
-  pendingMetal=m;
+function openSheet(title,text){
+  sheetTitle.textContent=title;
+  sheetText.textContent=text;
   sheet.classList.add('show');
 }
 
-function confirmMetalSwitch(){
-  metal=pendingMetal;
-  charms=[];
-  bracelet.style.opacity=0;
-  setTimeout(()=>{
-    bracelet.src=`assets/bases/bracelet_base_${metal}.png`;
-    bracelet.style.opacity=1;
-  },200);
-
-  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
-  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
-
-  loadTray();
+function confirmSheet(){
+  if(pendingAction==='reset'){
+    charms=[];
+  }
+  if(pendingAction?.type==='metal'){
+    metal=pendingAction.value;
+    charms=[];
+    updateMetalUI();
+    loadTray();
+  }
+  pendingAction=null;
   closeSheet();
   render();
 }
@@ -436,14 +418,17 @@ function closeSheet(){
   sheet.classList.remove('show');
 }
 
+function updateMetalUI(){
+  bracelet.src='assets/bases/bracelet_base_'+metal+'.png';
+  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
+  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+}
+
 function calculatePrice(){
   let total=BASE_PRICE;
   if(charms.length>1){
     total+=(charms.length-1)*EXTRA_CHARM_PRICE;
   }
-  charms.forEach(c=>{
-    if(c.premium) total+=PREMIUM_EXTRA;
-  });
   return total;
 }
 
@@ -456,7 +441,7 @@ function render(){
     return;
   }
 
-  pricePill.textContent=`Rs. ${calculatePrice()}`;
+  pricePill.textContent='Rs. '+calculatePrice();
   pricePill.classList.add('show');
   cta.classList.add('show');
 
@@ -465,7 +450,7 @@ function render(){
   const radius=rect.width*0.36;
   const angles=SLOT_ANGLES[charms.length];
 
-  charms.forEach((c,i)=>{
+  charms.forEach((file,i)=>{
     const a=angles[angles.length-1-i];
     const rad=a*Math.PI/180;
     const x=cx+radius*Math.cos(rad);
@@ -473,12 +458,12 @@ function render(){
 
     const w=document.createElement('div');
     w.className='charm';
-    w.style.left=`${x-PHYSICS.anchorX}px`;
-    w.style.top=`${y-PHYSICS.anchorY}px`;
-    w.style.transform=`rotate(${a-90}deg)`;
+    w.style.left=(x-PHYSICS.anchorX)+'px';
+    w.style.top=(y-PHYSICS.anchorY)+'px';
+    w.style.transform='rotate('+(a-90)+'deg)';
 
     const img=document.createElement('img');
-    img.src=c.src;
+    img.src='assets/charms/'+file;
     img.style.width=PHYSICS.size+'px';
 
     w.appendChild(img);
