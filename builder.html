@@ -7,33 +7,28 @@
 
 <style>
 /* =========================
-   GLOBAL RESET
+   THEME
 ========================= */
-* {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+:root {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --text: #111;
+  --muted: #777;
+  --accent: #000;
+  --pill: rgba(0,0,0,0.04);
+  --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
+  --shadow-hover: 0 14px 40px rgba(0,0,0,0.12);
 }
 
-.bracelet,
-.charm img {
-  pointer-events: none;
-}
+* { box-sizing: border-box; }
 
-/* =========================
-   BASE
-========================= */
 body {
   margin: 0;
   padding: 16px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f9f7f4;
+  background: var(--bg);
+  color: var(--text);
   text-align: center;
-  color: #111;
-}
-
-h2 {
-  margin: 8px 0 12px;
 }
 
 /* =========================
@@ -41,13 +36,24 @@ h2 {
 ========================= */
 .header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
 }
 
-.back {
+.header button {
+  background: none;
+  border: none;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* =========================
+   TITLE
+========================= */
+h2 {
+  margin: 10px 0 14px;
+  font-size: 22px;
 }
 
 /* =========================
@@ -56,21 +62,25 @@ h2 {
 .metal-toggle {
   display: inline-flex;
   gap: 6px;
-  margin: 12px 0;
+  background: var(--pill);
+  padding: 4px;
+  border-radius: 999px;
+  margin-bottom: 16px;
 }
 
 .metal-toggle button {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
-  border: 1px solid #ccc;
-  background: #fff;
+  border: none;
   cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  transition: all .2s ease;
 }
 
 .metal-toggle button.active {
-  background: #000;
+  background: var(--accent);
   color: #fff;
-  border-color: #000;
 }
 
 /* =========================
@@ -78,7 +88,11 @@ h2 {
 ========================= */
 .canvas-wrap {
   position: relative;
-  margin-top: 8px;
+  margin: 0 auto 14px;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
 }
 
 .canvas {
@@ -88,6 +102,9 @@ h2 {
   margin: 0 auto;
 }
 
+/* =========================
+   BRACELET
+========================= */
 .bracelet {
   position: absolute;
   width: 72%;
@@ -95,20 +112,7 @@ h2 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-/* =========================
-   PRICE PILL
-========================= */
-.price-pill {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(10px);
-  font-size: 14px;
+  pointer-events: none;
 }
 
 /* =========================
@@ -118,130 +122,99 @@ h2 {
   position: absolute;
   cursor: pointer;
   transform-origin: top center;
+  animation: popIn .25s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(.85) rotate(var(--r)); opacity: 0; }
+  to   { transform: scale(1) rotate(var(--r)); opacity: 1; }
 }
 
 .charm img {
   display: block;
+  width: 46px;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* =========================
+   PRICE PILL
+========================= */
+.price-pill {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  background: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: all .2s ease;
+}
+
+.price-pill.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* =========================
    HINT
 ========================= */
 .hint {
-  margin-top: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--muted);
+  margin: 10px 0 14px;
 }
 
 /* =========================
    TRAY
 ========================= */
+.tray-wrap {
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
 .tray {
-  margin-top: 14px;
-  padding: 14px;
-  background: #fff;
-  border-radius: 16px;
   display: flex;
   justify-content: center;
   gap: 16px;
 }
 
-/* =========================
-   RESET
-========================= */
-.reset-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 6px;
+.tray img {
+  width: 46px;
+  cursor: pointer;
+  transition: transform .18s ease;
 }
 
-.reset-row button {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
+.tray img:active {
+  transform: scale(.92);
 }
 
 /* =========================
    CTA
 ========================= */
 .cta {
-  margin-top: 14px;
-}
-
-.cta button {
-  width: 100%;
-  padding: 14px;
-  border-radius: 999px;
-  border: none;
+  margin-top: 18px;
   background: #000;
   color: #fff;
+  padding: 18px;
+  border-radius: 999px;
   font-size: 16px;
-  display: none;
-}
-
-/* =========================
-   MODAL
-========================= */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal.hidden {
-  display: none;
-}
-
-.modal-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  width: 80%;
-  max-width: 300px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-}
-
-.confirm {
-  background: #000;
-  color: #fff;
-}
-
-/* =========================
-   PREMIUM TOAST
-========================= */
-.toast {
-  position: fixed;
-  bottom: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 13px;
   opacity: 0;
-  transition: opacity 0.3s;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: all .25s ease;
 }
 
-.toast.show {
+.cta.show {
   opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 </style>
 </head>
@@ -249,58 +222,58 @@ h2 {
 <body>
 
 <div class="header">
-  <div class="back">← Back</div>
-  <div></div>
+  <button onclick="history.back()">← Back</button>
+  <button onclick="handleReset()">Reset</button>
 </div>
 
 <h2>Build My Bracelet</h2>
 
 <div class="metal-toggle">
-  <button id="goldBtn" class="active">Gold</button>
-  <button id="silverBtn">Silver</button>
+  <button id="goldBtn" class="active" onclick="switchMetal('gold')">Gold</button>
+  <button id="silverBtn" onclick="switchMetal('silver')">Silver</button>
 </div>
 
 <div class="canvas-wrap">
+  <div class="price-pill" id="pricePill">Rs. 249</div>
+
   <div class="canvas" id="canvas">
-    <div class="price-pill" id="pricePill">Rs. 399</div>
-    <img id="braceletImg" class="bracelet" src="assets/bases/bracelet_base_gold.png" />
+    <img id="braceletBase"
+      src="assets/bases/bracelet_base_gold.png"
+      class="bracelet" />
   </div>
 </div>
 
 <div class="hint">Tap a charm to add • Tap charm to remove</div>
 
-<div class="tray" id="tray"></div>
-
-<div class="reset-row">
-  <button id="resetBtn">Reset</button>
+<div class="tray-wrap">
+  <div class="tray" id="tray"></div>
 </div>
 
-<div class="cta">
-  <button id="ctaBtn">Love it · Add to Bag 🛍️</button>
-</div>
-
-<!-- MODAL -->
-<div id="modal" class="modal hidden">
-  <div class="modal-card">
-    <p id="modalText"></p>
-    <div class="modal-actions">
-      <button id="cancelModal">Cancel</button>
-      <button id="confirmModal" class="confirm">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast">Premium charm added ✨</div>
+<div class="cta" id="cta">Love it · Add to Bag 🛍️</div>
 
 <script>
 /* =========================
-   CONFIG (LOCKED)
+   STATE
+========================= */
+let metal = 'gold';
+let charms = [];
+
+const PRICING = {
+  base: 249,
+  charm: 80,
+  premiumExtra: 50
+};
+
+const PREMIUM = ['LetterA'];
+
+/* =========================
+   PHYSICS (LOCKED)
 ========================= */
 const CHARM_PHYSICS = {
   size: 46,
   anchorX: 23,
   anchorY: 6,
-  scale: 0.9,
+  scale: 1,
   attachOffset: 2
 };
 
@@ -312,95 +285,54 @@ const SLOT_ANGLES = {
   5: [40,65,90,115,140]
 };
 
-const PRICING = {
-  base: 399,
-  charm: 60,
-  premium: 99
+/* =========================
+   FILE MAP (NO MAGIC)
+========================= */
+const CHARMS = {
+  gold: [
+    '3DBowRibbon_Charm_Gold.png',
+    'EvilEye_Charm_Gold.png',
+    'LetterA_Charm_Gold.png',
+    'NorthStar_Charm_Gold.png',
+    'RedCherry_Charm_Gold.png'
+  ],
+  silver: [
+    '3DBowRibbon_Charm_Silver.png',
+    'EvilEye_Charm_Silver.png',
+    'LetterA_Charm_Silver.png',
+    'NorthStar_Charm_Silver.png',
+    'RedCherry_Charm_Silver.png'
+  ]
 };
 
-const GOLD_CHARMS = [
-  "3DBowRibbon_Charm_Gold.png",
-  "EvilEye_Charm_Gold.png",
-  "LetterA_Charm_Gold.png",
-  "NorthStar_Charm_Gold.png",
-  "RedCherry_Charm_Gold.png"
-];
-
-const SILVER_CHARMS = [
-  "3DBowRibbon_Charm_Silver.png",
-  "EvilEye_Charm_Silver.png",
-  "LetterA_Charm_Silver.png",
-  "NorthStar_Charm_Silver.png",
-  "RedCherry_Charm_Silver.png"
-];
-
-const PREMIUM_CHARMS = [
-  "NorthStar"
-];
+const canvas = document.getElementById('canvas');
+const tray = document.getElementById('tray');
+const pricePill = document.getElementById('pricePill');
+const cta = document.getElementById('cta');
+const baseImg = document.getElementById('braceletBase');
 
 /* =========================
-   STATE
+   INIT
 ========================= */
-let metal = "gold";
-let charms = [];
-
-const canvas = document.getElementById("canvas");
-const tray = document.getElementById("tray");
-const braceletImg = document.getElementById("braceletImg");
-const pricePill = document.getElementById("pricePill");
-const ctaBtn = document.getElementById("ctaBtn");
+renderTray();
+updatePrice();
 
 /* =========================
-   MODAL
+   FUNCTIONS
 ========================= */
-const modal = document.getElementById("modal");
-const modalText = document.getElementById("modalText");
-const confirmModal = document.getElementById("confirmModal");
-const cancelModal = document.getElementById("cancelModal");
-
-let modalAction = null;
-
-function openModal(text, action) {
-  modalText.textContent = text;
-  modalAction = action;
-  modal.classList.remove("hidden");
-}
-
-confirmModal.onclick = () => {
-  modal.classList.add("hidden");
-  modalAction && modalAction();
-};
-
-cancelModal.onclick = () => modal.classList.add("hidden");
-
-/* =========================
-   TOAST
-========================= */
-const toast = document.getElementById("toast");
-function showToast() {
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 1400);
-}
-
-/* =========================
-   LOGIC
-========================= */
-function loadTray() {
-  tray.innerHTML = "";
-  const list = metal === "gold" ? GOLD_CHARMS : SILVER_CHARMS;
-  list.forEach(name => {
-    const img = document.createElement("img");
-    img.src = `assets/charms/${name}`;
-    img.style.width = "44px";
-    img.onclick = () => addCharm(name);
+function renderTray() {
+  tray.innerHTML = '';
+  CHARMS[metal].forEach(file => {
+    const img = document.createElement('img');
+    img.src = `assets/charms/${file}`;
+    img.onclick = () => addCharm(file);
     tray.appendChild(img);
   });
 }
 
-function addCharm(name) {
+function addCharm(file) {
   if (charms.length >= 5) return;
-  charms.push(name);
-  if (PREMIUM_CHARMS.some(p => name.includes(p))) showToast();
+  charms.push(file);
   render();
 }
 
@@ -409,106 +341,77 @@ function removeCharm(i) {
   render();
 }
 
-function calculatePrice() {
-  let total = PRICING.base + charms.length * PRICING.charm;
-  charms.forEach(c => {
-    if (PREMIUM_CHARMS.some(p => c.includes(p))) {
-      total += PRICING.premium;
-    }
+function render() {
+  document.querySelectorAll('.charm').forEach(el => el.remove());
+  if (!charms.length) {
+    cta.classList.remove('show');
+    pricePill.classList.remove('show');
+    updatePrice();
+    return;
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width/2;
+  const cy = rect.height/2;
+  const radius = rect.width*0.36;
+  const angles = SLOT_ANGLES[charms.length];
+
+  charms.forEach((file,i) => {
+    const angle = angles[angles.length-1-i];
+    const rad = angle*Math.PI/180;
+
+    const x = cx + radius*Math.cos(rad);
+    const y = cy + radius*Math.sin(rad) + CHARM_PHYSICS.attachOffset;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'charm';
+    wrap.style.left = `${x-CHARM_PHYSICS.anchorX}px`;
+    wrap.style.top  = `${y-CHARM_PHYSICS.anchorY}px`;
+    wrap.style.setProperty('--r', `${angle-90}deg`);
+    wrap.style.transform = `rotate(${angle-90}deg)`;
+
+    const img = document.createElement('img');
+    img.src = `assets/charms/${file}`;
+    img.style.width = CHARM_PHYSICS.size+'px';
+
+    wrap.onclick = ()=>removeCharm(i);
+    wrap.appendChild(img);
+    canvas.appendChild(wrap);
+  });
+
+  cta.classList.add('show');
+  pricePill.classList.add('show');
+  updatePrice();
+}
+
+function updatePrice() {
+  let total = PRICING.base;
+  charms.forEach(f=>{
+    total += PRICING.charm;
+    if (f.includes('LetterA')) total += PRICING.premiumExtra;
   });
   pricePill.textContent = `Rs. ${total}`;
 }
 
-function render() {
-  document.querySelectorAll(".charm").forEach(e => e.remove());
-  calculatePrice();
+function switchMetal(m) {
+  if (metal === m) return;
+  if (charms.length && !confirm('Switching metal will reset your design. Continue?')) return;
 
-  ctaBtn.style.display = charms.length ? "block" : "none";
-  if (!charms.length) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
-  const radius = rect.width * 0.36;
-  const angles = SLOT_ANGLES[charms.length];
-
-  charms.forEach((src,i) => {
-    const angle = angles[angles.length - 1 - i];
-    const rad = angle * Math.PI / 180;
-
-    const x = cx + radius * Math.cos(rad);
-    const y = cy + radius * Math.sin(rad) + CHARM_PHYSICS.attachOffset;
-
-    const wrap = document.createElement("div");
-    wrap.className = "charm";
-    wrap.style.left = `${x - CHARM_PHYSICS.anchorX}px`;
-    wrap.style.top = `${y - CHARM_PHYSICS.anchorY}px`;
-    wrap.style.transform = `rotate(${angle - 90}deg) scale(${CHARM_PHYSICS.scale})`;
-
-    const img = document.createElement("img");
-    img.src = `assets/charms/${src}`;
-    img.style.width = CHARM_PHYSICS.size + "px";
-
-    wrap.appendChild(img);
-    wrap.onclick = () => removeCharm(i);
-    canvas.appendChild(wrap);
-  });
+  metal = m;
+  charms = [];
+  document.getElementById('goldBtn').classList.toggle('active', m==='gold');
+  document.getElementById('silverBtn').classList.toggle('active', m==='silver');
+  baseImg.src = `assets/bases/bracelet_base_${m}.png`;
+  renderTray();
+  render();
 }
 
-/* =========================
-   EVENTS
-========================= */
-document.getElementById("goldBtn").onclick = () => {
-  if (metal === "gold") return;
-  if (!charms.length) {
-    metal = "gold";
-    braceletImg.src = "assets/bases/bracelet_base_gold.png";
-    loadTray();
-    document.getElementById("goldBtn").classList.add("active");
-    document.getElementById("silverBtn").classList.remove("active");
-    return;
-  }
-  openModal("Switching metal will reset your design.", () => {
-    charms = [];
-    metal = "gold";
-    braceletImg.src = "assets/bases/bracelet_base_gold.png";
-    loadTray();
-    document.getElementById("goldBtn").classList.add("active");
-    document.getElementById("silverBtn").classList.remove("active");
-    render();
-  });
-};
-
-document.getElementById("silverBtn").onclick = () => {
-  if (metal === "silver") return;
-  if (!charms.length) {
-    metal = "silver";
-    braceletImg.src = "assets/bases/bracelet_base_silver.png";
-    loadTray();
-    document.getElementById("silverBtn").classList.add("active");
-    document.getElementById("goldBtn").classList.remove("active");
-    return;
-  }
-  openModal("Switching metal will reset your design.", () => {
-    charms = [];
-    metal = "silver";
-    braceletImg.src = "assets/bases/bracelet_base_silver.png";
-    loadTray();
-    document.getElementById("silverBtn").classList.add("active");
-    document.getElementById("goldBtn").classList.remove("active");
-    render();
-  });
-};
-
-document.getElementById("resetBtn").onclick = () => {
+function handleReset() {
   if (!charms.length) return;
-  openModal("Reset your bracelet?", () => {
-    charms = [];
-    render();
-  });
-};
-
-loadTray();
+  if (!confirm('Reset your bracelet?')) return;
+  charms=[];
+  render();
+}
 </script>
 
 </body>
