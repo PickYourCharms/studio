@@ -6,236 +6,385 @@
 <title>Style My Earrings</title>
 
 <style>
-  body {
-    margin: 0;
-    padding: 16px;
-    font-family: system-ui, -apple-system, sans-serif;
-    background: #faf7f2;
-    text-align: center;
-  }
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  padding: 14px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f6f3ec;
+  text-align: center;
+  color: #111;
+  -webkit-tap-highlight-color: transparent;
+}
 
-  h2 {
-    margin-bottom: 10px;
-  }
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
 
-  .canvas {
-    position: relative;
-    width: min(92vw, 360px);
-    aspect-ratio: 1 / 1.2;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 22px;
-    padding: 18px;
-    box-sizing: border-box;
-  }
+/* TITLE */
+h2 { margin: 8px 0 10px; }
 
-  .hooks {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
+/* METAL TOGGLE */
+.metal-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.metal-toggle button {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+.metal-toggle button.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
 
-  .hook {
-    position: absolute;
-    top: 40px;
-    transform-origin: top center;
-  }
+/* BUILDER SURFACE */
+.builder-surface {
+  background: #fff;
+  border-radius: 26px;
+  padding: 10px 12px 18px;
+  margin: 0 auto;
+  max-width: 420px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.06);
+}
 
-  .hook.left {
-    left: 24%;
-  }
+/* CANVAS */
+.canvas {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1.2;
+  margin: 0 auto;
+}
 
-  .hook.right {
-    right: 24%;
-  }
+/* HOOKS */
+.hook {
+  position: absolute;
+  top: 40px;
+  transform-origin: top center;
+}
+.hook.left { left: 24%; }
+.hook.right { right: 24%; }
+.hook img { pointer-events: none; }
 
-  .hook img {
-    display: block;
-    pointer-events: none;
-  }
+/* CHARMS */
+.charm {
+  position: absolute;
+  cursor: pointer;
+  transform-origin: top center;
+}
+.charm img { width: 60px; pointer-events: none; }
 
-  .charm {
-    position: absolute;
-    cursor: pointer;
-    user-select: none;
-    transform-origin: top center;
-  }
+/* PRICE */
+.price-pill {
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.95);
+  font-size: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.2s ease;
+}
+.price-pill.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  .charm img {
-    display: block;
-    pointer-events: none;
-  }
+/* RESET */
+.reset-row {
+  text-align: right;
+  margin: 6px auto 10px;
+  max-width: 360px;
+}
+.reset-row button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #777;
+  cursor: pointer;
+}
 
-  .hint {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #666;
-  }
+/* HELPER */
+.helper { font-size: 13px; color: #777; }
 
-  .tray {
-    margin-top: 16px;
-    background: #fff;
-    padding: 12px;
-    border-radius: 18px;
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-  }
+/* TRAY */
+.tray-surface {
+  background: #fff;
+  border-radius: 22px;
+  padding: 14px 10px;
+  margin: 14px auto 90px;
+  max-width: 420px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.05);
+}
+.tray {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+.tray img { width: 44px; cursor: pointer; }
 
-  .tray img {
-    width: 44px;
-    cursor: pointer;
-  }
+/* CTA */
+.cta {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  padding: 16px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.25s ease;
+}
+.cta.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  .price-pill {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    background: #fff;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-weight: 500;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  }
-
-  .reset {
-    margin-top: 12px;
-    font-size: 14px;
-    color: #666;
-    cursor: pointer;
-  }
-
-  .cta {
-    margin-top: 18px;
-    background: #000;
-    color: #fff;
-    padding: 16px;
-    border-radius: 999px;
-    font-size: 16px;
-  }
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  width: 86%;
+  max-width: 320px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+.primary { background: #000; color: #fff; }
+.secondary { background: #eee; }
 </style>
 </head>
 
 <body>
 
+<div class="header">
+  <button onclick="history.back()">← Back</button>
+</div>
+
 <h2>Style My Earrings</h2>
 
-<div class="canvas" id="canvas">
-  <div class="price-pill">Rs. 249</div>
+<div class="metal-toggle">
+  <button id="goldBtn" class="active" onclick="onMetalClick('gold')">Gold</button>
+  <button id="silverBtn" onclick="onMetalClick('silver')">Silver</button>
+</div>
 
-  <div class="hooks">
+<div class="builder-surface">
+  <div class="canvas" id="canvas">
     <div class="hook left">
-      <img src="assets/bases/LeftHook_gold.png" id="leftHook" />
+      <img id="leftHook" src="assets/bases/LeftHook_gold.png">
     </div>
-
     <div class="hook right">
-      <img src="assets/bases/RightHook_gold.png" id="rightHook" />
+      <img id="rightHook" src="assets/bases/RightHook_gold.png">
+    </div>
+    <div id="pricePill" class="price-pill"></div>
+  </div>
+
+  <div class="reset-row">
+    <button onclick="onResetClick()">Reset</button>
+  </div>
+
+  <div class="helper">Tap a charm to add • Tap charm to remove</div>
+</div>
+
+<div class="tray-surface">
+  <div class="tray" id="tray"></div>
+</div>
+
+<button id="cta" class="cta">Love it · Add to Bag</button>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <div id="modalText"></div>
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="primary" id="modalConfirm">Confirm</button>
     </div>
   </div>
 </div>
 
-<div class="hint">Tap a charm to add • Tap charm to remove</div>
-
-<div class="tray">
-  <img src="assets/charms/3DBowRibbon_Charm_Gold.png" onclick="addCharm(this.src)" />
-  <img src="assets/charms/EvilEye_Charm_Gold.png" onclick="addCharm(this.src)" />
-  <img src="assets/charms/LetterA_Charm_Gold.png" onclick="addCharm(this.src)" />
-  <img src="assets/charms/NorthStar_Charm_Gold.png" onclick="addCharm(this.src)" />
-  <img src="assets/charms/RedCherry_Charm_Gold.png" onclick="addCharm(this.src)" />
-</div>
-
-<div class="reset" onclick="resetEarrings()">Reset</div>
-
-<div class="cta">Love it · Add to Bag 🛍️</div>
-
 <script>
-/* =========================
-   🔧 EARRING PHYSICS PANEL
-   (ONLY TUNE THIS)
-   ========================= */
-const EARRING_PHYSICS = {
-  hookScale: 0.45,      // resize hook
-  charmSize: 64,        // charm size
-  charmOffsetY: 6,      // hug distance
+/* ===== CONFIG ===== */
+const BASE_PRICE = 249;
 
-  leftHook: {
-    anchorX: 96,
-    anchorY: 168
-  },
-
-  rightHook: {
-    anchorX: 104,
-    anchorY: 168
-  }
+const CHARMS = {
+  gold:[
+    '3DBowRibbon_Charm_Gold.png',
+    'EvilEye_Charm_Gold.png',
+    'LetterA_Charm_Gold.png',
+    'NorthStar_Charm_Gold.png',
+    'RedCherry_Charm_Gold.png'
+  ],
+  silver:[
+    '3DBowRibbon_Charm_Silver.png',
+    'EvilEye_Charm_Silver.png',
+    'LetterA_Charm_Silver.png',
+    'NorthStar_Charm_Silver.png',
+    'RedCherry_Charm_Silver.png'
+  ]
 };
 
-const canvas = document.getElementById('canvas');
-const leftHookEl = document.getElementById('leftHook');
-const rightHookEl = document.getElementById('rightHook');
+/* PHYSICS */
+const PHYSICS = {
+  hookScale:0.45,
+  charmSize:60,
+  left:{x:96,y:168},
+  right:{x:104,y:168}
+};
 
-leftHookEl.style.transform = `scale(${EARRING_PHYSICS.hookScale})`;
-rightHookEl.style.transform = `scale(${EARRING_PHYSICS.hookScale})`;
+let metal='gold';
+let charms={left:null,right:null};
 
-let charms = { left: null, right: null };
+/* ELEMENTS */
+const tray=document.getElementById('tray');
+const pricePill=document.getElementById('pricePill');
+const cta=document.getElementById('cta');
+const modal=document.getElementById('modal');
+const modalText=document.getElementById('modalText');
+const modalConfirm=document.getElementById('modalConfirm');
 
-function addCharm(src) {
-  if (!charms.left) {
-    charms.left = src;
-  } else if (!charms.right) {
-    charms.right = src;
-  } else {
+loadTray();
+
+/* TRAY */
+function loadTray(){
+  tray.innerHTML='';
+  CHARMS[metal].forEach(f=>{
+    const img=document.createElement('img');
+    img.src='assets/charms/'+f;
+    img.onclick=()=>addCharm(f);
+    tray.appendChild(img);
+  });
+}
+
+/* ADD / REMOVE */
+function addCharm(file){
+  if(!charms.left) charms.left=file;
+  else if(!charms.right) charms.right=file;
+  render();
+}
+
+function render(){
+  document.querySelectorAll('.charm').forEach(e=>e.remove());
+
+  const count=(charms.left?1:0)+(charms.right?1:0);
+  if(count===0){
+    pricePill.classList.remove('show');
+    cta.classList.remove('show');
     return;
   }
+
+  pricePill.textContent='Rs. '+BASE_PRICE;
+  pricePill.classList.add('show');
+  cta.classList.add('show');
+
+  drawCharm('left');
+  drawCharm('right');
+}
+
+function drawCharm(side){
+  if(!charms[side]) return;
+
+  const hook=document.querySelector('.hook.'+side+' img');
+  const hRect=hook.getBoundingClientRect();
+  const cRect=document.getElementById('canvas').getBoundingClientRect();
+
+  const w=document.createElement('div');
+  w.className='charm';
+  w.style.left=(hRect.left-cRect.left+PHYSICS[side].x-PHYSICS.charmSize/2)+'px';
+  w.style.top=(hRect.top-cRect.top+PHYSICS[side].y)+'px';
+
+  const img=document.createElement('img');
+  img.src='assets/charms/'+charms[side];
+  img.style.width=PHYSICS.charmSize+'px';
+
+  w.appendChild(img);
+  w.onclick=()=>{charms[side]=null;render()};
+  document.getElementById('canvas').appendChild(w);
+}
+
+/* METAL */
+function onMetalClick(next){
+  if(next===metal) return;
+  if(charms.left||charms.right){
+    showModal('Switching metal will reset your design.',()=>{
+      charms={left:null,right:null};
+      metal=next;
+      updateMetal();
+    });
+  }else{
+    metal=next;
+    updateMetal();
+  }
+}
+
+function updateMetal(){
+  document.getElementById('leftHook').src='assets/bases/LeftHook_'+metal+'.png';
+  document.getElementById('rightHook').src='assets/bases/RightHook_'+metal+'.png';
+  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
+  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
+  loadTray();
   render();
 }
 
-function removeCharm(side) {
-  charms[side] = null;
-  render();
+/* RESET */
+function onResetClick(){
+  if(!charms.left&&!charms.right) return;
+  showModal('Reset earring design?',()=>{
+    charms={left:null,right:null};
+    render();
+  });
 }
 
-function resetEarrings() {
-  charms.left = null;
-  charms.right = null;
-  render();
+/* MODAL */
+function showModal(text,fn){
+  modalText.textContent=text;
+  modalConfirm.onclick=()=>{closeModal();fn()};
+  modal.style.display='flex';
 }
-
-function render() {
-  document.querySelectorAll('.charm').forEach(el => el.remove());
-
-  renderCharm('left');
-  renderCharm('right');
-}
-
-function renderCharm(side) {
-  const src = charms[side];
-  if (!src) return;
-
-  const hookEl = side === 'left' ? leftHookEl : rightHookEl;
-  const hookRect = hookEl.getBoundingClientRect();
-  const canvasRect = canvas.getBoundingClientRect();
-
-  const physics = side === 'left'
-    ? EARRING_PHYSICS.leftHook
-    : EARRING_PHYSICS.rightHook;
-
-  const x = hookRect.left - canvasRect.left + physics.anchorX;
-  const y = hookRect.top - canvasRect.top + physics.anchorY + EARRING_PHYSICS.charmOffsetY;
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'charm';
-  wrapper.style.left = `${x - EARRING_PHYSICS.charmSize / 2}px`;
-  wrapper.style.top = `${y}px`;
-
-  const img = document.createElement('img');
-  img.src = src;
-  img.style.width = EARRING_PHYSICS.charmSize + 'px';
-
-  wrapper.appendChild(img);
-  wrapper.onclick = () => removeCharm(side);
-
-  canvas.appendChild(wrapper);
-}
+function closeModal(){ modal.style.display='none'; }
 </script>
 
 </body>
