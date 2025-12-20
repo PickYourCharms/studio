@@ -1,71 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Build My Bracelet</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build My Bracelet</title>
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 24px;
-    }
+<style>
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #fff;
+    text-align: center;
+  }
 
-    h2 {
-      margin-bottom: 12px;
-    }
+  h2 {
+    margin-bottom: 12px;
+  }
 
-    /* ===== CANVAS ===== */
-    .canvas {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 0 auto;
-    }
+  /* =========================
+     CANVAS (RESPONSIVE)
+     ========================= */
+  .canvas {
+    position: relative;
+    width: min(92vw, 380px);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+  }
 
-    /* ===== BRACELET IMAGE ===== */
-    .bracelet {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
+  /* =========================
+     BRACELET BASE
+     ========================= */
+  .bracelet {
+    position: absolute;
+    width: 72%;
+    height: 72%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
 
-    /* ===== CHARMS ===== */
-    .charm {
-      position: absolute;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      transform-origin: center;
-    }
+  /* =========================
+     CHARMS ON CANVAS
+     ========================= */
+  .charm {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    user-select: none;
+    transform-origin: center;
+  }
 
-    /* ===== HINT ===== */
-    .hint {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #666;
-    }
+  /* =========================
+     INSTRUCTION
+     ========================= */
+  .hint {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+  }
 
-    /* ===== TRAY ===== */
-    .tray {
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      margin-top: 20px;
-    }
+  /* =========================
+     TRAY
+     ========================= */
+  .tray {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
 
-    .tray img {
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-    }
-  </style>
+  .tray img {
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+  }
+</style>
 </head>
 
 <body>
@@ -76,11 +88,11 @@
   <img
     src="assets/bases/bracelet_base_gold.png"
     class="bracelet"
-    alt="Bracelet Base"
+    alt="Bracelet base"
   />
 </div>
 
-<div class="hint">Tap a charm to add • Click charm to remove</div>
+<div class="hint">Tap a charm to add • Tap charm to remove</div>
 
 <div class="tray">
   <img src="assets/charms/3DBowRibbon_Charm_Gold.png" onclick="addCharm(this.src)" />
@@ -91,24 +103,20 @@
 </div>
 
 <script>
-  const canvas = document.getElementById('canvas');
-
-  /* ===== CENTER ===== */
-  const CENTER_X = 160;
-  const CENTER_Y = 160;
-
-  /* ===== GEOMETRY (LOCKED) ===== */
-  const BRACELET_RADIUS = 100;   // half of bracelet image size (200px)
-  const ATTACH_OFFSET = 15;
-
-  const ARC_START = 30;
-  const ARC_END = 150;
-
+  const canvas = document.getElementById("canvas");
   let charms = [];
 
   function addCharm(src) {
     if (charms.length >= 5) return;
-    charms.push(src);
+
+    // CENTER-OUT insertion (LOCKED LOGIC)
+    if (charms.length === 0) {
+      charms.push(src);
+    } else {
+      const middle = Math.floor(charms.length / 2);
+      charms.splice(middle + 1, 0, src);
+    }
+
     render();
   }
 
@@ -118,8 +126,18 @@
   }
 
   function render() {
-    document.querySelectorAll('.charm').forEach(el => el.remove());
+    document.querySelectorAll(".charm").forEach(el => el.remove());
     if (charms.length === 0) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+
+    const radius = rect.width * 0.36;   // bracelet radius
+    const attachOffset = 8;              // pulls charms closer to chain
+
+    const ARC_START = 30;
+    const ARC_END = 150;
 
     const step =
       charms.length === 1
@@ -134,18 +152,18 @@
 
       const rad = angleDeg * Math.PI / 180;
 
-      const x = CENTER_X + BRACELET_RADIUS * Math.cos(rad);
-      const y = CENTER_Y + BRACELET_RADIUS * Math.sin(rad) + ATTACH_OFFSET;
+      const x = cx + radius * Math.cos(rad);
+      const y = cy + radius * Math.sin(rad) + attachOffset;
 
-      const img = document.createElement('img');
+      const img = document.createElement("img");
       img.src = src;
-      img.className = 'charm';
+      img.className = "charm";
 
-      img.style.left = `${x - 18}px`;
-      img.style.top = `${y - 18}px`;
+      img.style.left = `${x - 21}px`;
+      img.style.top = `${y - 21}px`;
 
-      const tilt = angleDeg - 90;
-      img.style.transform = `rotate(${tilt}deg)`;
+      // Directional tilt (LEFT → RIGHT)
+      img.style.transform = `rotate(${angleDeg - 90}deg)`;
 
       img.onclick = () => removeCharm(i);
       canvas.appendChild(img);
