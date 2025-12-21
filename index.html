@@ -68,7 +68,17 @@
   <h2>Combo</h2>
   <p>Bracelet + Earrings</p>
   <span class="price-hint">Better together</span>
-  <button class="primary-btn">I want it all →</button>
+  <button
+  class="primary-btn"
+  onclick="
+    sessionStorage.setItem('comboMode','true');
+    sessionStorage.removeItem('comboBraceletDesign');
+    sessionStorage.removeItem('comboEarringDesign');
+    window.location.href='builder.html';
+  ">
+  I want it all →
+</button>
+
 </div>
 
   <!-- Curated -->
@@ -85,5 +95,6 @@
 
 </body>
 </html>
+
 
 
