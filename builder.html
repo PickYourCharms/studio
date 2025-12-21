@@ -4,38 +4,44 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Build My Bracelet</title>
+<link rel="stylesheet" href="styles.css?v=2.0">
 <style>
-/* ... (Your CSS) ... */
-.bottom-sheet { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px 30px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 100; display: flex; flex-direction: column; gap: 12px; text-align: center; }
-.bottom-sheet.active { transform: translateY(0); }
-.sheet-actions { display: flex; gap: 10px; }
-.sheet-btn { flex: 1; padding: 14px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
-.sheet-btn.primary { background: #000; color: #fff; }
-.sheet-btn.secondary { background: #f0f0f0; color: #000; }
-body { margin: 0; padding: 14px; font-family: system-ui, -apple-system, sans-serif; background: #f6f3ec; text-align: center; color: #111; -webkit-tap-highlight-color: transparent; }
-.header { display: flex; justify-content: space-between; align-items: center; }
+/* Local overrides if needed (Moved most to styles.css for cleanliness) */
+body { background: #f6f3ec; padding: 14px 14px 100px 14px; } /* Padding for bottom spacing */
+
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .header button { background: none; border: none; font-size: 14px; cursor: pointer; }
-h2 { margin: 8px 0 10px; }
+
+/* Builder Components */
 .metal-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
 .metal-toggle button { padding: 8px 18px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
 .metal-toggle button.active { background: #000; color: #fff; border-color: #000; }
+
 .builder-surface { background: #ffffff; border-radius: 26px; padding: 10px 12px 18px; margin: 0 auto; max-width: 420px; box-shadow: 0 18px 40px rgba(0,0,0,0.06); }
 .canvas { position: relative; width: 100%; max-width: 360px; aspect-ratio: 1 / 1; margin: -6px auto 0; }
 .bracelet { position: absolute; width: 72%; height: 72%; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+
 .price-pill { position: absolute; top: 6%; right: 6%; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,0.95); font-size: 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); opacity: 0; transform: translateY(6px); transition: all 0.2s ease; }
 .price-pill.show { opacity: 1; transform: translateY(0); }
+
 .charm { position: absolute; cursor: pointer; transform-origin: top center; }
 .charm img { width: 46px; }
+
 .reset-row { text-align: right; margin: 6px auto 10px; max-width: 360px; }
 .reset-row button { background: none; border: none; font-size: 14px; color: #777; cursor: pointer; }
-.helper { font-size: 13px; color: #777; }
-.tray-surface { background: #ffffff; border-radius: 22px; padding: 14px 10px; margin: 14px auto 90px; max-width: 420px; box-shadow: 0 12px 28px rgba(0,0,0,0.05); }
+
+.helper { font-size: 13px; color: #777; margin-top: 10px; }
+
+.tray-surface { background: #ffffff; border-radius: 22px; padding: 14px 10px; margin: 14px auto 0; max-width: 420px; box-shadow: 0 12px 28px rgba(0,0,0,0.05); }
 .tray { display: flex; justify-content: center; gap: 18px; }
 .tray img { width: 44px; cursor: pointer; }
-.cta { position: fixed; bottom: 14px; left: 14px; right: 14px; padding: 16px; border-radius: 999px; background: #000; color: #fff; border: none; font-size: 16px; cursor: pointer; opacity: 0; transform: translateY(12px); transition: all 0.25s ease; }
+
+.cta { position: fixed; bottom: 20px; left: 14px; right: 14px; padding: 16px; border-radius: 999px; background: #000; color: #fff; border: none; font-size: 16px; cursor: pointer; opacity: 0; transform: translateY(12px); transition: all 0.25s ease; }
 .cta.show { opacity: 1; transform: translateY(0); }
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 99; }
-.modal-card { background: #fff; border-radius: 18px; padding: 20px; width: 86%; max-width: 320px; }
+
+/* Modal */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 999; }
+.modal-card { background: #fff; border-radius: 18px; padding: 20px; width: 86%; max-width: 320px; text-align: center; }
 .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 .modal-actions button { flex: 1; padding: 12px; border-radius: 999px; border: none; cursor: pointer; }
 .primary { background: #000; color: #fff; }
@@ -44,22 +50,46 @@ h2 { margin: 8px 0 10px; }
 </head>
 
 <body>
-<div class="header"> <button onclick="goBack()">← Back</button> </div>
+
+<div class="header">
+  <button onclick="goBack()">← Back</button>
+  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
+    </svg>
+  </button>
+</div>
+
 <h2>Build My Bracelet</h2>
+
 <div class="metal-toggle">
   <button id="goldBtn" class="active" onclick="onMetalClick('gold')">Gold</button>
   <button id="silverBtn" onclick="onMetalClick('silver')">Silver</button>
 </div>
+
 <div class="builder-surface">
   <div class="canvas" id="canvas">
     <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
     <div id="pricePill" class="price-pill"></div>
   </div>
-  <div class="reset-row"> <button onclick="onResetClick()">Reset</button> </div>
+
+  <div class="reset-row">
+    <button onclick="onResetClick()">Reset</button>
+  </div>
+
   <div class="helper">Tap a charm to add • Tap charm to remove</div>
 </div>
-<div class="tray-surface"> <div class="tray" id="tray"></div> </div>
+
+<div class="tray-surface">
+  <div class="tray" id="tray"></div>
+</div>
+
 <button id="cta" class="cta">Love it · Add to Bag</button>
+
+<div class="post-actions-container">
+  <button class="action-btn btn-build-more" onclick="window.location.href='index.html'">Build More</button>
+  <button class="action-btn btn-view-cart" onclick="window.location.href='cart.html'">View Cart</button>
+</div>
 
 <div id="modal" class="modal">
   <div class="modal-card">
@@ -68,15 +98,6 @@ h2 { margin: 8px 0 10px; }
       <button class="secondary" onclick="closeModal()">Cancel</button>
       <button class="primary" id="modalConfirm">Confirm</button>
     </div>
-  </div>
-</div>
-
-<div id="successSheet" class="bottom-sheet">
-  <h3>Added to Cart ✨</h3>
-  <p>Your design has been saved.</p>
-  <div class="sheet-actions">
-    <button class="sheet-btn secondary" onclick="window.location.href='index.html'">Build More</button>
-    <button class="sheet-btn primary" onclick="window.location.href='cart.html'">View Cart</button>
   </div>
 </div>
 
@@ -93,6 +114,7 @@ const CHARMS = {
 let metal = 'gold';
 let charms = [];
 
+// DOM
 const canvas = document.getElementById('canvas');
 const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
@@ -101,15 +123,20 @@ const cta = document.getElementById('cta');
 const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
-const successSheet = document.getElementById('successSheet');
+const navCartBtn = document.getElementById('navCartBtn');
 
+// QUERY PARAMS
 const urlParams = new URLSearchParams(window.location.search);
 const isCombo = urlParams.get('mode') === 'combo';
 const isResume = urlParams.get('resume') === 'true';
 
+// INIT
 function init() {
+  // Check Cart Icon
+  const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+  if (cart.length > 0) navCartBtn.style.display = 'block';
+
   if (isResume) {
-    // RESUME from SESSION STORAGE
     const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
     if (draft && draft.data) {
       metal = draft.data.metal;
@@ -125,6 +152,7 @@ function init() {
     }
     cta.textContent = "Continue to Earrings →";
   }
+
   updateMetal(); 
 }
 
@@ -134,7 +162,6 @@ function saveDraft() {
     data: { metal, charms },
     timestamp: Date.now()
   };
-  // SAVE to SESSION STORAGE
   sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
 }
 
@@ -197,7 +224,11 @@ function render(){
     const img=document.createElement('img');
     img.src='assets/charms/'+file;
     w.appendChild(img);
-    w.onclick=()=>{charms.splice(i,1);render();saveDraft();};
+    w.onclick=()=>{
+      // Prevent removal if frozen
+      if(document.body.classList.contains('frozen-state')) return;
+      charms.splice(i,1);render();saveDraft();
+    }; 
     canvas.appendChild(w);
   });
 }
@@ -235,6 +266,7 @@ function updateMetal(){
   render();
 }
 
+// CTA HANDLER
 cta.onclick = function() {
   if (isCombo) {
     const state = { metal, charms };
@@ -245,11 +277,11 @@ cta.onclick = function() {
       data: { metal: 'gold', charms: {left:null,right:null} }, 
       comboContext: { bracelet: state }
     };
-    // SAVE draft to SESSION STORAGE
     sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
 
     window.location.href = 'earring-builder.html?mode=combo';
   } else {
+    // SINGLE FLOW FINAL SUBMIT
     const product = {
       id: Date.now(),
       type: 'Bracelet',
@@ -264,16 +296,18 @@ cta.onclick = function() {
 };
 
 function addToCart(item) {
-  // KEEP CART IN LOCAL STORAGE
   let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   cart.push(item);
   localStorage.setItem('pyc_cart', JSON.stringify(cart));
 
-  // CLEAR DRAFT FROM SESSION STORAGE
+  // Clear Draft
   sessionStorage.removeItem('pyc_draft');
 
-  successSheet.classList.add('active');
-  cta.style.display = 'none';
+  // FREEZE UI
+  document.body.classList.add('frozen-state');
+
+  // SHOW CART ICON IMMEDIATELY
+  navCartBtn.style.display = 'block';
 }
 
 function showModal(text,confirmFn){
