@@ -4,12 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Build My Bracelet</title>
-<link rel="stylesheet" href="styles.css?v=2.1">
+<link rel="stylesheet" href="styles.css?v=2.2">
 <style>
-/* Internal overrides kept minimal */
+/* Internal overrides */
 body { background: #f6f3ec; padding: 14px 14px 100px 14px; }
-.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.header button { background: none; border: none; font-size: 14px; cursor: pointer; }
+h2 { margin: 8px 0 10px; }
+/* ... existing component styles ... */
 .metal-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
 .metal-toggle button { padding: 8px 18px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
 .metal-toggle button.active { background: #000; color: #fff; border-color: #000; }
@@ -38,6 +38,7 @@ body { background: #f6f3ec; padding: 14px 14px 100px 14px; }
 
 <div class="header">
   <button onclick="goBack()">← Back</button>
+  <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
@@ -58,16 +59,11 @@ body { background: #f6f3ec; padding: 14px 14px 100px 14px; }
     <div id="pricePill" class="price-pill"></div>
   </div>
 
-  <div class="reset-row">
-    <button onclick="onResetClick()">Reset</button>
-  </div>
-
+  <div class="reset-row"> <button onclick="onResetClick()">Reset</button> </div>
   <div class="helper">Tap a charm to add • Tap charm to remove</div>
 </div>
 
-<div class="tray-surface">
-  <div class="tray" id="tray"></div>
-</div>
+<div class="tray-surface"> <div class="tray" id="tray"></div> </div>
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
 
@@ -131,14 +127,21 @@ function init() {
       metal = data.metal;
       charms = data.charms;
     }
+    // Force text initially, but render will confirm it
     cta.textContent = "Continue to Earrings →";
   }
-
   updateMetal(); 
 }
 
 function saveDraft() {
+  // LOGIC: If design is empty, REMOVE draft. Else SAVE draft.
+  if (charms.length === 0) {
+    sessionStorage.removeItem('pyc_draft');
+    return;
+  }
+
   const draftData = {
+    // Preserve ?mode=combo if present
     url: 'builder.html' + window.location.search,
     data: { metal, charms },
     timestamp: Date.now()
@@ -147,6 +150,12 @@ function saveDraft() {
 }
 
 function goBack() {
+  // If we have added to cart (Frozen state), back means Home.
+  if (document.body.classList.contains('frozen-state')) {
+    window.location.href = 'index.html';
+    return;
+  }
+
   if (isCombo) {
     window.location.href = 'index.html'; 
   } else {
@@ -184,6 +193,13 @@ function render(){
   pricePill.textContent='Rs. '+ totalPrice;
   pricePill.classList.add('show');
   cta.classList.add('show');
+
+  // CRITICAL FIX: Ensure Combo Text persists even on resume
+  if (isCombo) {
+    cta.textContent = "Continue to Earrings →";
+  } else {
+    cta.textContent = "Love it · Add to Bag";
+  }
 
   const rect=canvas.getBoundingClientRect();
   const cx=rect.width/2, cy=rect.height/2;
@@ -246,9 +262,7 @@ function updateMetal(){
   render();
 }
 
-// CTA HANDLER
 cta.onclick = function() {
-  // SAFETY CHECK FOR INVISIBLE CLICK
   if(!cta.classList.contains('show')) return;
 
   if (isCombo) {
@@ -282,6 +296,7 @@ function addToCart(item) {
   cart.push(item);
   localStorage.setItem('pyc_cart', JSON.stringify(cart));
 
+  // Clear Draft IMMEDIATELY upon add to cart
   sessionStorage.removeItem('pyc_draft');
 
   document.body.classList.add('frozen-state');
