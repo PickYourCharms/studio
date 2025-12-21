@@ -1,17 +1,25 @@
 * {
   box-sizing: border-box;
   font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
+  padding: 0; /* REMOVED GLOBAL PADDING */
   background: #ffffff;
   color: #0a0a0a;
-  padding-bottom: 100px; 
 }
 
-/* === NAVBAR (Home) & HEADER (Builders) SHARED STYLES === */
-.navbar, .header {
+/* WRAPPER FOR CONTENT PADDING */
+/* Apply this to the div wrapping everything BELOW the header */
+.main-container {
+  padding: 14px;
+  padding-bottom: 100px; /* Space for sticky footers */
+}
+
+/* === HOME NAVBAR (Left Aligned Logo) === */
+.navbar {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -19,20 +27,38 @@ body {
   backdrop-filter: blur(14px) saturate(160%);
   background: rgba(255,255,255,0.75);
   border-bottom: 1px solid rgba(0,0,0,0.05);
-  display: grid; /* Changed to Grid for perfect centering */
-  grid-template-columns: 40px 1fr 40px; /* Left button, Center Logo, Right button */
+  display: flex; /* Flex for Left/Right alignment */
+  justify-content: space-between;
   align-items: center;
-  justify-items: center; /* Center content in grid cells */
+  width: 100%;
 }
 
-/* Specific alignments for grid items */
-.navbar > :first-child, .header > :first-child { justify-self: start; }
-.navbar > :last-child, .header > :last-child { justify-self: end; }
+/* === BUILDER HEADER (Center Aligned Logo) === */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 10px 14px;
+  backdrop-filter: blur(14px) saturate(160%);
+  background: rgba(255,255,255,0.75);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  display: grid; /* Grid for Perfect Center alignment */
+  grid-template-columns: 40px 1fr 40px; /* Left Button | Center Logo | Right Button */
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+}
 
-.logo-img { height: 22px; }
+/* Header Grid Children Alignment */
+.header > :first-child { justify-self: start; }
+.header > :last-child { justify-self: end; }
 
-/* Buttons in Header */
-.header button {
+/* LOGO */
+.logo-img { height: 22px; display: block; }
+.logo-link { text-decoration: none; border: none; display: block; }
+
+/* BUTTONS */
+.header button, .navbar button {
   background: none;
   border: none;
   font-size: 14px;
@@ -43,14 +69,7 @@ body {
   justify-content: center;
 }
 
-.cart-icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  display: none; /* Hidden by default */
-}
-
+.cart-icon-btn { display: none; } /* Hidden by default */
 .cart-icon-btn svg { width: 24px; height: 24px; color: #000; }
 
 /* HERO */
@@ -64,14 +83,18 @@ body {
 .hero-text h1 { font-size: 26px; line-height: 1.15; margin-bottom: 6px; }
 .hero-text p { font-size: 14px; color: #333; }
 
-/* GRID & CARDS */
+/* GRID */
 .entry-grid { display: grid; gap: 22px; padding: 24px 16px; }
 .entry-card { background: #f9f9f9; border-radius: 24px; padding: 16px; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1); }
 .entry-card.interactive:active { transform: translateY(-2px); }
+
+/* IMAGES */
 .card-image { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 16px; margin-bottom: 14px; }
 .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1); }
 .entry-card.interactive:active .card-image img { transform: scale(1.02); }
 .combo-badge { position: absolute; bottom: 12px; right: 12px; background: rgba(255,255,255,0.9); color: #15803d; padding: 4px 8px; border-radius: 999px; font-size: 11px; }
+
+/* TEXT & BUTTONS */
 .entry-card h2 { margin: 0 0 4px; }
 .entry-card p { margin: 0 0 10px; color: #666; }
 .price-hint { display: block; font-size: 12px; color: #777; margin-bottom: 12px; }
@@ -80,23 +103,15 @@ body {
 
 /* === PREMIUM RESUME BAR === */
 .resume-bar {
-  position: fixed;
-  bottom: 24px;
-  left: 16px;
-  right: 16px;
-  background: #111; 
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-radius: 16px;
+  position: fixed; bottom: 24px; left: 16px; right: 16px;
+  background: #111; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-radius: 16px;
   box-shadow: 0 14px 30px rgba(0,0,0,0.25);
   z-index: 90;
   transform: translateY(150%);
   transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
 }
 .resume-bar.show { transform: translateY(0); }
 .resume-info { display: flex; flex-direction: column; text-align: left; }
@@ -122,20 +137,11 @@ body.frozen-state .post-actions-container { display: flex; }
 .btn-build-more { background: #e5e5e5; color: #000; }
 .btn-view-cart { background: #000; color: #fff; }
 
-.helper {
-  font-size: 13px;
-  color: #777;
-  margin-top: 10px;
-  text-align: center;
-  width: 100%;
-  display: block;
-}
+.helper { font-size: 13px; color: #777; margin-top: 10px; text-align: center; width: 100%; display: block; }
 
 .cta {
   position: fixed; bottom: 20px; left: 14px; right: 14px; padding: 16px; border-radius: 999px; background: #000; color: #fff; border: none; font-size: 16px; cursor: pointer;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: all 0.25s ease;
-  pointer-events: none; /* Fix for invisible click */
+  opacity: 0; transform: translateY(12px); transition: all 0.25s ease;
+  pointer-events: none;
 }
 .cta.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
