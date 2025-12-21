@@ -38,10 +38,16 @@
     <p>Build it charm by charm.</p>
     <span class="price-hint">Starting from Rs. 249</span>
     <button
-      class="primary-btn"
-      onclick="window.location.href='builder.html'">
-      I want to build this →
-    </button>
+  class="primary-btn"
+  onclick="
+    sessionStorage.removeItem('comboMode');
+    sessionStorage.removeItem('comboBracelet');
+    sessionStorage.removeItem('comboEarrings');
+    window.location.href='builder.html';
+  ">
+  I want to build this →
+</button>
+
   </div>
 
   <!-- Earrings -->
@@ -53,10 +59,16 @@
     <p>Style both ears your way.</p>
     <span class="price-hint">Starting from Rs. 199</span>
     <button 
-      class="primary-btn"
-      onclick="window.location.href='earring-builder.html'">
-      Let’s start →
-    </button>
+  class="primary-btn"
+  onclick="
+    sessionStorage.removeItem('comboMode');
+    sessionStorage.removeItem('comboBracelet');
+    sessionStorage.removeItem('comboEarrings');
+    window.location.href='earring-builder.html';
+  ">
+  Let’s start →
+</button>
+
   </div>
 
   <!-- Combo -->
@@ -98,6 +110,7 @@ function startCombo() {
 </script>
 </body>
 </html>
+
 
 
 
