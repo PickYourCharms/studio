@@ -70,14 +70,10 @@
   <span class="price-hint">Better together</span>
   <button
   class="primary-btn"
-  onclick="
-    sessionStorage.setItem('comboMode','true');
-    sessionStorage.removeItem('comboBraceletDesign');
-    sessionStorage.removeItem('comboEarringDesign');
-    window.location.href='builder.html';
-  ">
+  onclick="startCombo()">
   I want it all →
 </button>
+
 
 </div>
 
@@ -92,9 +88,17 @@
   </div>
 
 </section>
-
+<script>
+function startCombo() {
+  sessionStorage.setItem('comboMode', 'true');
+  sessionStorage.removeItem('comboBracelet');
+  sessionStorage.removeItem('comboEarrings');
+  window.location.href = 'builder.html';
+}
+</script>
 </body>
 </html>
+
 
 
 
