@@ -1,83 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My Cart</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  body { margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; color: #111; }
-  .header { padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
-  .header h1 { margin: 0; font-size: 18px; }
-  .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; }
-  
-  .cart-list { padding: 16px; min-height: 60vh; }
-  .empty-msg { text-align: center; color: #777; margin-top: 40px; }
-  
-  .cart-item { display: flex; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid #f5f5f5; padding-bottom: 20px; }
-  .item-img { width: 80px; height: 80px; background: #f9f9f9; border-radius: 12px; object-fit: cover; }
-  .item-details { flex: 1; }
-  .item-title { font-weight: 700; margin: 0 0 4px; font-size: 16px; }
-  .item-desc { font-size: 13px; color: #666; margin: 0 0 8px; line-height: 1.4; }
-  .item-price { font-weight: 600; font-size: 15px; }
-
-  .footer { border-top: 1px solid #eee; padding: 20px; position: sticky; bottom: 0; background: #fff; }
-  .total-row { display: flex; justify-content: space-between; margin-bottom: 16px; font-weight: 700; font-size: 18px; }
-  .checkout-btn { width: 100%; background: #000; color: #fff; border: none; padding: 16px; border-radius: 999px; font-size: 16px; cursor: pointer; }
-</style>
+  <meta charset="UTF-8" />
+  <title>My Bag - PickYourCharms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=3.0">
 </head>
+
 <body>
 
-<div class="header">
-  <h1>My Cart</h1>
-  <button class="close-btn" onclick="window.location.href='index.html'">✕</button>
+<header class="navbar">
+  <a href="index.html" class="logo-link">
+    <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  </a>
+  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.reload()">
+    <div class="cart-badge-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
+      </svg>
+      <span id="cartCountBadge" class="cart-count">0</span>
+    </div>
+  </button>
+</header>
+
+<div class="page-header">
+  <button onclick="window.location.href='index.html'">←</button>
+  <h1>My Bag</h1>
+  <div style="width: 24px;"></div> </div>
+
+<div class="main-container cart-page">
+  
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <img src="assets/home/curated_teaser.png" class="empty-img" style="opacity:0.5; filter:grayscale(1);">
+    <h3>Nothing to see here yet!</h3>
+    <p>Your bag is feeling lonely...</p>
+    <button class="primary-btn" onclick="window.location.href='index.html'">Start Building</button>
+  </div>
+
+  <div id="cartContent" style="display: none;">
+    
+    <div id="cartItemsList" class="cart-list">
+      </div>
+
+    <div class="bill-summary">
+      
+      <div class="coupon-section">
+        <input type="text" id="couponInput" placeholder="Enter Coupon Code" autocomplete="off">
+        <button id="applyCouponBtn" onclick="applyCoupon()">Apply</button>
+      </div>
+      <p id="couponMsg" class="coupon-msg"></p>
+
+      <div class="math-row">
+        <span>Subtotal</span>
+        <span id="subtotalVal">Rs. 0</span>
+      </div>
+
+      <div class="math-row discount-row" id="comboRow" style="display: none;">
+        <span>Combo Savings</span>
+        <span id="comboVal">-Rs. 0</span>
+      </div>
+
+      <div class="math-row discount-row" id="couponRow" style="display: none;">
+        <span id="couponCodeLabel">Coupon</span>
+        <span id="couponVal">-Rs. 0</span>
+      </div>
+
+      <div class="math-row">
+        <span>Shipping</span>
+        <span id="shippingVal">Rs. 80</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="math-row total-row">
+        <span>Total</span>
+        <span id="finalTotal">Rs. 0</span>
+      </div>
+    </div>
+
+    <div class="cart-footer-spacer"></div>
+    <button id="checkoutBtn" class="checkout-pill">Proceed to Checkout</button>
+
+  </div>
 </div>
 
-<div class="cart-list" id="cartList">
+<div id="bratTrapModal" class="modal">
+  <div class="modal-card brat-card">
+    <h3>Wait up! ✋</h3>
+    <p>Are you sure you're done styling?</p>
+    <div class="modal-actions vertical">
+      <button class="secondary" onclick="window.location.href='index.html'">Ughhh!!! I want to design more</button>
+      <button class="primary" onclick="window.location.href='checkout.html'">Maybe Later!!</button>
+    </div>
   </div>
-
-<div class="footer">
-  <div class="total-row">
-    <span>Total</span>
-    <span id="totalPrice">Rs. 0</span>
-  </div>
-  <button class="checkout-btn">Checkout</button>
 </div>
 
 <script>
-  const cartList = document.getElementById('cartList');
-  const totalEl = document.getElementById('totalPrice');
+// === DATA & CONSTANTS ===
+const BASE_PRICE = 249;
+const EXTRA_CHARM_PRICE = 50;
 
-  const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+// Mock Coupons
+const MOCK_COUPONS = [
+  { code: "WELCOME10", percent: 10, minOrder: 0 },
+  { code: "SAVE20", percent: 20, minOrder: 500 }
+];
 
+let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+let activeCoupon = null;
+
+// === DOM ELEMENTS ===
+const emptyState = document.getElementById('emptyState');
+const cartContent = document.getElementById('cartContent');
+const listContainer = document.getElementById('cartItemsList');
+const cartCountBadge = document.getElementById('cartCountBadge');
+const couponInput = document.getElementById('couponInput');
+const couponMsg = document.getElementById('couponMsg');
+
+// === INIT ===
+function init() {
+  updateCartBadge();
   if (cart.length === 0) {
-    cartList.innerHTML = '<div class="empty-msg">Your cart is empty.<br><br><a href="index.html">Start Styling</a></div>';
+    emptyState.style.display = 'flex';
+    cartContent.style.display = 'none';
   } else {
-    let total = 0;
-    cart.forEach(item => {
-      total += item.price;
-      
-      // Basic Description generation
-      let desc = '';
-      if(item.type === 'Bracelet') desc = `Metal: ${item.metal}, ${item.charms.length} Charms`;
-      else if(item.type === 'Earrings') desc = `Metal: ${item.metal}, Pair`;
-      else desc = 'Bracelet + Earrings Bundle';
-
-      const div = document.createElement('div');
-      div.className = 'cart-item';
-      div.innerHTML = `
-        <img src="${item.image}" class="item-img">
-        <div class="item-details">
-          <h3 class="item-title">${item.type}</h3>
-          <p class="item-desc">${desc}</p>
-          <div class="item-price">Rs. ${item.price}</div>
-        </div>
-      `;
-      cartList.appendChild(div);
-    });
-    totalEl.textContent = 'Rs. ' + total;
+    emptyState.style.display = 'none';
+    cartContent.style.display = 'block';
+    renderItems();
+    calculateTotals();
   }
-</script>
+}
 
+function updateCartBadge() {
+  cartCountBadge.textContent = cart.length;
+  document.getElementById('navCartBtn').style.display = 'block';
+}
+
+// === RENDER ITEMS ===
+function renderItems() {
+  listContainer.innerHTML = '';
+  
+  cart.forEach((item, index) => {
+    // Determine visuals based on type
+    let title = '';
+    let charmCount = 0;
+    let thumbSrc = '';
+
+    if (item.type === 'Combo (Bracelet + Earrings)') {
+      title = `${item.bracelet.metal} Combo Set`;
+      charmCount = item.bracelet.charms.length + (item.earrings.charms.left ? 1 : 0) + (item.earrings.charms.right ? 1 : 0);
+      thumbSrc = item.image; 
+    } else {
+      title = `${item.metal} ${item.type}`;
+      if (item.type === 'Bracelet') {
+        charmCount = item.charms.length;
+        thumbSrc = item.image;
+      } else {
+        // Earrings
+        charmCount = (item.charms.left ? 1 : 0) + (item.charms.right ? 1 : 0);
+        thumbSrc = item.image;
+      }
+    }
+
+    // Determine Base Price for display (before cart discounts)
+    // Note: If it's a combo from previous step, it might have a discounted price stored.
+    // For the UI listing, we show the stored price. 
+    // The Math engine will handle the actual recalculations.
+    const displayPrice = item.price; 
+
+    const card = document.createElement('div');
+    card.className = 'cart-item-card';
+    card.innerHTML = `
+      <div class="item-thumb">
+        <img src="${thumbSrc}">
+        <div class="charm-badge">${charmCount} charms</div>
+      </div>
+      <div class="item-details">
+        <div class="item-title">${title}</div>
+        <div class="item-price">Rs. ${displayPrice}</div>
+      </div>
+      <div class="item-actions">
+        <button class="icon-btn edit-btn" onclick="editItem(${index})">✎</button>
+        <button class="icon-btn delete-btn" onclick="deleteItem(${index})">✕</button>
+      </div>
+    `;
+    listContainer.appendChild(card);
+  });
+}
+
+// === MATH ENGINE ===
+function calculateTotals() {
+  // 1. FLATTEN CART FOR CALCULATION
+  // We need to separate Combos into individual components to apply the "Global Pairing Rule"
+  // effectively, or we trust the stored price. 
+  // *Decision:* To strictly follow the prompt's "Step B" logic (Pair cheapest bracelet with earring),
+  // we will extract base prices.
+  
+  let bracelets = [];
+  let earrings = [];
+  
+  // Helper to get raw price of a component
+  const getBraceletPrice = (bData) => BASE_PRICE + (bData.charms.length - 1) * EXTRA_CHARM_PRICE;
+  const getEarringPrice = () => BASE_PRICE;
+
+  cart.forEach(item => {
+    if (item.type === 'Bracelet') {
+      bracelets.push(getBraceletPrice(item));
+    } else if (item.type === 'Earrings') {
+      earrings.push(getEarringPrice());
+    } else if (item.type.includes('Combo')) {
+      // Explode combo for math
+      bracelets.push(getBraceletPrice(item.bracelet));
+      earrings.push(getEarringPrice());
+    }
+  });
+
+  // Step A: Subtotal (Sum of all individual components raw price)
+  let subtotal = 0;
+  bracelets.forEach(p => subtotal += p);
+  earrings.forEach(p => subtotal += p);
+
+  // Step B: Combo Discount Logic
+  // Sort Bracelets Ascending
+  bracelets.sort((a, b) => a - b);
+  
+  let comboDiscount = 0;
+  const pairCount = Math.min(bracelets.length, earrings.length);
+
+  for (let i = 0; i < pairCount; i++) {
+    const pairSum = bracelets[i] + earrings[i]; // earring price is constant 249 usually
+    comboDiscount += Math.floor(pairSum * 0.10);
+  }
+
+  // Step C: Coupon
+  let discountableAmount = subtotal - comboDiscount;
+  let couponDiscount = 0;
+  
+  if (activeCoupon) {
+    if (discountableAmount >= activeCoupon.minOrder) {
+      couponDiscount = Math.floor(discountableAmount * (activeCoupon.percent / 100));
+      couponMsg.textContent = `Coupon Applied: ${activeCoupon.code}`;
+      couponMsg.className = 'coupon-msg success';
+    } else {
+      activeCoupon = null; // Remove if criteria no longer met
+      couponMsg.textContent = `Order value too low for this coupon`;
+      couponMsg.className = 'coupon-msg error';
+    }
+  }
+
+  // Step D: Shipping
+  let valueForShipping = discountableAmount - couponDiscount;
+  let shippingFee = (valueForShipping >= 399) ? 0 : 80;
+
+  // Step E: Final
+  let finalTotal = subtotal - comboDiscount - couponDiscount + shippingFee;
+
+  // === RENDER VALUES ===
+  document.getElementById('subtotalVal').textContent = `Rs. ${subtotal}`;
+  
+  const comboRow = document.getElementById('comboRow');
+  if (comboDiscount > 0) {
+    comboRow.style.display = 'flex';
+    document.getElementById('comboVal').textContent = `-Rs. ${comboDiscount}`;
+  } else {
+    comboRow.style.display = 'none';
+  }
+
+  const couponRow = document.getElementById('couponRow');
+  if (couponDiscount > 0) {
+    couponRow.style.display = 'flex';
+    document.getElementById('couponCodeLabel').textContent = `Coupon (${activeCoupon.code})`;
+    document.getElementById('couponVal').textContent = `-Rs. ${couponDiscount}`;
+  } else {
+    couponRow.style.display = 'none';
+  }
+
+  const shipEl = document.getElementById('shippingVal');
+  if (shippingFee === 0) {
+    shipEl.textContent = 'FREE';
+    shipEl.style.color = '#15803d';
+  } else {
+    shipEl.textContent = `Rs. ${shippingFee}`;
+    shipEl.style.color = '#111';
+  }
+
+  document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
+}
+
+// === ACTIONS ===
+
+function deleteItem(index) {
+  cart.splice(index, 1);
+  localStorage.setItem('pyc_cart', JSON.stringify(cart));
+  init(); // Re-render everything
+}
+
+function editItem(index) {
+  const item = cart[index];
+  
+  // 1. Prepare Draft Data
+  let draftData = {};
+  let targetUrl = '';
+
+  if (item.type === 'Bracelet') {
+    draftData = {
+      url: 'builder.html',
+      data: { metal: item.metal, charms: item.charms },
+      timestamp: Date.now()
+    };
+    targetUrl = 'builder.html?resume=true';
+  } 
+  else if (item.type === 'Earrings') {
+    draftData = {
+      url: 'earring-builder.html',
+      data: { metal: item.metal, charms: item.charms },
+      timestamp: Date.now()
+    };
+    targetUrl = 'earring-builder.html?resume=true';
+  }
+  else if (item.type.includes('Combo')) {
+    // Reconstitute Combo
+    // We need to set the SessionStorage for the bracelet part 
+    // AND the Draft for the earring part (since that's the last step)
+    sessionStorage.setItem('combo_bracelet_data', JSON.stringify(item.bracelet));
+    
+    draftData = {
+      url: 'earring-builder.html?mode=combo',
+      data: { metal: item.earrings.metal, charms: item.earrings.charms },
+      comboContext: { bracelet: item.bracelet },
+      timestamp: Date.now()
+    };
+    targetUrl = 'earring-builder.html?mode=combo&resume=true';
+  }
+
+  // 2. Set Draft
+  sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
+
+  // 3. Remove from Cart
+  deleteItem(index);
+
+  // 4. Redirect
+  window.location.href = targetUrl;
+}
+
+function applyCoupon() {
+  const code = couponInput.value.trim().toUpperCase();
+  if (!code) return;
+
+  const valid = MOCK_COUPONS.find(c => c.code === code);
+  if (valid) {
+    activeCoupon = valid;
+    calculateTotals(); // Will update UI message
+  } else {
+    activeCoupon = null;
+    couponMsg.textContent = "Invalid Coupon Code";
+    couponMsg.className = 'coupon-msg error';
+    calculateTotals();
+  }
+}
+
+// === BRAT TRAP (MODAL) ===
+const modal = document.getElementById('bratTrapModal');
+const checkoutBtn = document.getElementById('checkoutBtn');
+
+checkoutBtn.onclick = function() {
+  modal.style.display = 'flex';
+}
+
+// Click outside to close (optional, but good UX)
+modal.onclick = function(e) {
+  if (e.target === modal) modal.style.display = 'none';
+}
+
+// Run
+init();
+
+</script>
 </body>
 </html>
