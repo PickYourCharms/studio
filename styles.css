@@ -133,3 +133,226 @@ body.frozen-state .post-actions-container { display: flex; }
   position: absolute; width: 40px; /* Slightly smaller charm for preview */
   transform-origin: top center;
 }
+
+/* === PAGE HEADER (Custom for Cart/Checkout) === */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+.page-header h1 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 800;
+}
+.page-header button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* === CART SPECIFIC === */
+.cart-page {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 60px;
+  text-align: center;
+}
+.empty-img {
+  width: 120px;
+  margin-bottom: 20px;
+}
+.empty-state h3 { margin: 0 0 8px; }
+.empty-state p { margin: 0 0 24px; color: #666; }
+
+/* Item Card */
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.cart-item-card {
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 16px;
+  padding: 10px;
+  gap: 12px;
+}
+.item-thumb {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.charm-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px 0 0 0;
+}
+.item-details {
+  flex: 1;
+}
+.item-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.item-price {
+  font-size: 13px;
+  color: #555;
+}
+.item-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #333;
+}
+.delete-btn { color: #dc2626; border-color: #fee2e2; background: #fef2f2; }
+
+/* Bill Summary */
+.bill-summary {
+  background: #f9f9f9;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 100px;
+}
+.math-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #444;
+}
+.discount-row { color: #15803d; }
+.total-row {
+  font-weight: 800;
+  font-size: 18px;
+  color: #000;
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+.divider {
+  height: 1px;
+  background: #ddd;
+  margin: 16px 0;
+}
+
+/* Coupon */
+.coupon-section {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.coupon-section input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+.coupon-section button {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.coupon-msg {
+  font-size: 12px;
+  margin: 0 0 16px;
+  min-height: 18px;
+}
+.coupon-msg.success { color: #15803d; }
+.coupon-msg.error { color: #dc2626; }
+
+/* Checkout Button */
+.checkout-pill {
+  position: fixed;
+  bottom: 24px;
+  left: 16px;
+  right: 16px;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 18px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  z-index: 80;
+  cursor: pointer;
+}
+
+/* Brat Trap Modal Specifics */
+.brat-card {
+  text-align: center;
+  padding-bottom: 30px;
+}
+.brat-card h3 { font-size: 22px; margin-bottom: 8px; }
+.modal-actions.vertical {
+  flex-direction: column;
+}
+.modal-actions.vertical button {
+  width: 100%;
+}
+
+/* Cart Badge */
+.cart-badge-wrapper { position: relative; display: flex; }
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
