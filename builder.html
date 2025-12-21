@@ -255,7 +255,7 @@ h2 {
   <div class="tray" id="tray"></div>
 </div>
 
-<button id="cta" class="cta" onclick="onBraceletCTA()">Love it · Add to Bag</button>
+<button id="cta" class="cta">Love it · Add to Bag</button>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
@@ -269,10 +269,10 @@ h2 {
 </div>
 
 <script>
+// ... (Existing Constants remain the same)
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
 const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
-
 const SLOT_ANGLES = {
   1:[90],
   2:[70,110],
@@ -280,28 +280,16 @@ const SLOT_ANGLES = {
   4:[45,75,105,135],
   5:[40,65,90,115,140]
 };
-
 const CHARMS = {
-  gold: [
-    '3DBowRibbon_Charm_Gold.png',
-    'EvilEye_Charm_Gold.png',
-    'LetterA_Charm_Gold.png',
-    'NorthStar_Charm_Gold.png',
-    'RedCherry_Charm_Gold.png'
-  ],
-  silver: [
-    '3DBowRibbon_Charm_Silver.png',
-    'EvilEye_Charm_Silver.png',
-    'LetterA_Charm_Silver.png',
-    'NorthStar_Charm_Silver.png',
-    'RedCherry_Charm_Silver.png'
-  ]
+  gold: [ '3DBowRibbon_Charm_Gold.png', 'EvilEye_Charm_Gold.png', 'LetterA_Charm_Gold.png', 'NorthStar_Charm_Gold.png', 'RedCherry_Charm_Gold.png' ],
+  silver: [ '3DBowRibbon_Charm_Silver.png', 'EvilEye_Charm_Silver.png', 'LetterA_Charm_Silver.png', 'NorthStar_Charm_Silver.png', 'RedCherry_Charm_Silver.png' ]
 };
 
+// ... (State variables)
 let metal = 'gold';
 let charms = [];
-let pendingAction = null;
 
+// ... (DOM Elements)
 const canvas = document.getElementById('canvas');
 const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
@@ -311,7 +299,29 @@ const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
 
-loadTray();
+// === NEW: COMBO LOGIC START ===
+const urlParams = new URLSearchParams(window.location.search);
+const isCombo = urlParams.get('mode') === 'combo';
+
+function init() {
+  // If in combo mode, check if we have a saved state to restore
+  if (isCombo) {
+    const savedData = sessionStorage.getItem('combo_bracelet_data');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      metal = data.metal;
+      charms = data.charms;
+    }
+    // Update CTA text
+    cta.textContent = "Continue to Earrings →";
+  }
+  
+  updateMetal(); // This handles loadTray and render
+}
+// === NEW: COMBO LOGIC END ===
+
+// Run init instead of just loadTray
+init(); 
 
 function loadTray(){
   tray.innerHTML='';
@@ -335,14 +345,15 @@ function render(){
   if(charms.length===0){
     pricePill.classList.remove('show');
     cta.classList.remove('show');
-    updateCTAForMode();
     return;
   }
 
+  // Calculate Price
   pricePill.textContent='Rs. '+(BASE_PRICE + (charms.length-1)*EXTRA_CHARM_PRICE);
   pricePill.classList.add('show');
   cta.classList.add('show');
 
+  // Positioning Logic
   const rect=canvas.getBoundingClientRect();
   const cx=rect.width/2, cy=rect.height/2;
   const radius=rect.width*0.36;
@@ -368,7 +379,6 @@ function render(){
   });
 }
 
-/* ===== FIX 1 ===== */
 function onMetalClick(next){
   if(next===metal) return;
   if(charms.length>0){
@@ -386,7 +396,6 @@ function onMetalClick(next){
   }
 }
 
-/* ===== FIX 2 ===== */
 function onResetClick(){
   if(charms.length===0) return;
   showModal(
@@ -406,6 +415,22 @@ function updateMetal(){
   render();
 }
 
+// === UPDATED: CTA CLICK HANDLER ===
+cta.onclick = function() {
+  if (isCombo) {
+    // 1. Save Bracelet State
+    const state = { metal: metal, charms: charms };
+    sessionStorage.setItem('combo_bracelet_data', JSON.stringify(state));
+    
+    // 2. Go to Earrings in Combo Mode
+    window.location.href = 'earring-builder.html?mode=combo';
+  } else {
+    // Normal Flow
+    alert("Added Bracelet to Bag!");
+    // window.location.href = 'cart.html'; 
+  }
+};
+
 /* MODAL */
 function showModal(text,confirmFn){
   modalText.textContent=text;
@@ -418,33 +443,6 @@ function showModal(text,confirmFn){
 function closeModal(){
   modal.style.display='none';
 }
-function onBraceletCTA() {
-  const isCombo = sessionStorage.getItem('comboMode') === 'true';
-
-  if (isCombo) {
-    // Save bracelet state
-    sessionStorage.setItem('comboBracelet', JSON.stringify({
-      metal,
-      charms
-    }));
-
-    // Go to earrings
-    window.location.href = 'earring-builder.html';
-  } else {
-    // Existing single-product flow (UNCHANGED)
-    // whatever you already do for Add to Bag
-  }
-}
-function updateCTAForMode() {
-  const isCombo = sessionStorage.getItem('comboMode') === 'true';
-  if (isCombo) {
-    cta.textContent = 'Continue to Earrings →';
-  } else {
-    cta.textContent = 'Love it · Add to Bag';
-  }
-}
-updateCTAForMode();
-
 </script>
 
 </body>
