@@ -4,9 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Build My Bracelet</title>
-<link rel="stylesheet" href="styles.css?v=2.3">
+<link rel="stylesheet" href="styles.css?v=2.4">
 <style>
-/* Builder specific local styles */
+/* Internal overrides */
 body { background: #f6f3ec; }
 h2 { margin: 8px 0 10px; text-align: center; }
 .metal-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
@@ -48,7 +48,7 @@ h2 { margin: 8px 0 10px; text-align: center; }
 </div>
 
 <div class="main-container">
-  <h2>Build My Bracelet</h2>
+  <h2 id="pageTitle">Build My Bracelet</h2>
 
   <div class="metal-toggle">
     <button id="goldBtn" class="active" onclick="onMetalClick('gold')">Gold</button>
@@ -107,6 +107,7 @@ const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
 const navCartBtn = document.getElementById('navCartBtn');
+const pageTitle = document.getElementById('pageTitle');
 
 const urlParams = new URLSearchParams(window.location.search);
 const isCombo = urlParams.get('mode') === 'combo';
@@ -287,6 +288,9 @@ function addToCart(item) {
   sessionStorage.removeItem('pyc_draft');
   document.body.classList.add('frozen-state');
   navCartBtn.style.display = 'block';
+
+  // FIX: Update Copy for Single Flow
+  pageTitle.textContent = "Added to Bag ✨";
 }
 
 function showModal(text,confirmFn){
