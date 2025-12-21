@@ -335,6 +335,7 @@ function render(){
   if(charms.length===0){
     pricePill.classList.remove('show');
     cta.classList.remove('show');
+    updateCTAForMode();
     return;
   }
 
@@ -434,6 +435,15 @@ function onBraceletCTA() {
     // whatever you already do for Add to Bag
   }
 }
+function updateCTAForMode() {
+  const isCombo = sessionStorage.getItem('comboMode') === 'true';
+  if (isCombo) {
+    cta.textContent = 'Continue to Earrings →';
+  } else {
+    cta.textContent = 'Love it · Add to Bag';
+  }
+}
+updateCTAForMode();
 
 </script>
 
