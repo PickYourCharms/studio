@@ -156,28 +156,15 @@ body.frozen-state .post-actions-container { display: flex; }
   padding: 0;
 }
 
-/* === CART SPECIFIC === */
+/* ... (Keep your Global Navbar/Header/General Styles) ... */
+
+/* === CART SPECIFIC STYLES === */
+
 .cart-page {
   min-height: 80vh;
   display: flex;
   flex-direction: column;
 }
-
-/* Empty State */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 60px;
-  text-align: center;
-}
-.empty-img {
-  width: 120px;
-  margin-bottom: 20px;
-}
-.empty-state h3 { margin: 0 0 8px; }
-.empty-state p { margin: 0 0 24px; color: #666; }
 
 /* Item Card */
 .cart-list {
@@ -186,6 +173,7 @@ body.frozen-state .post-actions-container { display: flex; }
   gap: 16px;
   margin-bottom: 30px;
 }
+
 .cart-item-card {
   display: flex;
   align-items: center;
@@ -193,242 +181,135 @@ body.frozen-state .post-actions-container { display: flex; }
   border-radius: 16px;
   padding: 10px;
   gap: 12px;
-}
-.item-thumb {
   position: relative;
-  width: 70px;
-  height: 70px;
-  background: #fff;
-  border-radius: 12px;
   overflow: hidden;
-  flex-shrink: 0;
-}
-.item-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.charm-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: rgba(0,0,0,0.7);
-  color: #fff;
-  font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 6px 0 0 0;
-}
-.item-details {
-  flex: 1;
-}
-.item-title {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-.item-price {
-  font-size: 13px;
-  color: #555;
-}
-.item-actions {
-  display: flex;
-  gap: 8px;
-}
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: #333;
-}
-.delete-btn { color: #dc2626; border-color: #fee2e2; background: #fef2f2; }
-
-/* Bill Summary */
-.bill-summary {
-  background: #f9f9f9;
-  border-radius: 20px;
-  padding: 20px;
-  margin-bottom: 100px;
-}
-.math-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #444;
-}
-.discount-row { color: #15803d; }
-.total-row {
-  font-weight: 800;
-  font-size: 18px;
-  color: #000;
-  margin-top: 16px;
-  margin-bottom: 0;
-}
-.divider {
-  height: 1px;
-  background: #ddd;
-  margin: 16px 0;
 }
 
-/* Coupon */
-.coupon-section {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.coupon-section input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-}
-.coupon-section button {
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.coupon-msg {
-  font-size: 12px;
-  margin: 0 0 16px;
-  min-height: 18px;
-}
-.coupon-msg.success { color: #15803d; }
-.coupon-msg.error { color: #dc2626; }
-
-/* Checkout Button */
-.checkout-pill {
-  position: fixed;
-  bottom: 24px;
-  left: 16px;
-  right: 16px;
-  background: #000;
-  color: #fff;
-  border: none;
-  padding: 18px;
-  border-radius: 999px;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  z-index: 80;
-  cursor: pointer;
-}
-
-/* Brat Trap Modal Specifics */
-.brat-card {
-  text-align: center;
-  padding-bottom: 30px;
-}
-.brat-card h3 { font-size: 22px; margin-bottom: 8px; }
-.modal-actions.vertical {
-  flex-direction: column;
-}
-.modal-actions.vertical button {
-  width: 100%;
-}
-
-/* Cart Badge */
-.cart-badge-wrapper { position: relative; display: flex; }
-.cart-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #dc2626;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ... (Keep all your existing CSS) ... */
-
-/* === DYNAMIC MINI PREVIEWS (Cart) === */
-
+/* === THE THUMBNAIL (The Container) === */
 .item-thumb {
   position: relative;
   width: 70px;
   height: 70px;
-  background: #f0f0f0;
+  background: #fff;
   border-radius: 12px;
-  overflow: hidden; /* Crops the scaled-down canvas */
+  overflow: hidden; /* Clips the large canvas */
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid #eee;
 }
 
-/* The container that simulates the builder canvas */
-.mini-preview-wrapper {
+/* === THE MINI BUILDER ENGINE (The Scaling Logic) === */
+/* We render the jewelry at 300px (easy math) and scale it down to 70px */
+.mini-canvas-scaler {
   position: absolute;
-  width: 300px; /* Reference width for math */
+  width: 300px;
   height: 300px;
   top: 0;
   left: 0;
-  transform-origin: 0 0; /* Scale from top-left */
-  transform: scale(0.233); /* 300px * 0.233 ≈ 70px */
+  transform-origin: 0 0;
+  transform: scale(0.233); /* 300px * 0.233 = 70px */
   pointer-events: none;
 }
 
-/* Combo Split Layout */
-.mini-combo-grid {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
-.mini-combo-half {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  background: #f9f9f9;
-}
-/* Adjust scale for split view (halves are smaller) */
-.mini-combo-half .mini-preview-wrapper {
-  transform: scale(0.233); 
-  /* Center horizontally in the half-box */
-  left: 50%;
-  margin-left: -35px; /* Half of 70px (final width) roughly adjusted */
-}
-
-/* Shared Elements */
-.mini-base-img {
+/* Base Images in Mini Canvas */
+.mini-base {
   position: absolute;
-  width: 70%;
-  height: 70%;
+  width: 72%;
+  height: 72%;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   object-fit: contain;
 }
 
+/* Charms in Mini Canvas */
 .mini-charm {
   position: absolute;
-  width: 40px; /* Standard charm size for reference 300px canvas */
+  width: 46px; /* Same relative size as builder */
   transform-origin: top center;
 }
 
-/* Earring Specifics in Mini */
+/* Earring Specifics */
 .mini-hook {
   position: absolute;
-  top: 20px;
+  top: 60px; /* Adjusted for 300px container */
   width: 50%;
 }
 .mini-hook.left { left: 50%; transform: translateX(-100%); }
 .mini-hook.right { left: 50%; }
+
+/* === COMBO SPLIT VIEW === */
+.combo-split-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.combo-half {
+  position: relative;
+  width: 100%;
+  height: 50%; /* Top half / Bottom half */
+  overflow: hidden;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+.combo-half:last-child { border-bottom: none; }
+
+/* Adjust scaler for split view to center items vertically */
+.combo-half .mini-canvas-scaler {
+  top: -30%; /* Shift up to center the jewelry in the half-box */
+}
+
+/* Badge */
+.charm-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 6px 0 0 0;
+  z-index: 2;
+}
+
+/* === TEXT & ACTIONS === */
+.item-details { flex: 1; }
+.item-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; text-transform: capitalize; }
+.item-price { font-size: 13px; color: #555; }
+
+.item-actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid #ddd; background: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: #333;
+}
+.delete-btn { color: #dc2626; border-color: #fee2e2; background: #fef2f2; }
+
+/* === SUMMARY & COUPON (Keep Existing) === */
+.bill-summary { background: #f9f9f9; border-radius: 20px; padding: 20px; margin-bottom: 100px; }
+.math-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #444; }
+.discount-row { color: #15803d; }
+.total-row { font-weight: 800; font-size: 18px; color: #000; margin-top: 16px; }
+.divider { height: 1px; background: #ddd; margin: 16px 0; }
+
+.coupon-section { display: flex; gap: 8px; margin-bottom: 8px; }
+.coupon-section input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.coupon-section button { background: #000; color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.coupon-msg { font-size: 12px; margin: 0 0 16px; min-height: 18px; }
+.coupon-msg.success { color: #15803d; }
+.coupon-msg.error { color: #dc2626; }
+
+.checkout-pill {
+  position: fixed; bottom: 24px; left: 16px; right: 16px;
+  background: #000; color: #fff; border: none; padding: 18px;
+  border-radius: 999px; font-size: 16px; font-weight: 700;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 80; cursor: pointer;
+}
+
+/* Empty State */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 60px; text-align: center; }
+.empty-img { width: 120px; margin-bottom: 20px; }
+.empty-state h3 { margin: 0 0 8px; }
+.empty-state p { margin: 0 0 24px; color: #666; }
