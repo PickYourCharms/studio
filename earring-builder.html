@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Style My Earrings</title>
-<link rel="stylesheet" href="styles.css?v=2.4">
+<link rel="stylesheet" href="styles.css?v=2.5">
 <style>
 /* Internal overrides */
 body { background: #f6f3ec; }
@@ -89,6 +89,7 @@ h2 { margin: 8px 0 10px; text-align: center; }
 
 <script>
 const BASE_PRICE = 249;
+const EXTRA_CHARM_PRICE = 50; // Needed for Bracelet Price Calculation
 const CHARMS = {
   gold: [ '3DBowRibbon_Charm_Gold.png', 'EvilEye_Charm_Gold.png', 'LetterA_Charm_Gold.png', 'NorthStar_Charm_Gold.png', 'RedCherry_Charm_Gold.png' ],
   silver: [ '3DBowRibbon_Charm_Silver.png', 'EvilEye_Charm_Silver.png', 'LetterA_Charm_Silver.png', 'NorthStar_Charm_Silver.png', 'RedCherry_Charm_Silver.png' ]
@@ -155,7 +156,7 @@ function saveDraft() {
 
   if (isEarringsEmpty) {
     if (isCombo && comboCtx) {
-      // Valid combo state (Empty earring + Valid Bracelet) -> Keep Draft
+      // Keep draft alive
     } else {
       sessionStorage.removeItem('pyc_draft');
       return;
@@ -275,7 +276,7 @@ cta.onclick = function() {
   if(!cta.classList.contains('show')) return;
   
   if (isCombo) {
-    // 1. Get Bracelet Data BEFORE removing from session
+    // 1. Get Bracelet Data
     const braceletData = JSON.parse(sessionStorage.getItem('combo_bracelet_data'));
     const earringData = { metal: metal, charms: charms };
     
@@ -294,19 +295,17 @@ cta.onclick = function() {
       image: 'assets/home/model_combo_mobile.png'
     };
     
-    // 4. Local Cart Update
     let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
     cart.push(product);
     localStorage.setItem('pyc_cart', JSON.stringify(cart));
     
-    // 5. Freeze & UI Update
+    // 4. Freeze & UI Update
     document.body.classList.add('frozen-state');
     navCartBtn.style.display = 'block';
     
     // === COMBO UI TRANSFORMATION ===
     pageTitle.textContent = "The Perfect Duo ✨";
     
-    // Create Combo Stack
     const comboStack = document.createElement('div');
     comboStack.className = 'combo-stack';
     
@@ -314,14 +313,21 @@ cta.onclick = function() {
     const bCanvas = document.createElement('div');
     bCanvas.className = 'canvas bracelet-preview';
     
-    // Bracelet Base
     const bImg = document.createElement('img');
     bImg.className = 'bracelet-base-img';
     bImg.src = 'assets/bases/bracelet_base_' + braceletData.metal + '.png';
     bCanvas.appendChild(bImg);
+
+    // --- NEW: Add Price Pill to Bracelet ---
+    const bCharmCount = braceletData.charms.length;
+    const bPriceText = BASE_PRICE + (bCharmCount - 1) * EXTRA_CHARM_PRICE;
+    const bPricePill = document.createElement('div');
+    bPricePill.className = 'price-pill show';
+    bPricePill.textContent = 'Rs. ' + bPriceText;
+    bCanvas.appendChild(bPricePill);
+    // ---------------------------------------
     
-    // Bracelet Charms
-    const bRect = { width: 300, height: 300 }; // approximation for preview
+    const bRect = { width: 300, height: 300 };
     const cx = bRect.width/2, cy = bRect.height/2;
     const radius = bRect.width * 0.36;
     const angles = B_ANGLES[braceletData.charms.length];
@@ -345,16 +351,9 @@ cta.onclick = function() {
        bCanvas.appendChild(w);
     });
     
-    // Add Bracelet to Stack
     comboStack.appendChild(bCanvas);
-    
-    // B. Add Existing Earring Canvas to Stack
     comboStack.appendChild(canvas);
-    
-    // Update Surface
-    builderSurface.insertBefore(comboStack, builderSurface.firstChild); // Insert at top
-    
-    // Hide Price Pill in frozen state is handled by CSS, but ensure visual cleanness
+    builderSurface.insertBefore(comboStack, builderSurface.firstChild);
 
   } else {
     // SINGLE FLOW
@@ -371,13 +370,12 @@ cta.onclick = function() {
 };
 
 function calculateComboPrice(b, e) {
-  const bPrice = 249 + (b.charms.length-1)*50;
-  const ePrice = 249;
+  const bPrice = BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
+  const ePrice = BASE_PRICE;
   return Math.floor((bPrice + ePrice) * 0.9); 
 }
 
 function addToCart(item) {
-  // STANDARD SINGLE FLOW ADD
   let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   cart.push(item);
   localStorage.setItem('pyc_cart', JSON.stringify(cart));
