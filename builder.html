@@ -4,231 +4,43 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Build My Bracelet</title>
-
 <style>
-body {
-  margin: 0;
-  padding: 14px;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f6f3ec;
-  text-align: center;
-  color: #111;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* HEADER */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header button {
-  background: none;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-/* TITLE */
-h2 {
-  margin: 8px 0 10px;
-}
-
-/* METAL TOGGLE */
-.metal-toggle {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.metal-toggle button {
-  padding: 8px 18px;
-  border-radius: 999px;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-}
-
-.metal-toggle button.active {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-}
-
-/* BUILDER */
-.builder-surface {
-  background: #ffffff;
-  border-radius: 26px;
-  padding: 10px 12px 18px;
-  margin: 0 auto;
-  max-width: 420px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.06);
-}
-
-.canvas {
-  position: relative;
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 1 / 1;
-  margin: -6px auto 0;
-}
-
-.bracelet {
-  position: absolute;
-  width: 72%;
-  height: 72%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-/* PRICE */
-.price-pill {
-  position: absolute;
-  top: 6%;
-  right: 6%;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.95);
-  font-size: 14px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  opacity: 0;
-  transform: translateY(6px);
-  transition: all 0.2s ease;
-}
-
-.price-pill.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* CHARMS */
-.charm {
-  position: absolute;
-  cursor: pointer;
-  transform-origin: top center;
-}
-
-.charm img {
-  width: 46px;
-}
-
-/* RESET */
-.reset-row {
-  text-align: right;
-  margin: 6px auto 10px;
-  max-width: 360px;
-}
-
-.reset-row button {
-  background: none;
-  border: none;
-  font-size: 14px;
-  color: #777;
-  cursor: pointer;
-}
-
-/* HELPER */
-.helper {
-  font-size: 13px;
-  color: #777;
-}
-
-/* TRAY */
-.tray-surface {
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 14px 10px;
-  margin: 14px auto 90px;
-  max-width: 420px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.05);
-}
-
-.tray {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-}
-
-.tray img {
-  width: 44px;
-  cursor: pointer;
-}
-
-/* CTA */
-.cta {
-  position: fixed;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
-  padding: 16px;
-  border-radius: 999px;
-  background: #000;
-  color: #fff;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: all 0.25s ease;
-}
-
-.cta.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 99;
-}
-
-.modal-card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 20px;
-  width: 86%;
-  max-width: 320px;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 12px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-}
-
-.primary {
-  background: #000;
-  color: #fff;
-}
-
-.secondary {
-  background: #eee;
-}
+/* ... (Your existing CSS remains exactly the same) ... */
+body { margin: 0; padding: 14px; font-family: system-ui, -apple-system, sans-serif; background: #f6f3ec; text-align: center; color: #111; -webkit-tap-highlight-color: transparent; }
+.header { display: flex; justify-content: space-between; align-items: center; }
+.header button { background: none; border: none; font-size: 14px; cursor: pointer; }
+h2 { margin: 8px 0 10px; }
+.metal-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.metal-toggle button { padding: 8px 18px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+.metal-toggle button.active { background: #000; color: #fff; border-color: #000; }
+.builder-surface { background: #ffffff; border-radius: 26px; padding: 10px 12px 18px; margin: 0 auto; max-width: 420px; box-shadow: 0 18px 40px rgba(0,0,0,0.06); }
+.canvas { position: relative; width: 100%; max-width: 360px; aspect-ratio: 1 / 1; margin: -6px auto 0; }
+.bracelet { position: absolute; width: 72%; height: 72%; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+.price-pill { position: absolute; top: 6%; right: 6%; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,0.95); font-size: 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.15); opacity: 0; transform: translateY(6px); transition: all 0.2s ease; }
+.price-pill.show { opacity: 1; transform: translateY(0); }
+.charm { position: absolute; cursor: pointer; transform-origin: top center; }
+.charm img { width: 46px; }
+.reset-row { text-align: right; margin: 6px auto 10px; max-width: 360px; }
+.reset-row button { background: none; border: none; font-size: 14px; color: #777; cursor: pointer; }
+.helper { font-size: 13px; color: #777; }
+.tray-surface { background: #ffffff; border-radius: 22px; padding: 14px 10px; margin: 14px auto 90px; max-width: 420px; box-shadow: 0 12px 28px rgba(0,0,0,0.05); }
+.tray { display: flex; justify-content: center; gap: 18px; }
+.tray img { width: 44px; cursor: pointer; }
+.cta { position: fixed; bottom: 14px; left: 14px; right: 14px; padding: 16px; border-radius: 999px; background: #000; color: #fff; border: none; font-size: 16px; cursor: pointer; opacity: 0; transform: translateY(12px); transition: all 0.25s ease; }
+.cta.show { opacity: 1; transform: translateY(0); }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 99; }
+.modal-card { background: #fff; border-radius: 18px; padding: 20px; width: 86%; max-width: 320px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+.modal-actions button { flex: 1; padding: 12px; border-radius: 999px; border: none; cursor: pointer; }
+.primary { background: #000; color: #fff; }
+.secondary { background: #eee; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <button onclick="history.back()">← Back</button>
+  <button onclick="goBack()">← Back</button>
 </div>
 
 <h2>Build My Bracelet</h2>
@@ -257,7 +69,6 @@ h2 {
 
 <button id="cta" class="cta">Love it · Add to Bag</button>
 
-<!-- MODAL -->
 <div id="modal" class="modal">
   <div class="modal-card">
     <div id="modalText"></div>
@@ -269,10 +80,10 @@ h2 {
 </div>
 
 <script>
-// ... (Existing Constants remain the same)
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
 const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
+
 const SLOT_ANGLES = {
   1:[90],
   2:[70,110],
@@ -280,16 +91,15 @@ const SLOT_ANGLES = {
   4:[45,75,105,135],
   5:[40,65,90,115,140]
 };
+
 const CHARMS = {
   gold: [ '3DBowRibbon_Charm_Gold.png', 'EvilEye_Charm_Gold.png', 'LetterA_Charm_Gold.png', 'NorthStar_Charm_Gold.png', 'RedCherry_Charm_Gold.png' ],
   silver: [ '3DBowRibbon_Charm_Silver.png', 'EvilEye_Charm_Silver.png', 'LetterA_Charm_Silver.png', 'NorthStar_Charm_Silver.png', 'RedCherry_Charm_Silver.png' ]
 };
 
-// ... (State variables)
 let metal = 'gold';
 let charms = [];
 
-// ... (DOM Elements)
 const canvas = document.getElementById('canvas');
 const bracelet = document.getElementById('bracelet');
 const tray = document.getElementById('tray');
@@ -299,12 +109,11 @@ const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
 
-// === NEW: COMBO LOGIC START ===
+// === COMBO LOGIC ===
 const urlParams = new URLSearchParams(window.location.search);
 const isCombo = urlParams.get('mode') === 'combo';
 
 function init() {
-  // If in combo mode, check if we have a saved state to restore
   if (isCombo) {
     const savedData = sessionStorage.getItem('combo_bracelet_data');
     if (savedData) {
@@ -312,15 +121,24 @@ function init() {
       metal = data.metal;
       charms = data.charms;
     }
-    // Update CTA text
     cta.textContent = "Continue to Earrings →";
   }
-  
-  updateMetal(); // This handles loadTray and render
+  updateMetal(); 
 }
-// === NEW: COMBO LOGIC END ===
 
-// Run init instead of just loadTray
+// === NEW: Explicit Go Back Logic ===
+function goBack() {
+  if (isCombo) {
+    // If we are in combo mode, 'Back' from the bracelet page 
+    // means we want to exit the entire flow and go Home.
+    // This breaks the loop.
+    window.location.href = 'index.html'; 
+  } else {
+    // Normal flow
+    history.back();
+  }
+}
+
 init(); 
 
 function loadTray(){
@@ -348,12 +166,10 @@ function render(){
     return;
   }
 
-  // Calculate Price
   pricePill.textContent='Rs. '+(BASE_PRICE + (charms.length-1)*EXTRA_CHARM_PRICE);
   pricePill.classList.add('show');
   cta.classList.add('show');
 
-  // Positioning Logic
   const rect=canvas.getBoundingClientRect();
   const cx=rect.width/2, cy=rect.height/2;
   const radius=rect.width*0.36;
@@ -415,23 +231,16 @@ function updateMetal(){
   render();
 }
 
-// === UPDATED: CTA CLICK HANDLER ===
 cta.onclick = function() {
   if (isCombo) {
-    // 1. Save Bracelet State
     const state = { metal: metal, charms: charms };
     sessionStorage.setItem('combo_bracelet_data', JSON.stringify(state));
-    
-    // 2. Go to Earrings in Combo Mode
     window.location.href = 'earring-builder.html?mode=combo';
   } else {
-    // Normal Flow
     alert("Added Bracelet to Bag!");
-    // window.location.href = 'cart.html'; 
   }
 };
 
-/* MODAL */
 function showModal(text,confirmFn){
   modalText.textContent=text;
   modalConfirm.onclick=()=>{
@@ -444,6 +253,5 @@ function closeModal(){
   modal.style.display='none';
 }
 </script>
-
 </body>
 </html>
