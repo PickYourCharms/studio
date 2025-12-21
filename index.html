@@ -4,12 +4,10 @@
   <meta charset="UTF-8" />
   <title>PickYourCharms</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css?v=1.1.0">
+  <link rel="stylesheet" href="styles.css?v=1.2.0">
 </head>
 
 <body>
@@ -28,8 +26,6 @@
 </section>
 
 <section class="entry-grid">
-
-  <!-- Bracelet -->
   <div class="entry-card interactive">
     <div class="card-image">
       <img src="assets/home/model_bracelet_mobile.png" loading="lazy">
@@ -37,14 +33,9 @@
     <h2>Bracelet</h2>
     <p>Build it charm by charm.</p>
     <span class="price-hint">Starting from Rs. 249</span>
-    <button
-      class="primary-btn"
-      onclick="window.location.href='builder.html'">
-      I want to build this →
-    </button>
+    <button class="primary-btn" onclick="startFresh('builder.html')">I want to build this →</button>
   </div>
 
-  <!-- Earrings -->
   <div class="entry-card interactive">
     <div class="card-image">
       <img src="assets/home/model_earring_mobile.png" loading="lazy">
@@ -52,28 +43,20 @@
     <h2>Earrings</h2>
     <p>Style both ears your way.</p>
     <span class="price-hint">Starting from Rs. 199</span>
-    <button 
-      class="primary-btn"
-      onclick="window.location.href='earring-builder.html'">
-      Let’s start →
-    </button>
+    <button class="primary-btn" onclick="startFresh('earring-builder.html')">Let’s start →</button>
   </div>
 
-  <!-- Combo -->
   <div class="entry-card interactive combo-card">
-  <div class="card-image">
-    <img src="assets/home/model_combo_mobile.png" loading="lazy">
-    <span class="combo-badge">SAVE 10% ✨</span>
+    <div class="card-image">
+      <img src="assets/home/model_combo_mobile.png" loading="lazy">
+      <span class="combo-badge">SAVE 10% ✨</span>
+    </div>
+    <h2>Combo</h2>
+    <p>Bracelet + Earrings</p>
+    <span class="price-hint">Better together</span>
+    <button class="primary-btn" onclick="startFresh('builder.html?mode=combo')">I want it all →</button>
   </div>
-  <h2>Combo</h2>
-  <p>Bracelet + Earrings</p>
-  <span class="price-hint">Better together</span>
-  <button class="primary-btn" onclick="window.location.href='builder.html?mode=combo'">
-    I want it all →
-  </button>
-</div>
 
-  <!-- Curated -->
   <div class="entry-card interactive curated-card">
     <div class="card-image">
       <img src="assets/home/curated_teaser.png" loading="lazy">
@@ -82,10 +65,39 @@
     <p>Designed by us, for days you don’t want to decide.</p>
     <button class="secondary-btn">Explore curated designs →</button>
   </div>
-
 </section>
+
+<div id="resumeBar" class="resume-bar" onclick="resumeDraft()">
+  <span class="resume-text">I left something unfinished...</span>
+  <span class="resume-action">Let's finish →</span>
+</div>
+
+<script>
+  // 1. Check for draft in SESSION STORAGE
+  const draftStr = sessionStorage.getItem('pyc_draft');
+  
+  if (draftStr) {
+    const draft = JSON.parse(draftStr);
+    // Show only if draft exists
+    document.getElementById('resumeBar').classList.add('show');
+  }
+
+  // 2. Resume Action
+  function resumeDraft() {
+    const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
+    if (draft && draft.url) {
+      const separator = draft.url.includes('?') ? '&' : '?';
+      window.location.href = draft.url + separator + 'resume=true';
+    }
+  }
+
+  // 3. Start Fresh
+  function startFresh(url) {
+    // Optional: Clear previous draft if starting fresh
+    // sessionStorage.removeItem('pyc_draft'); 
+    window.location.href = url;
+  }
+</script>
 
 </body>
 </html>
-
-
