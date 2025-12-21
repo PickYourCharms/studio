@@ -38,16 +38,10 @@
     <p>Build it charm by charm.</p>
     <span class="price-hint">Starting from Rs. 249</span>
     <button
-  class="primary-btn"
-  onclick="
-    sessionStorage.removeItem('comboMode');
-    sessionStorage.removeItem('comboBracelet');
-    sessionStorage.removeItem('comboEarrings');
-    window.location.href='builder.html';
-  ">
-  I want to build this →
-</button>
-
+      class="primary-btn"
+      onclick="window.location.href='builder.html'">
+      I want to build this →
+    </button>
   </div>
 
   <!-- Earrings -->
@@ -59,16 +53,10 @@
     <p>Style both ears your way.</p>
     <span class="price-hint">Starting from Rs. 199</span>
     <button 
-  class="primary-btn"
-  onclick="
-    sessionStorage.removeItem('comboMode');
-    sessionStorage.removeItem('comboBracelet');
-    sessionStorage.removeItem('comboEarrings');
-    window.location.href='earring-builder.html';
-  ">
-  Let’s start →
-</button>
-
+      class="primary-btn"
+      onclick="window.location.href='earring-builder.html'">
+      Let’s start →
+    </button>
   </div>
 
   <!-- Combo -->
@@ -80,13 +68,9 @@
   <h2>Combo</h2>
   <p>Bracelet + Earrings</p>
   <span class="price-hint">Better together</span>
-  <button
-  class="primary-btn"
-  onclick="startCombo()">
-  I want it all →
-</button>
-
-
+  <button class="primary-btn" onclick="window.location.href='bracelet-builder.html?mode=combo'">
+    I want it all →
+  </button>
 </div>
 
   <!-- Curated -->
@@ -100,18 +84,7 @@
   </div>
 
 </section>
-<script>
-function startCombo() {
-  sessionStorage.setItem('comboMode', 'true');
-  sessionStorage.removeItem('comboBracelet');
-  sessionStorage.removeItem('comboEarrings');
-  window.location.href = 'builder.html';
-}
-</script>
+
 </body>
 </html>
-
-
-
-
 
