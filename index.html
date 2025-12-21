@@ -7,14 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=2.2">
+  <link rel="stylesheet" href="styles.css?v=2.3">
 </head>
 
 <body>
 
 <header class="navbar">
-  <div style="width:24px"></div> 
-  <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  <a href="index.html" class="logo-link">
+    <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  </a>
+  
   <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
@@ -22,40 +24,42 @@
   </button>
 </header>
 
-<section class="hero">
-  <img src="assets/home/banner_vertical.png" loading="eager" fetchpriority="high">
-  <div class="hero-overlay"></div>
-  <div class="hero-text">
-    <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
-    <p>Create a piece that means something.</p>
-  </div>
-</section>
+<div style="padding-bottom: 100px;">
+  <section class="hero">
+    <img src="assets/home/banner_vertical.png" loading="eager" fetchpriority="high">
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <h1>Hand-picked.<br>Hand-styled.<br>Made by you.</h1>
+      <p>Create a piece that means something.</p>
+    </div>
+  </section>
 
-<section class="entry-grid">
-  <div class="entry-card interactive">
-    <div class="card-image"> <img src="assets/home/model_bracelet_mobile.png" loading="lazy"> </div>
-    <h2>Bracelet</h2> <p>Build it charm by charm.</p> <span class="price-hint">Starting from Rs. 249</span>
-    <button class="primary-btn" onclick="startFresh('builder.html')">I want to build this →</button>
-  </div>
+  <section class="entry-grid">
+    <div class="entry-card interactive">
+      <div class="card-image"> <img src="assets/home/model_bracelet_mobile.png" loading="lazy"> </div>
+      <h2>Bracelet</h2> <p>Build it charm by charm.</p> <span class="price-hint">Starting from Rs. 249</span>
+      <button class="primary-btn" onclick="startFresh('builder.html')">I want to build this →</button>
+    </div>
 
-  <div class="entry-card interactive">
-    <div class="card-image"> <img src="assets/home/model_earring_mobile.png" loading="lazy"> </div>
-    <h2>Earrings</h2> <p>Style both ears your way.</p> <span class="price-hint">Starting from Rs. 199</span>
-    <button class="primary-btn" onclick="startFresh('earring-builder.html')">Let’s start →</button>
-  </div>
+    <div class="entry-card interactive">
+      <div class="card-image"> <img src="assets/home/model_earring_mobile.png" loading="lazy"> </div>
+      <h2>Earrings</h2> <p>Style both ears your way.</p> <span class="price-hint">Starting from Rs. 199</span>
+      <button class="primary-btn" onclick="startFresh('earring-builder.html')">Let’s start →</button>
+    </div>
 
-  <div class="entry-card interactive combo-card">
-    <div class="card-image"> <img src="assets/home/model_combo_mobile.png" loading="lazy"> <span class="combo-badge">SAVE 10% ✨</span> </div>
-    <h2>Combo</h2> <p>Bracelet + Earrings</p> <span class="price-hint">Better together</span>
-    <button class="primary-btn" onclick="startFresh('builder.html?mode=combo')">I want it all →</button>
-  </div>
+    <div class="entry-card interactive combo-card">
+      <div class="card-image"> <img src="assets/home/model_combo_mobile.png" loading="lazy"> <span class="combo-badge">SAVE 10% ✨</span> </div>
+      <h2>Combo</h2> <p>Bracelet + Earrings</p> <span class="price-hint">Better together</span>
+      <button class="primary-btn" onclick="startFresh('builder.html?mode=combo')">I want it all →</button>
+    </div>
 
-  <div class="entry-card interactive curated-card">
-    <div class="card-image"> <img src="assets/home/curated_teaser.png" loading="lazy"> </div>
-    <h2>Curated Pieces</h2> <p>Designed by us, for days you don’t want to decide.</p>
-    <button class="secondary-btn">Explore curated designs →</button>
-  </div>
-</section>
+    <div class="entry-card interactive curated-card">
+      <div class="card-image"> <img src="assets/home/curated_teaser.png" loading="lazy"> </div>
+      <h2>Curated Pieces</h2> <p>Designed by us, for days you don’t want to decide.</p>
+      <button class="secondary-btn">Explore curated designs →</button>
+    </div>
+  </section>
+</div>
 
 <div id="resumeBar" class="resume-bar" onclick="resumeDraft()">
   <div class="resume-info"> <span class="resume-title">I left something unfinished...</span> <span class="resume-sub">Tap to pick up where you left off</span> </div>
@@ -63,32 +67,19 @@
 </div>
 
 <script>
-// Use 'pageshow' to ensure this runs even on Back button navigation
-window.addEventListener('pageshow', function(event) {
-  checkState();
-});
+window.addEventListener('pageshow', function(event) { checkState(); });
 
 function checkState() {
-  // 1. Check for draft
   const draftStr = sessionStorage.getItem('pyc_draft');
   const resumeBar = document.getElementById('resumeBar');
   
-  if (draftStr) {
-    // Only show if draft is valid
-    resumeBar.classList.add('show');
-  } else {
-    // Explicitly hide if no draft (important for back nav after checkout)
-    resumeBar.classList.remove('show');
-  }
+  if (draftStr) { resumeBar.classList.add('show'); } 
+  else { resumeBar.classList.remove('show'); }
 
-  // 2. Check for Cart
   const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   const cartBtn = document.getElementById('navCartBtn');
-  if (cart.length > 0) {
-    cartBtn.style.display = 'block';
-  } else {
-    cartBtn.style.display = 'none';
-  }
+  if (cart.length > 0) cartBtn.style.display = 'block';
+  else cartBtn.style.display = 'none';
 }
 
 function resumeDraft() {
@@ -100,8 +91,6 @@ function resumeDraft() {
 }
 
 function startFresh(url) {
-  // Optional: clear draft on explicit new start, 
-  // but usually better to overwrite on interaction.
   window.location.href = url;
 }
 </script>
