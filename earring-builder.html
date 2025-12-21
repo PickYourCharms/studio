@@ -253,7 +253,7 @@ h2 { margin: 8px 0 10px; }
   <div class="tray" id="tray"></div>
 </div>
 
-<button id="cta" class="cta">Love it · Add to Bag</button>
+<button id="cta" class="cta" onclick="onEarringCTA()">Love it · Add to Bag</button>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
@@ -397,6 +397,37 @@ function showModal(text,fn){
   modal.style.display='flex';
 }
 function closeModal(){modal.style.display='none';}
+function onEarringCTA() {
+  const isCombo = sessionStorage.getItem('comboMode') === 'true';
+
+  if (isCombo) {
+    const braceletData = JSON.parse(sessionStorage.getItem('comboBracelet'));
+
+    const earringData = {
+      metal,
+      charms
+    };
+
+    // FINAL COMBO OBJECT
+    const comboOrder = {
+      bracelet: braceletData,
+      earrings: earringData
+    };
+
+    // For now just store it (cart comes later)
+    sessionStorage.setItem('finalComboOrder', JSON.stringify(comboOrder));
+
+    // Clear combo temp state
+    sessionStorage.removeItem('comboMode');
+    sessionStorage.removeItem('comboBracelet');
+    sessionStorage.removeItem('comboEarrings');
+
+    // Later → cart / checkout
+    alert('Combo ready. Bracelet + Earrings saved.');
+  } else {
+    // Existing single-product flow (UNCHANGED)
+  }
+}  
 </script>
 
 </body>
