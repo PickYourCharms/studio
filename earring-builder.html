@@ -142,9 +142,21 @@ function init() {
     cta.textContent = "Love it · Add Bundle to Bag";
   }
   updateMetal();
-  // === FIX: HIJACK PHONE BACK BUTTON ===
-  window.history.pushState(null, null, window.location.href);
-  window.onpopstate = function () {
+  // === FIX: DELAY THE HIJACK TO BYPASS BROWSER RESTRICTIONS ===
+  setTimeout(() => {
+    window.history.pushState({ page: 'loaded' }, null, window.location.href);
+  }, 100); // 100ms delay helps it register on stricter phones
+
+  window.onpopstate = function (event) {
+    // If we are in "Frozen State" (Added to Bag), just unfreeze!
+    if (document.body.classList.contains('frozen-state')) {
+      document.body.classList.remove('frozen-state');
+      navCartBtn.style.display = 'none'; // Hide cart button if needed
+      // Restore the button text if necessary, or just let them edit
+      return; 
+    }
+    
+    // Otherwise, run normal back logic
     goBack(); 
   };
 }
@@ -381,6 +393,8 @@ function calculateComboPrice(b, e) {
 }
 
 function addToCart(item) {
+  // === FORCE HISTORY ENTRY ON USER CLICK (Reliable on all phones) ===
+  window.history.pushState({ page: 'frozen' }, null, window.location.href);
   let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   cart.push(item);
   localStorage.setItem('pyc_cart', JSON.stringify(cart));
