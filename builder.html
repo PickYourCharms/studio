@@ -134,6 +134,15 @@ function init() {
     cta.textContent = "Continue to Earrings →";
   }
   updateMetal(); 
+  // === FIX: HIJACK PHONE BACK BUTTON ===
+  // Push a dummy state so the back button doesn't leave the page immediately
+  window.history.pushState(null, null, window.location.href);
+
+  // Listen for the back button press
+  window.onpopstate = function () {
+    // Instead of defaulting to previous history, run our custom logic
+    goBack();
+    };
 }
 
 function saveDraft() {
