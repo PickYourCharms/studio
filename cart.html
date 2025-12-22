@@ -128,9 +128,18 @@ function buildMiniBracelet(metal, charms) {
   const base = document.createElement('img');
   base.className = 'mini-base';
   base.src = `assets/bases/bracelet_base_${metal}.png`;
+  
+  // FIX 1: Move the visual image UP (was 50% in CSS)
+  base.style.top = '40%'; 
+  
   container.appendChild(base);
 
-  const cx = REF_SIZE / 2, cy = REF_SIZE / 2, radius = REF_SIZE * 0.36;
+  // FIX 2: Move the calculation center UP by 30px to match the image
+  // 50% of 300px = 150px. 40% = 120px. Difference is 30px.
+  const cx = REF_SIZE / 2;
+  const cy = (REF_SIZE / 2) - 30; 
+
+  const radius = REF_SIZE * 0.36;
   const angles = B_ANGLES[charms.length] || [];
 
   charms.forEach((file, i) => {
