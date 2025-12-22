@@ -118,11 +118,12 @@ function init() {
     renderCoupons();
     calculateTotals();
   }
-  // === FIX: HIJACK PHONE BACK BUTTON ===
-  window.history.pushState(null, null, window.location.href);
+// === FIX: DELAYED HIJACK ===
+  setTimeout(() => {
+    window.history.pushState(null, null, window.location.href);
+  }, 100);
   
   window.onpopstate = function () {
-    // On the cart page, the Back button should always go to Home
     window.location.href = 'index.html';
   };
 }
