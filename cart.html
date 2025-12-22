@@ -118,6 +118,13 @@ function init() {
     renderCoupons();
     calculateTotals();
   }
+  // === FIX: HIJACK PHONE BACK BUTTON ===
+  window.history.pushState(null, null, window.location.href);
+  
+  window.onpopstate = function () {
+    // On the cart page, the Back button should always go to Home
+    window.location.href = 'index.html';
+  };
 }
 
 // --- MINI BUILDERS ---
