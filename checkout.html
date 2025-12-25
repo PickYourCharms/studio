@@ -561,6 +561,10 @@
   }
 
   function proceedToWhatsApp() {
+    // 1. GET THE BUTTON (To disable it)
+    const btn = document.querySelector('.whatsapp-button'); 
+
+    // 2. VALIDATION (Your existing logic)
     let isValid = true;
     let firstError = null;
     const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
@@ -587,6 +591,15 @@
       return; 
     }
 
+    // 3. LOCK BUTTON (Prevents Double Clicks/Mis-clicks)
+    // This gives immediate visual feedback so the user knows it's working
+    if(btn) {
+        btn.innerHTML = "Opening WhatsApp...";
+        btn.style.pointerEvents = "none";
+        btn.style.opacity = "0.7";
+    }
+
+    // 4. SAVE DATA (Your existing working logic)
     saveDraft(); 
 
     const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
@@ -614,20 +627,26 @@
 
     const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
     
-    // === FINAL CLEANUP ===
-    // 1. Remove "Visited" flag so bottom sheet doesn't show next time
+    // 5. CLEANUP (Your existing working logic)
     sessionStorage.removeItem('pyc_checkout_visited');
-    // 2. Clear Cart
     localStorage.removeItem('pyc_cart');
-    // 3. Clear other Session Data (Drafts/Coupons)
     sessionStorage.removeItem('pyc_draft');
     sessionStorage.removeItem('pyc_applied_coupon');
     
-    // Note: We intentionally DO NOT clear 'checkout_draft_persistent' from localStorage
-    // so it autofills next time.
+    // 6. REDIRECT (The Fix)
+    // Instead of opening a popup AND redirecting (which causes the glitch),
+    // we simply navigate the current window to WhatsApp. 
+    // This is 100% reliable on mobile.
+    window.location.href = url;
 
-    window.open(url, '_blank');
-    window.location.replace('index.html');
+    // Optional: Reset button after 3 seconds in case they hit "Back"
+    setTimeout(() => {
+        if(btn) {
+            btn.innerHTML = "Pay on WhatsApp";
+            btn.style.pointerEvents = "auto";
+            btn.style.opacity = "1";
+        }
+    }, 3000);
   }
 
   function handleBackNavigation() {
