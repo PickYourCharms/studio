@@ -115,7 +115,13 @@ const isResume = urlParams.get('resume') === 'true';
 
 function init() {
   const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
-  if (cart.length > 0) navCartBtn.style.display = 'block';
+  
+  // FIX: Strictly show/hide based on cart content on load
+  if (cart.length > 0) {
+    navCartBtn.style.display = 'block';
+  } else {
+    navCartBtn.style.display = 'none';
+  }
 
   if (isResume) {
     const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
@@ -134,21 +140,24 @@ function init() {
     cta.textContent = "Continue to Earrings →";
   }
   updateMetal(); 
-  // === FIX: DELAY THE HIJACK TO BYPASS BROWSER RESTRICTIONS ===
+  
   setTimeout(() => {
     window.history.pushState({ page: 'loaded' }, null, window.location.href);
-  }, 100); // 100ms delay helps it register on stricter phones
+  }, 100);
 
   window.onpopstate = function (event) {
-    // If we are in "Frozen State" (Added to Bag), just unfreeze!
     if (document.body.classList.contains('frozen-state')) {
       document.body.classList.remove('frozen-state');
-      navCartBtn.style.display = 'none'; // Hide cart button if needed
-      // Restore the button text if necessary, or just let them edit
+      
+      // FIX: When unfreezing (going back), re-check cart to decide visibility
+      const currentCart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+      if (currentCart.length > 0) {
+         navCartBtn.style.display = 'block';
+      } else {
+         navCartBtn.style.display = 'none';
+      }
       return; 
     }
-    
-    // Otherwise, run normal back logic
     goBack(); 
   };
 }
