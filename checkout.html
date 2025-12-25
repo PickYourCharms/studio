@@ -200,8 +200,7 @@
     <div class="phone-wrapper">
       <span class="phone-prefix">🇮🇳 +91</span>
       <input type="tel" id="customerPhone" class="premium-input phone-field" placeholder="98765 43210" 
-             onpaste="handlePhonePaste(event, this)" 
-             oninput="handlePhoneInput(this)" 
+             oninput="handlePhoneInput(event, this)" 
              onblur="saveDraft()">
     </div>
   </div>
@@ -238,8 +237,7 @@
       <div class="phone-wrapper">
         <span class="phone-prefix">🇮🇳 +91</span>
         <input type="tel" id="receiverPhone" class="premium-input phone-field" 
-               onpaste="handlePhonePaste(event, this)" 
-               oninput="handlePhoneInput(this)" 
+               oninput="handlePhoneInput(event, this)" 
                onblur="saveDraft()">
       </div>
     </div>
@@ -472,7 +470,8 @@
       // Trigger update
       validateInput(document.getElementById('receiverName'));
       // Manual trigger for validation
-      handlePhoneInput(document.getElementById('receiverPhone')); 
+      const e = { inputType: 'manual' }; // Dummy event
+      handlePhoneInput(e, document.getElementById('receiverPhone')); 
     } else {
       document.getElementById('receiverName').value = '';
       document.getElementById('receiverPhone').value = '';
@@ -480,36 +479,30 @@
     saveDraft();
   }
 
-  // --- STRICT INPUT HANDLERS (UPDATED) ---
+  // --- SMART PHONE HANDLER (FIXED) ---
   
-  function handlePhoneInput(el) {
-    // 1. Remove non-digits
+  function handlePhoneInput(e, el) {
+    // 1. Strip all non-digits
     let val = el.value.replace(/\D/g, '');
     
-    // 2. Strict Length Cap (Left to Right) for Manual Typing
-    // If length > 10, keep first 10.
+    // 2. Logic to detect Paste vs Type
+    // The "inputType" check tells us if this event came from a paste action
+    const isPaste = e.inputType && e.inputType.includes('Paste');
+    
+    // 3. APPLY RULES
     if (val.length > 10) {
-      val = val.slice(0, 10);
+        if (isPaste || val.length >= 12) {
+            // IF PASTE: It's likely +919876543210 (12 digits) or 9198...
+            // User wants the LAST 10 digits in this case.
+            val = val.slice(-10);
+        } else {
+            // IF TYPING: User already has 10 digits and types 1 more.
+            // User wants to STOP at 10 (keep first 10).
+            val = val.slice(0, 10);
+        }
     }
     
     el.value = val;
-    validateInput(el);
-    saveDraft();
-  }
-
-  function handlePhonePaste(e, el) {
-    e.preventDefault();
-    // Get pasted data
-    let pastedData = (e.clipboardData || window.clipboardData).getData('text');
-    // Remove non-digits
-    let clean = pastedData.replace(/\D/g, '');
-    
-    // SMART LOGIC: If paste > 10 chars, take LAST 10 (ignores prefix)
-    if(clean.length > 10) {
-      clean = clean.slice(-10);
-    }
-    
-    el.value = clean;
     validateInput(el);
     saveDraft();
   }
@@ -733,6 +726,7 @@
 
   // --- NAVIGATION HIJACK ---
   function handleBackNavigation() {
+    // Consistent behavior: Show modal
     document.getElementById('confirmBackModal').style.display = 'flex';
   }
   function confirmGoBack() { 
