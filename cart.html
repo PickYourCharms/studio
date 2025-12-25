@@ -713,14 +713,14 @@ function onCheckoutClick() {
 }
 
 function forceCheckout() {
-  // CRITICAL: We must save the coupon data before navigating, 
-  // otherwise the checkout page won't know about the discount.
+  // 1. Save the applied coupon so Checkout Page can see it
   if (activeCoupon) {
     sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(activeCoupon));
   } else {
     sessionStorage.removeItem('pyc_applied_coupon');
   }
-  
+
+  // 2. Redirect to checkout
   window.location.href = 'checkout.html';
 }
 
@@ -760,9 +760,9 @@ document.getElementById('checkoutUpsellModal').onclick = function(e) {
       Uggghhh! I want some more!
     </button>
     
-    <a href="#" class="secondary-link" onclick="forceCheckout()">
-      Maybe Later
-    </a>
+    <a href="javascript:void(0)" class="secondary-link" onclick="forceCheckout()">
+  Maybe Later
+</a>
   </div>
 </div> 
 </body>
