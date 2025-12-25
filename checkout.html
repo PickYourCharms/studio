@@ -362,18 +362,12 @@
     calculateTotals();
 
     // === BACK BUTTON HIJACK (TRAP) ===
-    // 1. Push a state immediately to "trap" the back button
-    window.history.pushState({ page: 'checkout' }, document.title, window.location.href);
-
-    // 2. Listen for when the user hits back
-    window.addEventListener('popstate', function(event) {
-      // 3. Immediately PUSH IT AGAIN so the browser url stays on checkout.html
-      // This stops the browser from actually going back to cart.html
-      window.history.pushState({ page: 'checkout' }, document.title, window.location.href);
-      
-      // 4. Now show our custom modal
+    setTimeout(() => {
+      window.history.pushState(null, null, window.location.href);
+    }, 100);
+    window.onpopstate = function() {
       handleBackNavigation();
-    });
+    };
   }
 
   // --- CALCULATIONS ONLY ---
@@ -710,6 +704,9 @@
       return; 
     }
 
+    // FIX: FORCE SAVE BEFORE GENERATING MESSAGE
+    saveDraft(); 
+
     // 3. Generate Message
     const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
     const total = document.getElementById('finalTotal').textContent;
@@ -728,6 +725,7 @@
     addressBlock += `${data.city}, ${data.state} - ${data.pincode}`;
 
     let msg = `Hey PickYourCharms!✨\nI’ve just placed an order and here are the details 💌\n\n*Order ID:* ${orderID} ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
+
     if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
     if(data.isGift) {
       msg += `\n\n🎁 *GIFT ORDER*\nTo: ${data.receiverName}\nPhone: ${data.receiverPhone}\nRelation: ${data.relation}\nOccasion: ${data.occasion}\nNote: ${data.giftMessage}`;
