@@ -549,3 +549,24 @@ body.frozen-state .post-actions-container { display: flex; }
   font-size: 12px;
   cursor: pointer;
 }
+
+.coupon-trigger-bar {
+  margin-top: 30px; /* Increased space from items above */
+  margin-bottom: 20px; /* Space from subtotal below */
+}
+
+/* Style for the "Add more to avail" text (Issue #2) */
+.coupon-condition-text {
+  font-size: 11px;
+  color: #d97706; /* Amber/Orange color */
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
+}
+
+.coupon-left {
+  display: flex;
+  flex-direction: column; /* Stack Title and Condition */
+  align-items: flex-start !important;
+  gap: 2px !important;
+}
