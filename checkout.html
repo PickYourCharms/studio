@@ -12,12 +12,12 @@
 
 <body class="checkout-body">
 
-<nav class="navbar">
+<header class="navbar">
   <a href="index.html" class="logo-link">
     <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   </a>
   <div style="width: 24px;"></div> 
-</nav>
+</header>
 
 <div class="page-header">
   <button onclick="handleBackNavigation()">←</button>
@@ -28,26 +28,28 @@
 <div class="main-container checkout-container">
 
   <div class="form-section">
-    <h3 class="section-title">What's the vibe? <span class="opt">(Optional)</span></h3>
+    <h3 class="section-title">What's the vibe? ☁️</h3>
+    <p class="section-desc" style="color:#888; font-size:13px; margin:-8px 0 16px;">Optional, but helps us pack it right.</p>
+    
     <div class="vibe-scroller">
-      <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Soft')">Soft</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm 🌿</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic 🌹</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark 🖤</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful 🍭</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal ✨</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other ✏️</button>
     </div>
-    <div id="otherVibeContainer" class="input-wrapper" style="display:none; margin-top:12px;">
-      <input type="text" id="vibeCustomText" placeholder="Describe your vibe..." oninput="saveDraft()">
+    
+    <div id="otherVibeContainer" class="input-wrapper" style="display:none; margin-top:16px;">
+      <input type="text" id="vibeCustomText" placeholder="Describe your vibe (e.g. Coquette)" oninput="saveDraft()">
     </div>
   </div>
 
   <div class="form-section">
-    <h3 class="section-title">Your Details</h3>
+    <h3 class="section-title">Contact Info</h3>
     
     <div class="input-wrapper">
-      <label>Name</label>
+      <label>Full Name</label>
       <input type="text" id="customerName" placeholder="e.g. Ananya Singh" oninput="saveDraft()">
     </div>
 
@@ -66,30 +68,45 @@
     <div class="toggle-row">
       <div>
         <h3 class="section-title" style="margin:0;">Is this a gift? 🎁</h3>
-        <p class="section-desc" style="margin:0;">We'll pack it extra special.</p>
+        <p class="section-desc" style="margin:4px 0 0; color:#666; font-size:13px;">We'll pack it extra special.</p>
       </div>
       <label class="switch">
         <input type="checkbox" id="isGift" onchange="toggleGiftSection()">
-        <span class="slider round"></span>
+        <span class="slider"></span>
       </label>
     </div>
   </div>
 
   <div id="giftReceiverDetails" class="form-section hidden">
-    <h3 class="section-title">Receiver's Details</h3>
-    
     <div class="checkbox-row">
       <input type="checkbox" id="copyDetails" onchange="copyCustomerDetails()">
-      <label for="copyDetails">Same as my details</label>
+      <label for="copyDetails">Same as my contact details</label>
     </div>
 
-    <div class="input-wrapper">
-      <label>Receiver Name</label>
-      <input type="text" id="receiverName" oninput="saveDraft()">
+    <div class="form-row" style="display:flex; gap:12px;">
+        <div class="input-wrapper" style="flex:1;">
+          <label>Receiver Name</label>
+          <input type="text" id="receiverName" oninput="saveDraft()">
+        </div>
+        <div class="input-wrapper" style="flex:1;">
+          <label>Receiver Phone</label>
+          <input type="tel" id="receiverPhone" oninput="saveDraft()">
+        </div>
+    </div>
+
+    <div class="form-row" style="display:flex; gap:12px;">
+      <div class="input-wrapper" style="flex:1;">
+        <label>Relation</label>
+        <input type="text" id="relation" placeholder="Friend, Sister..." oninput="saveDraft()">
+      </div>
+      <div class="input-wrapper" style="flex:1;">
+        <label>Occasion</label>
+        <input type="text" id="occasion" placeholder="Birthday..." oninput="saveDraft()">
+      </div>
     </div>
     <div class="input-wrapper">
-      <label>Receiver Phone</label>
-      <input type="tel" id="receiverPhone" oninput="saveDraft()">
+      <label>Message on Card</label>
+      <textarea id="giftMessage" rows="2" placeholder="Write a sweet note..." oninput="saveDraft()"></textarea>
     </div>
   </div>
 
@@ -97,46 +114,27 @@
     <h3 class="section-title">Shipping Address</h3>
 
     <div class="input-wrapper">
-      <label>Full Address (House No, Street)</label>
-      <textarea id="shippingAddress" rows="3" placeholder="Enter full address" oninput="saveDraft()"></textarea>
+      <label>Flat, House no., Building, Company, Apartment</label>
+      <textarea id="shippingAddress" rows="2" placeholder="e.g. 104, Sunrise Apartments" oninput="saveDraft()"></textarea>
     </div>
 
-    <div class="form-row">
-      <div class="input-wrapper half">
+    <div class="form-row" style="display:flex; gap:12px;">
+      <div class="input-wrapper" style="flex:1;">
         <label>City</label>
         <input type="text" id="city" placeholder="City" oninput="saveDraft()">
       </div>
-      <div class="input-wrapper half">
+      <div class="input-wrapper" style="flex:1;">
         <label>Pincode</label>
         <input type="number" id="pincode" placeholder="560001" oninput="handlePincodeChange()">
       </div>
     </div>
-    <small id="pincodeHelper" class="helper-text"></small>
-  </div>
-
-  <div id="giftMetaDetails" class="form-section hidden">
-    <h3 class="section-title">Gift Message</h3>
-    
-    <div class="form-row">
-      <div class="input-wrapper half">
-        <label>Relation</label>
-        <input type="text" id="relation" placeholder="Friend, Sister..." oninput="saveDraft()">
-      </div>
-      <div class="input-wrapper half">
-        <label>Occasion</label>
-        <input type="text" id="occasion" placeholder="Birthday..." oninput="saveDraft()">
-      </div>
-    </div>
-    <div class="input-wrapper">
-      <label>Message</label>
-      <textarea id="giftMessage" rows="2" placeholder="Write a sweet note..." oninput="saveDraft()"></textarea>
-    </div>
+    <small id="pincodeHelper" class="helper-text" style="display:block; margin-top:-8px; font-size:12px;"></small>
   </div>
 
   <div class="order-summary-clean">
-    <h3 class="section-title" style="margin-bottom: 16px;">Order Summary</h3>
+    <h3 class="section-title" style="margin-bottom: 20px;">Receipt</h3>
     
-    <div id="summaryList" class="simple-item-list"></div>
+    <div id="summaryList"></div>
     
     <div class="bill-divider"></div>
 
@@ -163,7 +161,7 @@
   </button>
 </div>
 
-<div id="confirmBackModal" class="modal" style="display: none;">
+<div id="confirmBackModal" class="modal">
   <div class="modal-card">
     <h3>Go back to cart?</h3>
     <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved.</p>
@@ -180,7 +178,6 @@ const PHONE_NUMBER = "918910344676";
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
 
-// === STATE ===
 let cart = [];
 let appliedCoupon = null;
 let currentVibe = "";
@@ -204,27 +201,35 @@ function init() {
   calculateTotals();
 }
 
+// Fixed: Better Summary with Images
 function renderOrderSummary() {
   const container = document.getElementById('summaryList');
   let html = '';
   cart.forEach(item => {
     let title = item.type;
     let desc = "";
+    // Fallback image if specific thumbnail logic isn't used here
+    let imgSrc = item.image || 'assets/home/curated_teaser.png';
+
     if (item.type.includes('Combo')) {
         title = "Combo Set";
         desc = `${item.bracelet.metal} Bracelet + ${item.earrings.metal} Earrings`;
+        imgSrc = 'assets/home/model_combo_mobile.png';
     }
     else if (item.type === 'Bracelet') {
         title = `${item.metal} Bracelet`;
         desc = `${item.charms.length} Charms`;
+        imgSrc = `assets/bases/bracelet_base_${item.metal}.png`;
     }
     else {
         title = `${item.metal} Earrings`;
         desc = "Custom Pair";
+        imgSrc = `assets/bases/LeftHook_${item.metal}.png`;
     }
     
     html += `
       <div class="simple-item">
+        <div class="si-img-box"><img src="${imgSrc}"></div>
         <div class="si-info">
             <span class="si-name">${title}</span>
             <span class="si-desc">${desc}</span>
@@ -252,14 +257,13 @@ function selectVibe(btn, vibe) {
 function toggleGiftSection() {
   const isGift = document.getElementById('isGift').checked;
   const receiverSec = document.getElementById('giftReceiverDetails');
-  const metaSec = document.getElementById('giftMetaDetails');
   
   if (isGift) {
     receiverSec.classList.remove('hidden');
-    metaSec.classList.remove('hidden');
+    // Scroll to gift section smoothly
+    setTimeout(() => receiverSec.scrollIntoView({behavior: "smooth", block: "center"}), 100);
   } else {
     receiverSec.classList.add('hidden');
-    metaSec.classList.add('hidden');
   }
   saveDraft();
 }
@@ -379,7 +383,7 @@ function prefillForm(data) {
   if (data.vibe) {
     const chips = document.querySelectorAll('.vibe-chip');
     chips.forEach(chip => {
-      if (chip.textContent === data.vibe) selectVibe(chip, data.vibe);
+      if (chip.textContent.includes(data.vibe)) selectVibe(chip, data.vibe);
     });
     if (data.vibe === 'Other') document.getElementById('vibeCustomText').value = data.vibeText || '';
   }
@@ -401,6 +405,8 @@ function proceedToWhatsApp() {
   for (let id of reqFields) {
     if (!document.getElementById(id).value.trim()) {
       alert("Please fill all required fields");
+      // Highlight the first missing field
+      document.getElementById(id).focus();
       return;
     }
   }
@@ -411,6 +417,7 @@ function proceedToWhatsApp() {
   let itemStr = "";
   cart.forEach((item, i) => {
     let detail = item.type === 'Bracelet' ? `${item.charms.length} Charms` : '';
+    if(item.type.includes('Combo')) detail = "Set";
     itemStr += `\n${i+1}. ${item.type} ${detail} (Rs. ${item.price})`;
   });
 
