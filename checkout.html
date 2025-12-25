@@ -723,7 +723,7 @@
     if(data.landmark) addressBlock += `Landmark: ${data.landmark}\n`;
     addressBlock += `${data.city}, ${data.state} - ${data.pincode}`;
 
-    let msg = `*New Order: ${orderID}* ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
+    let msg = `Hey PickYourCharms! \n✨I’ve just placed an order and here are the details 💌\n\n*Order ID:* ${orderID} ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
 
     if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
     if(data.isGift) {
