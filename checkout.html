@@ -42,10 +42,20 @@
     }
     .premium-input:focus { background: #fff; border-color: #000; }
     
+    /* PHONE INPUT SPECIFIC */
+    .phone-wrapper { position: relative; }
+    .phone-prefix {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 16px; color: #111; font-weight: 500; pointer-events: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    /* Padding left accommodates the +91 prefix */
+    input.phone-field { padding-left: 85px; }
+
     /* ERROR STATE (Red Highlight) */
     .premium-input.input-error {
-      border-color: #dc2626;
-      background-color: #fef2f2;
+      border-color: #dc2626 !important;
+      background-color: #fef2f2 !important;
       animation: shake 0.3s ease;
     }
     .premium-input.input-error::placeholder { color: #f87171; }
@@ -123,13 +133,26 @@
       display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
     }
     .helper-text { font-size: 12px; color: #666; margin-top: 4px; }
+    
+    /* MODAL FOR BACK BUTTON */
+    .modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+    }
+    .modal-card {
+      background: #fff; border-radius: 18px; padding: 20px; width: 86%; max-width: 320px; text-align: center;
+    }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 999px; border: none; cursor: pointer; }
+    .primary { background: #000; color: #fff; }
+    .secondary { background: #eee; }
   </style>
 </head>
 
 <body>
 
 <div class="header">
-  <button onclick="window.location.href='cart.html'">←</button>
+  <button onclick="handleBackNavigation()">←</button>
   <a href="index.html" class="logo-link">
     <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   </a>
@@ -166,7 +189,10 @@
 
   <div class="form-group">
     <label class="form-label">Phone Number <span class="required-star">*</span></label>
-    <input type="tel" id="customerPhone" class="premium-input" placeholder="+91 98765 43210" oninput="validateInput(this); saveDraft()">
+    <div class="phone-wrapper">
+      <span class="phone-prefix">🇮🇳 +91</span>
+      <input type="tel" id="customerPhone" class="premium-input phone-field" placeholder="98765 43210" oninput="handlePhoneInput(this); saveDraft()">
+    </div>
   </div>
 
   <div class="form-group">
@@ -198,7 +224,10 @@
       </div>
       <div class="form-col">
         <label class="form-label">Receiver Phone <span class="required-star">*</span></label>
-        <input type="tel" id="receiverPhone" class="premium-input" oninput="validateInput(this); saveDraft()">
+        <div class="phone-wrapper">
+          <span class="phone-prefix">🇮🇳 +91</span>
+          <input type="tel" id="receiverPhone" class="premium-input phone-field" oninput="handlePhoneInput(this); saveDraft()">
+        </div>
       </div>
     </div>
 
@@ -233,7 +262,7 @@
     </div>
     <div class="form-col">
       <label class="form-label">Pincode <span class="required-star">*</span></label>
-      <input type="number" id="pincode" class="premium-input" placeholder="560001" oninput="validateInput(this); handlePincode()">
+      <input type="tel" id="pincode" class="premium-input" placeholder="560001" oninput="handlePincodeInput(this)">
     </div>
   </div>
   <div id="pincodeMsg" class="helper-text"></div>
@@ -261,6 +290,17 @@
   </button>
 </div>
 
+<div id="confirmBackModal" class="modal">
+  <div class="modal-card">
+    <h3>Go back to cart?</h3>
+    <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved.</p>
+    <div class="modal-actions">
+      <button class="secondary" onclick="confirmGoBack()">Go Back</button>
+      <button class="primary" onclick="closeModal()">Stay Here</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // === CONFIG ===
   const PHONE_NUMBER = "918910344676"; 
@@ -283,14 +323,21 @@
 
     restoreDraft();
     calculateTotals();
+
+    // === BACK BUTTON HIJACK ===
+    setTimeout(() => {
+      window.history.pushState(null, null, window.location.href);
+    }, 100);
+    window.onpopstate = function() {
+      handleBackNavigation();
+    };
   }
 
-  // --- CALCULATIONS ONLY (No visual item render) ---
+  // --- CALCULATIONS ONLY ---
   function calculateTotals() {
     let subtotal = 0;
     let bracelets = [], earrings = [];
     
-    // Helper to get raw prices
     const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
     const getEPrice = () => BASE_PRICE;
 
@@ -306,7 +353,6 @@
     bracelets.forEach(p => subtotal += p);
     earrings.forEach(p => subtotal += p);
 
-    // Calculate Combo Savings
     bracelets.sort((a,b) => a-b);
     let comboDiscount = 0;
     const pairs = Math.min(bracelets.length, earrings.length);
@@ -325,7 +371,6 @@
       }
     }
 
-    // Shipping Logic
     const pincode = document.getElementById('pincode').value;
     let shipping = 80;
     const msg = document.getElementById('pincodeMsg');
@@ -394,10 +439,11 @@
   function copyContactDetails() {
     if(document.getElementById('copyDetails').checked) {
       document.getElementById('receiverName').value = document.getElementById('customerName').value;
-      document.getElementById('receiverPhone').value = document.getElementById('customerPhone').value;
-      // Trigger validation removal on copy
+      const phone = document.getElementById('customerPhone').value;
+      document.getElementById('receiverPhone').value = phone;
+      // Trigger update
       validateInput(document.getElementById('receiverName'));
-      validateInput(document.getElementById('receiverPhone'));
+      handlePhoneInput(document.getElementById('receiverPhone')); 
     } else {
       document.getElementById('receiverName').value = '';
       document.getElementById('receiverPhone').value = '';
@@ -405,13 +451,32 @@
     saveDraft();
   }
 
-  function handlePincode() {
-    validateInput(document.getElementById('pincode'));
+  // --- STRICT INPUT HANDLERS ---
+  
+  function handlePhoneInput(el) {
+    // 1. Remove anything that is NOT a number
+    let val = el.value.replace(/\D/g, '');
+    
+    // 2. Paste Logic: If copying a long string (like +91 9876...), take last 10
+    if (val.length > 10) {
+      val = val.slice(-10);
+    }
+    
+    el.value = val;
+    validateInput(el);
+  }
+
+  function handlePincodeInput(el) {
+    // Numbers only, max 6
+    let val = el.value.replace(/\D/g, '');
+    if (val.length > 6) val = val.slice(0, 6);
+    el.value = val;
+    
+    validateInput(el);
     saveDraft();
     calculateTotals();
   }
   
-  // Real-time Validation Removal
   function validateInput(el) {
     if(el.value.trim() !== "") {
       el.classList.remove('input-error');
@@ -468,25 +533,71 @@
       document.getElementById('giftMessage').value = data.giftMessage || '';
     }
   }
+  
+  // --- ORDER ID GENERATOR ---
+  function generateOrderID() {
+    const now = new Date();
+    // DDMMYYYY
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    // HHMM (24h)
+    const HH = String(now.getHours()).padStart(2, '0');
+    const MM = String(now.getMinutes()).padStart(2, '0');
+    
+    // Random 5 Char
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let rand = '';
+    for(let i=0; i<5; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
 
-  // --- WHATSAPP LOGIC WITH VALIDATION HIGHLIGHTING ---
+    // Determine Type
+    let hasCustom = false;
+    let hasReady = false;
+    
+    cart.forEach(item => {
+        const t = item.type.toLowerCase();
+        // Check if item is from builder
+        if(t.includes('bracelet') || t.includes('earring') || t.includes('combo')) {
+            hasCustom = true;
+        } else {
+            // Assume anything else is "Ready Made" / Curated
+            hasReady = true; 
+        }
+    });
+
+    let typeCode = 'CM'; // Default
+    if(hasCustom && hasReady) typeCode = 'MX';
+    else if(!hasCustom && hasReady) typeCode = 'RM';
+
+    return `PYC-${typeCode}-${dd}${mm}${yyyy}-${HH}${MM}-${rand}`;
+  }
+
+  // --- PROCEED WITH VALIDATION ---
   function proceedToWhatsApp() {
     let isValid = true;
     let firstError = null;
 
-    // 1. Identify Mandatory Fields
+    // 1. Mandatory Fields
     const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'shippingAddress', 'city', 'pincode'];
-    
-    // Add Gift Mandatory Fields if Gift is checked
     if(document.getElementById('isGift').checked) {
       mandatoryIds.push('receiverName', 'receiverPhone');
     }
 
-    // 2. Validate Loop
+    // 2. Loop Validation
     mandatoryIds.forEach(id => {
       const el = document.getElementById(id);
-      if(!el.value.trim()) {
-        el.classList.add('input-error'); // Add Red Border
+      const val = el.value.trim();
+      let error = false;
+
+      // Empty Check
+      if(!val) error = true;
+      
+      // Strict Length Check
+      if(id.includes('Phone') && val.length !== 10) error = true;
+      if(id === 'pincode' && val.length !== 6) error = true;
+
+      if(error) {
+        el.classList.add('input-error');
         isValid = false;
         if(!firstError) firstError = el;
       } else {
@@ -495,15 +606,15 @@
     });
 
     if(!isValid) {
-      // Scroll to the first error
       firstError.scrollIntoView({behavior: 'smooth', block: 'center'});
       firstError.focus();
-      return; // STOP
+      return; 
     }
 
-    // 3. Build Message
+    // 3. Generate Message
     const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
     const total = document.getElementById('finalTotal').textContent;
+    const orderID = generateOrderID();
 
     let itemsStr = "";
     cart.forEach((item, i) => {
@@ -513,7 +624,7 @@
       itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
     });
 
-    let msg = `*New Order: PickYourCharms* ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${data.address}\n${data.city} - ${data.pincode}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
+    let msg = `*New Order: ${orderID}* ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${data.address}\n${data.city} - ${data.pincode}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
 
     if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
     if(data.isGift) {
@@ -522,6 +633,20 @@
 
     const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
+  }
+
+  // --- NAVIGATION HIJACK ---
+  function handleBackNavigation() {
+    // If user has unsaved data (actually we auto-save, so checking if fields are non-empty might be better)
+    // But consistent behavior: Show modal
+    document.getElementById('confirmBackModal').style.display = 'flex';
+  }
+  function confirmGoBack() { 
+    saveDraft(); 
+    window.location.href = 'cart.html'; 
+  }
+  function closeModal() { 
+    document.getElementById('confirmBackModal').style.display = 'none'; 
   }
 
   init();
