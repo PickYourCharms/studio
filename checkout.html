@@ -350,6 +350,7 @@
   
   function init() {
     const cartData = localStorage.getItem('pyc_cart');
+    // If cart is empty, redirect to cart page immediately
     if (!cartData || JSON.parse(cartData).length === 0) {
       window.location.href = 'cart.html';
       return;
@@ -370,7 +371,7 @@
     };
   }
 
-  // --- CALCULATIONS ONLY ---
+  // ... (Calculations / Interaction / Toggle Logic is identical to previous, kept clean) ...
   function calculateTotals() {
     let subtotal = 0;
     let bracelets = [], earrings = [];
@@ -447,7 +448,6 @@
     document.getElementById('finalTotal').textContent = `Rs. ${total}`;
   }
 
-  // --- INTERACTION ---
   function selectVibe(btn, vibe) {
     document.querySelectorAll('.vibe-chip').forEach(b => b.classList.remove('selected'));
     if(currentVibe === vibe) {
@@ -478,9 +478,7 @@
       document.getElementById('receiverName').value = document.getElementById('customerName').value;
       const phone = document.getElementById('customerPhone').value;
       document.getElementById('receiverPhone').value = phone;
-      // Trigger update
       validateInput(document.getElementById('receiverName'));
-      // Manual trigger for validation (simulate typing)
       const e = { inputType: 'insertText' }; 
       handlePhoneInput(e, document.getElementById('receiverPhone')); 
     } else {
@@ -490,42 +488,26 @@
     saveDraft();
   }
 
-  // --- SMART PHONE HANDLER (FIXED FOR ALL DEVICES) ---
-  
   function handlePhoneInput(e, el) {
-    // 1. Clean the input (digits only)
     let val = el.value.replace(/\D/g, '');
-    
-    // 2. Logic: detect Paste vs Type
     const isPaste = e.inputType && e.inputType.toLowerCase().includes('paste');
-    
-    // 3. Logic Application
     if (val.length > 10) {
         if (isPaste || val.length >= 12) {
-            // IF PASTED (likely +91...), take LAST 10
             val = val.slice(-10);
         } else {
-            // IF TYPED (11th digit), STOP at 10 (keep first 10)
             val = val.slice(0, 10);
         }
     }
-    
     el.value = val;
     validateInput(el);
     saveDraft();
   }
 
   function handlePincodeInput(el) {
-    // Numbers only, max 6
     let val = el.value.replace(/\D/g, '');
     if (val.length > 6) val = val.slice(0, 6);
     el.value = val;
-    
-    // AUTO-FETCH CITY/STATE (New Feature)
-    if(val.length === 6) {
-        fetchPincodeDetails(val);
-    }
-
+    if(val.length === 6) fetchPincodeDetails(val);
     validateInput(el);
     saveDraft();
     calculateTotals();
@@ -535,7 +517,6 @@
     const msg = document.getElementById('pincodeMsg');
     msg.textContent = "Fetching location...";
     msg.style.color = "#888";
-
     fetch(`https://api.postalpincode.in/pincode/${pincode}`)
       .then(res => res.json())
       .then(data => {
@@ -543,31 +524,22 @@
           const details = data[0].PostOffice[0];
           document.getElementById('city').value = details.District;
           document.getElementById('state').value = details.State;
-          
-          // Clear errors if they were highlighted
           validateInput(document.getElementById('city'));
           validateInput(document.getElementById('state'));
-          
-          msg.textContent = ""; // Clear loader
+          msg.textContent = ""; 
           saveDraft();
         } else {
           msg.textContent = "Invalid Pincode";
           msg.style.color = "#dc2626";
         }
       })
-      .catch(err => {
-        console.error("Pincode fetch error", err);
-        msg.textContent = ""; 
-      });
+      .catch(err => { console.error(err); msg.textContent = ""; });
   }
   
   function validateInput(el) {
-    if(el.value.trim() !== "") {
-      el.classList.remove('input-error');
-    }
+    if(el.value.trim() !== "") el.classList.remove('input-error');
   }
 
-  // --- DRAFT SAVING ---
   function saveDraft() {
     const data = {
       name: document.getElementById('customerName').value,
@@ -592,17 +564,22 @@
   }
 
   function restoreDraft() {
-    const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
+    // 1. Try Session (Current Draft)
+    let data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
+    
+    // 2. If no Session, Try Local Storage (Saved User Prefs from previous orders)
+    if (!data) {
+        data = JSON.parse(localStorage.getItem('pyc_user_prefs'));
+    }
+
     if(!data) return;
 
     document.getElementById('customerName').value = data.name || '';
     document.getElementById('customerPhone').value = data.phone || '';
     document.getElementById('customerEmail').value = data.email || '';
-    
     document.getElementById('addressLine1').value = data.addressLine1 || '';
     document.getElementById('addressLine2').value = data.addressLine2 || '';
     document.getElementById('landmark').value = data.landmark || '';
-    
     document.getElementById('city').value = data.city || '';
     document.getElementById('state').value = data.state || '';
     document.getElementById('pincode').value = data.pincode || '';
@@ -614,78 +591,55 @@
       });
       if(data.vibe === 'Other') document.getElementById('vibeText').value = data.vibeText || '';
     }
-
-    if(data.isGift) {
-      document.getElementById('isGift').checked = true;
-      toggleGiftSection();
-      document.getElementById('receiverName').value = data.receiverName || '';
-      document.getElementById('receiverPhone').value = data.receiverPhone || '';
-      document.getElementById('relation').value = data.relation || '';
-      document.getElementById('occasion').value = data.occasion || '';
-      document.getElementById('giftMessage').value = data.giftMessage || '';
+    // Note: We deliberately don't restore Gift Details from LocalStorage (User Prefs), only from Session
+    // because Gift info usually changes per order.
+    if(data.isGift && sessionStorage.getItem('checkout_draft_v2')) {
+        document.getElementById('isGift').checked = true;
+        toggleGiftSection();
+        document.getElementById('receiverName').value = data.receiverName || '';
+        document.getElementById('receiverPhone').value = data.receiverPhone || '';
+        document.getElementById('relation').value = data.relation || '';
+        document.getElementById('occasion').value = data.occasion || '';
+        document.getElementById('giftMessage').value = data.giftMessage || '';
     }
   }
   
-  // --- ORDER ID GENERATOR ---
   function generateOrderID() {
     const now = new Date();
-    // DDMMYYYY
     const dd = String(now.getDate()).padStart(2, '0');
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const yyyy = now.getFullYear();
-    // HHMM (24h)
     const HH = String(now.getHours()).padStart(2, '0');
     const MM = String(now.getMinutes()).padStart(2, '0');
-    
-    // Random 5 Char
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let rand = '';
     for(let i=0; i<5; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
 
-    // Determine Type
     let hasCustom = false;
     let hasReady = false;
-    
     cart.forEach(item => {
         const t = item.type.toLowerCase();
-        // Check if item is from builder
-        if(t.includes('bracelet') || t.includes('earring') || t.includes('combo')) {
-            hasCustom = true;
-        } else {
-            // Assume anything else is "Ready Made" / Curated
-            hasReady = true; 
-        }
+        if(t.includes('bracelet') || t.includes('earring') || t.includes('combo')) hasCustom = true;
+        else hasReady = true; 
     });
-
-    let typeCode = 'CM'; // Default
+    let typeCode = 'CM'; 
     if(hasCustom && hasReady) typeCode = 'MX';
     else if(!hasCustom && hasReady) typeCode = 'RM';
 
     return `PYC-${typeCode}-${dd}${mm}${yyyy}-${HH}${MM}-${rand}`;
   }
 
-  // --- PROCEED WITH VALIDATION ---
   function proceedToWhatsApp() {
     let isValid = true;
     let firstError = null;
-
-    // 1. Mandatory Fields
     const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
-    
-    if(document.getElementById('isGift').checked) {
-      mandatoryIds.push('receiverName', 'receiverPhone');
-    }
+    if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
 
-    // 2. Loop Validation
     mandatoryIds.forEach(id => {
       const el = document.getElementById(id);
       const val = el.value.trim();
       let error = false;
-
-      // Empty Check
       if(!val) error = true;
-      
-      // Strict Length Check
       if(id.includes('Phone') && val.length !== 10) error = true;
       if(id === 'pincode' && val.length !== 6) error = true;
 
@@ -693,9 +647,7 @@
         el.classList.add('input-error');
         isValid = false;
         if(!firstError) firstError = el;
-      } else {
-        el.classList.remove('input-error');
-      }
+      } else el.classList.remove('input-error');
     });
 
     if(!isValid) {
@@ -704,10 +656,10 @@
       return; 
     }
 
-    // FIX: FORCE SAVE BEFORE GENERATING MESSAGE
+    // 1. FORCE SAVE to capture latest keystrokes
     saveDraft(); 
 
-    // 3. Generate Message
+    // 2. Read Data
     const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
     const total = document.getElementById('finalTotal').textContent;
     const orderID = generateOrderID();
@@ -733,25 +685,28 @@
 
     const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
     
-    // === FINAL REDIRECT LOGIC ===
-    // 1. Clear Data
+    // 3. STORE PREFS (For next visit)
+    const prefs = {
+        name: data.name, phone: data.phone, email: data.email,
+        addressLine1: data.addressLine1, addressLine2: data.addressLine2,
+        landmark: data.landmark, city: data.city, state: data.state, pincode: data.pincode
+    };
+    localStorage.setItem('pyc_user_prefs', JSON.stringify(prefs));
+
+    // 4. CLEANUP (End Session)
     localStorage.removeItem('pyc_cart');
     sessionStorage.clear();
-    
-    // 2. Open WhatsApp
+
+    // 5. REDIRECT (Home replaces Checkout in history)
     window.open(url, '_blank');
-    
-    // 3. Redirect current page to Home (Replace history so Back button goes to previous site or closes)
     window.location.replace('index.html');
   }
 
-  // --- NAVIGATION HIJACK ---
   function handleBackNavigation() {
     document.getElementById('confirmBackModal').style.display = 'flex';
   }
   function confirmGoBack() { 
     saveDraft(); 
-    // FORCE location change to break any history stack confusion
     window.location.href = 'cart.html'; 
   }
   function closeModal() { 
