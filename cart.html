@@ -47,18 +47,28 @@
 
     <div class="bill-summary">
       
-      <div id="couponTrigger" class="coupon-trigger-btn" onclick="toggleCouponSheet()">
-        <span>%</span> Apply Coupon
-      </div>
+     <div id="couponTrigger" class="coupon-trigger-bar" onclick="openCouponDrawer()">
+  <div class="coupon-left">
+    <svg class="coupon-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
+    </svg>
+    Apply Coupon
+  </div>
+  <div class="view-all-btn">
+    View All 
+    <span>&rsaquo;</span>
+  </div>
+</div>
 
-      <div id="couponSheet" class="coupon-sheet">
-        </div>
-
-      <div id="appliedCouponView" class="coupon-applied-view">
-        <span id="appliedCouponText"></span>
-        <button class="remove-coupon-btn" onclick="removeCoupon()">✕</button>
-      </div>
-
+<div id="appliedSection" class="coupon-applied-container" style="display: none;">
+  <div class="applied-left">
+    <svg class="coupon-icon-svg" style="color:#15803d;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+    </svg>
+    <span id="appliedCodeText">CODE APPLIED</span>
+  </div>
+  <div class="remove-coupon" onclick="removeCoupon()">Remove</div>
+</div>
       <div class="math-row"> <span>Subtotal</span> <span id="subtotalVal">Rs. 0</span> </div>
       <div class="math-row discount-row" id="comboRow" style="display: none;"> <span>Combo Savings</span> <span id="comboVal">-Rs. 0</span> </div>
       <div class="math-row discount-row" id="couponRow" style="display: none;"> <span id="couponCodeLabel">Coupon</span> <span id="couponVal">-Rs. 0</span> </div>
@@ -77,12 +87,110 @@
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
 
-// PREDEFINED COUPONS
-const COUPONS_DB = [
-  { code: "WELCOME10", percent: 10, minOrder: 0, desc: "10% off on your first order" },
-  { code: "CHARM20", percent: 20, minOrder: 999, desc: "20% off on orders above Rs. 999" },
-  { code: "FREESHIP", percent: 0, minOrder: 0, desc: "Free Shipping on all orders", freeShip: true }
+
+// === COUPON LOGIC ===
+const AVAILABLE_COUPONS = [
+  { code: 'WELCOME10', discount: 0.10, desc: '10% off your first order' },
+  { code: 'SAVE20', discount: 0.20, desc: '20% off on orders above ₹999' },
+  { code: 'FREESHIP', discount: 0, type: 'free_shipping', desc: 'Free Shipping on all orders' }
 ];
+
+let appliedCoupon = null;
+
+function init() {
+  renderCartItems();
+  
+  // FIX: Pre-render coupons into the hidden drawer
+  const drawerList = document.getElementById('drawerList');
+  drawerList.innerHTML = '';
+  
+  AVAILABLE_COUPONS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'coupon-card-item';
+    div.innerHTML = `
+      <div class="c-info">
+        <h4>${c.code}</h4>
+        <p>${c.desc}</p>
+      </div>
+      <button class="c-apply-btn" onclick="applyCoupon('${c.code}')">APPLY</button>
+    `;
+    drawerList.appendChild(div);
+  });
+
+  updateBill();
+}
+
+// UI: Open the full screen drawer
+function openCouponDrawer() {
+  document.getElementById('couponDrawer').classList.add('open');
+  // Prevent background scrolling
+  document.body.style.overflow = 'hidden'; 
+}
+
+// UI: Close the drawer
+function closeCouponDrawer() {
+  document.getElementById('couponDrawer').classList.remove('open');
+  document.body.style.overflow = ''; 
+}
+
+function applyCoupon(code) {
+  const found = AVAILABLE_COUPONS.find(c => c.code === code);
+  if (found) {
+    appliedCoupon = found;
+    updateBill();
+    
+    // UI Updates
+    closeCouponDrawer();
+    document.getElementById('couponTrigger').style.display = 'none';
+    document.getElementById('appliedSection').style.display = 'flex';
+    document.getElementById('appliedCodeText').textContent = `'${code}' applied`;
+  }
+}
+
+function removeCoupon() {
+  appliedCoupon = null;
+  updateBill();
+  
+  // UI Updates
+  document.getElementById('couponTrigger').style.display = 'flex';
+  document.getElementById('appliedSection').style.display = 'none';
+}
+
+function updateBill() {
+  if (cart.length === 0) {
+    // ... empty cart logic ...
+    return;
+  }
+
+  let subtotal = 0;
+  cart.forEach(item => subtotal += item.price);
+
+  let discountAmt = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'free_shipping') {
+      // Handle free shipping logic here if you have shipping costs
+    } else {
+      discountAmt = Math.floor(subtotal * appliedCoupon.discount);
+    }
+  }
+
+  const finalTotal = subtotal - discountAmt;
+
+  // Update DOM elements (Ensure these IDs exist in your HTML)
+  document.getElementById('subtotalPrice').textContent = "₹" + subtotal;
+  
+  const discountRow = document.getElementById('discountRow');
+  const discountEl = document.getElementById('discountPrice');
+  
+  if (discountAmt > 0) {
+    discountRow.style.display = 'flex';
+    discountEl.textContent = "- ₹" + discountAmt;
+  } else {
+    discountRow.style.display = 'none';
+  }
+
+  document.getElementById('totalPrice').textContent = "₹" + finalTotal;
+}
 
 const REF_SIZE = 300; 
 const PHYSICS = { 
@@ -547,5 +655,13 @@ function editItem(index, subType) {
   
 init();
 </script>
+  <div id="couponDrawer" class="coupon-drawer">
+  <div class="drawer-header">
+    <h3 class="drawer-title">Available Coupons</h3>
+    <button class="close-drawer-btn" onclick="closeCouponDrawer()">&times;</button>
+  </div>
+  <div class="drawer-content" id="drawerList">
+    </div>
+</div>
 </body>
 </html>
