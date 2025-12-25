@@ -421,39 +421,79 @@ function renderCoupons() {
   
   drawerList.innerHTML = '';
   
-  // 1. Logic to find the best "Featured" coupon
+  // 1. Logic to find the best "Featured" coupon for the inline view
   let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
   
   if (bestCoupon) {
     const isLocked = currentTotal < bestCoupon.minOrder;
     const diff = bestCoupon.minOrder - currentTotal;
     
-    // LOGIC: 3rd Line Styling
-    // If locked, show the subtle condition pill. 
-    // If unlocked, we can show a "Success" message or nothing.
-    const conditionHtml = isLocked 
-      ? `<div class="featured-condition-text">Add items worth ₹${diff} to avail</div>` 
-      : ``; // Optional: You could put `<div style="color:#15803d; font-size:11px; margin-top:6px;"><b>Eligible!</b> Apply now</div>` here
+    // Line 3: Condition text (Only shown if locked)
+    // We add margin-top to separate it slightly from the description
+    const conditionLine = isLocked 
+      ? `<div style="font-size:12px; color:#d97706; font-weight:600; margin-top:4px;">Add items worth ₹${diff} to avail</div>` 
+      : ``;
 
-    // LOGIC: Button
+    // Right Side: Apply Button (Only shown if unlocked)
+    // If locked, we leave the right side empty so the text can take up space
     const actionBtn = isLocked 
-      ? `` // Empty right side if locked
-      : `<button class="featured-apply-btn" onclick="selectCoupon('${bestCoupon.code}')">Apply</button>`;
+      ? `` 
+      : `<button class="featured-apply-btn" onclick="selectCoupon('${bestCoupon.code}')">APPLY</button>`;
 
     featuredCard.innerHTML = `
       <div class="featured-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v4.019c0 .567.294 1.097.75 1.407a6.002 6.002 0 000 4.417c-.456.31-.75.84-.75 1.407v4.019c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-4.019c0-.567-.294-1.097-.75-1.407a6.002 6.002 0 000-4.417c.456-.31.75-.84.75-1.407V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
       </div>
       <div class="featured-content">
-        <div class="featured-code">${bestCoupon.code}</div>
+        <span class="featured-code">${bestCoupon.code}</span>
+        
         <div class="featured-desc">${bestCoupon.desc}</div>
-        ${conditionHtml}
+        
+        ${conditionLine}
       </div>
       ${actionBtn}
     `;
   }
+
+  // 2. Render Drawer List (Rest of the function remains the same)
+  COUPONS_DB.forEach(coupon => {
+    const isLocked = currentTotal < coupon.minOrder;
+    const diff = coupon.minOrder - currentTotal;
+    
+    let actionBtn = isLocked 
+      ? `<button class="c-apply-btn" disabled>APPLY</button>` 
+      : `<button class="c-apply-btn" onclick="selectCoupon('${coupon.code}')">APPLY</button>`;
+      
+    let footerHtml = '';
+    if (isLocked) {
+      const percent = Math.min(100, (currentTotal / coupon.minOrder) * 100);
+      footerHtml = `
+        <div class="c-progress-bar"><div class="c-progress-fill" style="width:${percent}%"></div></div>
+        <div class="c-progress-text">Add ₹${diff} more to unlock</div>
+      `;
+    } else {
+       footerHtml = `<div style="font-size:11px; color:#15803d; margin-top:8px;">You are eligible for this offer!</div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'swiss-coupon-card';
+    card.innerHTML = `
+      <div class="coupon-strip">
+        <span class="strip-text">${coupon.type}</span>
+      </div>
+      <div class="coupon-main">
+        <div class="coupon-top-row">
+          <span class="c-code">${coupon.code}</span>
+          ${actionBtn}
+        </div>
+        <div class="c-benefit">Save ${coupon.freeShip ? 'Shipping' : coupon.percent + '%'}</div>
+        <div class="c-desc">${coupon.desc}</div>
+        ${footerHtml}
+      </div>
+    `;
+    drawerList.appendChild(card);
+  });
+}
 
 // Drawer Controls
 function openCouponDrawer() {
