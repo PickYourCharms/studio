@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - PickYourCharms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=4.0">
+</head>
+
+<body class="checkout-body">
+
+<div class="checkout-header">
+  <button class="back-btn" onclick="handleBackNavigation()">←</button>
+  <h1>Checkout</h1>
+  <div style="width: 24px;"></div> </div>
+
+<div class="main-container" style="padding-top: 20px;">
+  
+  <div class="order-summary-card">
+    <div class="summary-header" onclick="toggleSummary()">
+      <h3>Order Summary <span id="itemCount">(0 items)</span></h3>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div id="summaryContent" class="summary-content collapsed">
+      <div id="summaryList"></div>
+      <button class="text-link-btn" onclick="window.location.href='cart.html'">Edit in Cart</button>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3 class="section-title">Contact & Delivery</h3>
+    
+    <div class="input-group">
+      <label>Your Name*</label>
+      <input type="text" id="customerName" placeholder="e.g. Ananya Singh" oninput="saveDraft()">
+    </div>
+
+    <div class="input-group">
+      <label>Phone Number*</label>
+      <input type="tel" id="customerPhone" placeholder="+91 98765 43210" oninput="saveDraft()">
+    </div>
+    
+    <div class="input-group">
+      <label>Email Address*</label>
+      <input type="email" id="customerEmail" placeholder="name@example.com" oninput="saveDraft()">
+    </div>
+
+    <div class="input-group">
+      <label>Full Address*</label>
+      <textarea id="shippingAddress" rows="3" placeholder="Flat / House No / Street" oninput="saveDraft()"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="input-group half">
+        <label>City*</label>
+        <input type="text" id="city" placeholder="Bengaluru" oninput="saveDraft()">
+      </div>
+      <div class="input-group half">
+        <label>Pincode*</label>
+        <input type="number" id="pincode" placeholder="560001" oninput="handlePincodeChange()">
+        <small id="pincodeHelper" class="helper-text"></small>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3 class="section-title">What's the vibe? <span class="opt">(Optional)</span></h3>
+    <p class="section-desc">Helps us package it with the right mood.</p>
+    
+    <div class="vibe-grid">
+      <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Soft')">Soft</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal</button>
+      <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other</button>
+    </div>
+    
+    <div id="otherVibeContainer" class="input-group" style="display:none; margin-top:12px;">
+      <input type="text" id="vibeCustomText" placeholder="Describe your vibe..." oninput="saveDraft()">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="toggle-row">
+      <h3 class="section-title" style="margin:0;">Is this a gift? 🎁</h3>
+      <label class="switch">
+        <input type="checkbox" id="isGift" onchange="toggleGiftSection()">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div id="giftDetails" class="gift-details hidden">
+      <div class="input-group">
+        <label>Receiver's Name</label>
+        <input type="text" id="receiverName" oninput="saveDraft()">
+      </div>
+      <div class="input-group">
+        <label>Receiver's Phone</label>
+        <input type="tel" id="receiverPhone" oninput="saveDraft()">
+      </div>
+      <div class="form-row">
+        <div class="input-group half">
+          <label>Relation</label>
+          <input type="text" id="relation" placeholder="Friend, Sister..." oninput="saveDraft()">
+        </div>
+        <div class="input-group half">
+          <label>Occasion</label>
+          <input type="text" id="occasion" placeholder="Birthday..." oninput="saveDraft()">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Gift Message</label>
+        <textarea id="giftMessage" rows="2" placeholder="Write a sweet note..." oninput="saveDraft()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="bill-summary" style="margin-bottom: 120px; border-top:none; background:#fafafa; border-radius:16px;">
+    <div class="math-row"> <span>Subtotal</span> <span id="subtotalVal">Rs. 0</span> </div>
+    <div class="math-row discount-row" id="comboRow" style="display:none;"> <span>Combo Savings</span> <span id="comboVal">-Rs. 0</span> </div>
+    <div class="math-row discount-row" id="couponRow" style="display:none;"> <span>Coupon Discount</span> <span id="couponVal">-Rs. 0</span> </div>
+    <div class="math-row"> <span>Shipping</span> <span id="shippingVal">Rs. 80</span> </div>
+    <div class="divider"></div>
+    <div class="math-row total-row"> <span>Total Payable</span> <span id="finalTotal">Rs. 0</span> </div>
+  </div>
+
+  <div class="checkout-footer">
+    <button class="whatsapp-btn" onclick="proceedToWhatsApp()">
+      Proceed to WhatsApp Payment <span style="font-size: 18px; margin-left:6px;">→</span>
+    </button>
+  </div>
+
+</div>
+
+<div id="confirmBackModal" class="modal">
+  <div class="modal-card">
+    <h3>Go back to cart?</h3>
+    <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved. You can continue checkout anytime.</p>
+    <div class="modal-actions">
+      <button class="secondary" onclick="confirmGoBack()">Go Back</button>
+      <button class="primary" onclick="closeModal()">Stay Here</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === CONSTANTS ===
+const PHONE_NUMBER = "918910344676"; 
+const BASE_PRICE = 249;
+const EXTRA_CHARM_PRICE = 50;
+
+// === STATE ===
+let cart = [];
+let appliedCoupon = null;
+let currentVibe = "";
+let shippingCost = 80;
+let isDraftDirty = false;
+
+// === INITIALIZATION ===
+function init() {
+  // 1. Entry Rules
+  localStorage.setItem('checkout_started', 'true');
+  
+  const cartData = localStorage.getItem('pyc_cart');
+  if (!cartData || JSON.parse(cartData).length === 0) {
+    window.location.href = 'cart.html';
+    return;
+  }
+  cart = JSON.parse(cartData);
+
+  // 2. Load Coupon Data
+  const couponData = sessionStorage.getItem('pyc_applied_coupon');
+  if (couponData) appliedCoupon = JSON.parse(couponData);
+
+  // 3. Render Summary
+  renderOrderSummary();
+
+  // 4. Check for Draft
+  const draft = sessionStorage.getItem('checkout_draft');
+  if (draft) {
+    prefillForm(JSON.parse(draft));
+  } else if (window.location.search.includes('resume=true')) {
+    // If resume flag is present but no draft, we just stay here
+  }
+
+  // 5. Initial Calculations
+  calculateTotals();
+}
+
+// === RENDER LOGIC ===
+function renderOrderSummary() {
+  const container = document.getElementById('summaryList');
+  document.getElementById('itemCount').textContent = `(${cart.length} items)`;
+  
+  let html = '';
+  cart.forEach(item => {
+    let title = item.type;
+    if (item.type.includes('Combo')) title = "Combo Set";
+    else if (item.type === 'Bracelet') title = `${item.metal} Bracelet`;
+    else title = `${item.metal} Earrings`;
+    
+    html += `
+      <div class="summary-item">
+        <span class="s-name">${title}</span>
+        <span class="s-price">Rs. ${item.price}</span>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function toggleSummary() {
+  const content = document.getElementById('summaryContent');
+  const icon = document.querySelector('.toggle-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+// === FORM HANDLING ===
+function selectVibe(btn, vibe) {
+  // Reset others
+  document.querySelectorAll('.vibe-chip').forEach(c => c.classList.remove('selected'));
+  
+  if (currentVibe === vibe) {
+    // Deselect if clicking same
+    currentVibe = "";
+    document.getElementById('otherVibeContainer').style.display = 'none';
+  } else {
+    // Select new
+    btn.classList.add('selected');
+    currentVibe = vibe;
+    document.getElementById('otherVibeContainer').style.display = vibe === 'Other' ? 'block' : 'none';
+  }
+  saveDraft();
+}
+
+function toggleGiftSection() {
+  const isGift = document.getElementById('isGift').checked;
+  const details = document.getElementById('giftDetails');
+  if (isGift) {
+    details.classList.remove('hidden');
+  } else {
+    details.classList.add('hidden');
+    // Clear gift fields
+    document.getElementById('receiverName').value = '';
+    document.getElementById('receiverPhone').value = '';
+    document.getElementById('relation').value = '';
+    document.getElementById('occasion').value = '';
+    document.getElementById('giftMessage').value = '';
+  }
+  saveDraft();
+}
+
+function handlePincodeChange() {
+  const pincode = document.getElementById('pincode').value;
+  const helper = document.getElementById('pincodeHelper');
+  
+  saveDraft(); // Save value
+
+  // Only run logic if we have 3+ digits to avoid jumping
+  if (pincode.length < 3) {
+    helper.textContent = "";
+    calculateTotals(); // Revert to default
+    return;
+  }
+
+  calculateTotals(); // Logic sits inside calc
+}
+
+function saveDraft() {
+  isDraftDirty = true;
+  const formData = {
+    customerName: document.getElementById('customerName').value,
+    customerPhone: document.getElementById('customerPhone').value,
+    customerEmail: document.getElementById('customerEmail').value,
+    shippingAddress: document.getElementById('shippingAddress').value,
+    city: document.getElementById('city').value,
+    pincode: document.getElementById('pincode').value,
+    vibe: currentVibe,
+    vibeText: document.getElementById('vibeCustomText').value,
+    isGift: document.getElementById('isGift').checked,
+    receiverName: document.getElementById('receiverName').value,
+    receiverPhone: document.getElementById('receiverPhone').value,
+    relation: document.getElementById('relation').value,
+    occasion: document.getElementById('occasion').value,
+    giftMessage: document.getElementById('giftMessage').value
+  };
+  sessionStorage.setItem('checkout_draft', JSON.stringify(formData));
+}
+
+function prefillForm(data) {
+  document.getElementById('customerName').value = data.customerName || '';
+  document.getElementById('customerPhone').value = data.customerPhone || '';
+  document.getElementById('customerEmail').value = data.customerEmail || '';
+  document.getElementById('shippingAddress').value = data.shippingAddress || '';
+  document.getElementById('city').value = data.city || '';
+  document.getElementById('pincode').value = data.pincode || '';
+  
+  if (data.vibe) {
+    const chips = document.querySelectorAll('.vibe-chip');
+    chips.forEach(chip => {
+      if (chip.textContent === data.vibe) selectVibe(chip, data.vibe);
+    });
+    if (data.vibe === 'Other') document.getElementById('vibeCustomText').value = data.vibeText || '';
+  }
+
+  if (data.isGift) {
+    document.getElementById('isGift').click(); // Trigger change
+    document.getElementById('receiverName').value = data.receiverName || '';
+    document.getElementById('receiverPhone').value = data.receiverPhone || '';
+    document.getElementById('relation').value = data.relation || '';
+    document.getElementById('occasion').value = data.occasion || '';
+    document.getElementById('giftMessage').value = data.giftMessage || '';
+  }
+  
+  // Recalc based on filled data
+  calculateTotals();
+}
+
+// === MATH LOGIC ===
+function calculateTotals() {
+  let subtotal = 0;
+  let comboDiscount = 0;
+
+  // 1. Calculate Base Prices
+  let bracelets = [], earrings = [];
+  const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
+  
+  cart.forEach(item => {
+    if(item.type === 'Bracelet') bracelets.push(getBPrice(item));
+    else if(item.type === 'Earrings') earrings.push(BASE_PRICE);
+    else if(item.type.includes('Combo')) {
+      bracelets.push(getBPrice(item.bracelet));
+      earrings.push(BASE_PRICE);
+    }
+  });
+
+  bracelets.forEach(p => subtotal += p);
+  earrings.forEach(p => subtotal += p);
+
+  // 2. Combo Discount
+  bracelets.sort((a,b) => a-b);
+  const pairs = Math.min(bracelets.length, earrings.length);
+  for(let i=0; i<pairs; i++) {
+    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
+  }
+
+  // 3. Coupon Discount
+  let discountable = subtotal - comboDiscount;
+  let couponDisc = 0;
+  let forceFreeShip = false;
+
+  if (appliedCoupon) {
+    if (appliedCoupon.freeShip) forceFreeShip = true;
+    else if (discountable >= appliedCoupon.minOrder) {
+      couponDisc = Math.floor(discountable * (appliedCoupon.percent / 100));
+    }
+  }
+
+  // 4. Shipping Logic (THE KEY PART)
+  const pin = document.getElementById('pincode').value;
+  const helper = document.getElementById('pincodeHelper');
+  
+  // Default State
+  shippingCost = 80; 
+  helper.textContent = "Standard delivery applied";
+  helper.style.color = "#666";
+
+  if (forceFreeShip || (discountable - couponDisc >= 399)) {
+    shippingCost = 0;
+    helper.textContent = "Free shipping unlocked! ✨";
+    helper.style.color = "#15803d";
+  } else if (pin && pin.startsWith("560")) {
+    shippingCost = 50;
+    helper.textContent = "Local delivery applied 🛵";
+    helper.style.color = "#15803d";
+  }
+
+  // 5. Update UI
+  document.getElementById('subtotalVal').textContent = `Rs. ${subtotal}`;
+  
+  document.getElementById('comboRow').style.display = comboDiscount > 0 ? 'flex' : 'none';
+  document.getElementById('comboVal').textContent = `-Rs. ${comboDiscount}`;
+
+  document.getElementById('couponRow').style.display = (couponDisc > 0) ? 'flex' : 'none';
+  document.getElementById('couponVal').textContent = `-Rs. ${couponDisc}`;
+
+  const shipEl = document.getElementById('shippingVal');
+  shipEl.textContent = shippingCost === 0 ? 'FREE' : `Rs. ${shippingCost}`;
+  shipEl.style.color = shippingCost === 0 ? '#15803d' : '#111';
+
+  const total = subtotal - comboDiscount - couponDisc + shippingCost;
+  document.getElementById('finalTotal').textContent = `Rs. ${total}`;
+}
+
+// === NAVIGATION ===
+function handleBackNavigation() {
+  if (isDraftDirty) {
+    document.getElementById('confirmBackModal').style.display = 'flex';
+  } else {
+    window.location.href = 'cart.html';
+  }
+}
+function confirmGoBack() {
+  saveDraft(); // Ensure saved
+  window.location.href = 'cart.html';
+}
+function closeModal() {
+  document.getElementById('confirmBackModal').style.display = 'none';
+}
+
+// === WHATSAPP GENERATION ===
+function proceedToWhatsApp() {
+  // Validation
+  const reqFields = ['customerName', 'customerPhone', 'customerEmail', 'shippingAddress', 'city', 'pincode'];
+  for (let id of reqFields) {
+    if (!document.getElementById(id).value.trim()) {
+      alert("Please fill all required fields marked with *");
+      return;
+    }
+  }
+
+  // Prepare Data
+  const data = JSON.parse(sessionStorage.getItem('checkout_draft'));
+  const total = document.getElementById('finalTotal').textContent;
+  
+  // Build Items String
+  let itemStr = "";
+  cart.forEach((item, i) => {
+    itemStr += `\n${i+1}. ${item.type} (Rs. ${item.price})`;
+  });
+
+  // Build Message
+  let msg = `Hey PickYourCharms ✨ I’ve just placed an order!
+
+*Customer:*
+Name: ${data.customerName}
+Phone: ${data.customerPhone}
+Email: ${data.customerEmail}
+
+*Shipping:*
+${data.shippingAddress}, ${data.city} - ${data.pincode}
+
+*Order Details:*${itemStr}
+
+*Vibe:*
+${data.vibe === 'Other' ? data.vibeText : (data.vibe || 'Not selected')}
+
+*Gift:*
+${data.isGift ? `Yes 🎁\nTo: ${data.receiverName}\nNote: ${data.giftMessage}` : 'No'}
+
+*Price Breakdown:*
+Subtotal: ${document.getElementById('subtotalVal').textContent}
+Combo Savings: ${document.getElementById('comboVal').textContent}
+Coupon: ${document.getElementById('couponVal').textContent}
+Shipping: ${document.getElementById('shippingVal').textContent}
+
+*Total Payable: ${total}*
+
+Looking forward to this 💖`;
+
+  const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
+  
+  // Optional: Clear cart after successful handoff? 
+  // For now, we keep it as per instruction "Cart remains intact".
+  
+  window.open(url, '_blank');
+}
+
+init();
+</script>
+</body>
+</html>
