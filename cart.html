@@ -506,15 +506,20 @@ function editItem(index, subType) {
   let draft = {};
   let url = '';
 
+  // Clean slate first
   sessionStorage.removeItem('pyc_draft');
   sessionStorage.removeItem('combo_bracelet_data');
   sessionStorage.removeItem('combo_earring_data');
 
   if (item.type.includes('Combo')) {
     if (subType === 'bracelet') {
+      // FIX: Stash the EXISTING earring data so it isn't lost
+      sessionStorage.setItem('combo_earring_data', JSON.stringify(item.earrings));
+      
       draft = { url: 'builder.html?mode=combo', data: { metal: item.bracelet.metal, charms: item.bracelet.charms } };
       url = 'builder.html?mode=combo&resume=true';
     } else {
+      // Existing logic for editing earrings (keeps bracelet safe)
       sessionStorage.setItem('combo_bracelet_data', JSON.stringify(item.bracelet));
       draft = { 
         url: 'earring-builder.html?mode=combo', 
@@ -524,6 +529,7 @@ function editItem(index, subType) {
       url = 'earring-builder.html?mode=combo&resume=true';
     }
   } 
+  // ... rest of the function (Single Bracelet/Earring logic) ...
   else if (item.type === 'Bracelet') {
     draft = { url: 'builder.html', data: { metal: item.metal, charms: item.charms } };
     url = 'builder.html?resume=true';
@@ -538,7 +544,7 @@ function editItem(index, subType) {
   localStorage.setItem('pyc_cart', JSON.stringify(cart));
   window.location.href = url;
 }
-
+  
 init();
 </script>
 </body>
