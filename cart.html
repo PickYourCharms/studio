@@ -46,42 +46,67 @@
     <div id="cartItemsList" class="cart-list"></div>
 
     <div class="bill-summary">
-      
-      <div id="couponTrigger" class="coupon-trigger-btn" onclick="toggleCouponSheet()">
-        <span>%</span> Apply Coupon
+  
+  <div id="couponSectionRaw" class="coupon-section-container">
+    <div class="featured-coupon-card" id="featuredCouponCard">
       </div>
+    <div class="view-more-coupons" onclick="openCouponDrawer()">
+      View more coupons
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </div>
+  </div>
 
-      <div id="couponSheet" class="coupon-sheet">
-        </div>
+  <div id="appliedCouponView" class="coupon-applied-view" style="display: none;">
+    <div style="display:flex; align-items:center; gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#15803d" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <span id="appliedCouponText" style="font-weight:700;"></span>
+    </div>
+    <button class="remove-coupon-btn" onclick="removeCoupon()">✕</button>
+  </div>
 
-      <div id="appliedCouponView" class="coupon-applied-view">
-        <span id="appliedCouponText"></span>
-        <button class="remove-coupon-btn" onclick="removeCoupon()">✕</button>
+  <div id="couponOverlay" class="coupon-drawer-overlay" onclick="closeCouponDrawer()"></div>
+  <div id="couponDrawer" class="coupon-drawer">
+    <div class="drawer-header">
+      <h3>Apply Coupon</h3>
+      <button class="close-drawer-btn" onclick="closeCouponDrawer()">✕</button>
+    </div>
+    
+    <div class="coupon-input-container">
+      <div class="coupon-input-wrapper">
+        <input type="text" placeholder="Enter Coupon Code">
+        <button disabled>CHECK</button>
       </div>
-
-      <div class="math-row"> <span>Subtotal</span> <span id="subtotalVal">Rs. 0</span> </div>
-      <div class="math-row discount-row" id="comboRow" style="display: none;"> <span>Combo Savings</span> <span id="comboVal">-Rs. 0</span> </div>
-      <div class="math-row discount-row" id="couponRow" style="display: none;"> <span id="couponCodeLabel">Coupon</span> <span id="couponVal">-Rs. 0</span> </div>
-      <div class="math-row"> <span>Shipping</span> <span id="shippingVal">Rs. 80</span> </div>
-      <div class="divider"></div>
-      <div class="math-row total-row"> <span>Total</span> <span id="finalTotal">Rs. 0</span> </div>
     </div>
 
+    <div id="drawerList" class="drawer-content">
+      </div>
+  </div>
+  <div class="math-row"> <span>Subtotal</span> <span id="subtotalVal">Rs. 0</span> </div>
+  <div class="math-row discount-row" id="comboRow" style="display: none;"> <span>Combo Savings</span> <span id="comboVal">-Rs. 0</span> </div>
+  <div class="math-row discount-row" id="couponRow" style="display: none;"> <span id="couponCodeLabel">Coupon</span> <span id="couponVal">-Rs. 0</span> </div>
+  <div class="math-row"> <span>Shipping</span> <span id="shippingVal">Rs. 80</span> </div>
+  <div class="divider"></div>
+  <div class="math-row total-row"> <span>Total</span> <span id="finalTotal">Rs. 0</span> </div>
+</div>
+    
     <div class="cart-footer-spacer"></div>
     <button id="checkoutBtn" class="checkout-pill" onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
   </div>
 </div>
 
 <script>
-// --- CONSTANTS ---
+// --- UPDATED CONSTANTS ---
 const BASE_PRICE = 249;
 const EXTRA_CHARM_PRICE = 50;
 
-// PREDEFINED COUPONS
+// UPDATED COUPONS DB (Added display types)
 const COUPONS_DB = [
-  { code: "WELCOME10", percent: 10, minOrder: 0, desc: "10% off on your first order" },
-  { code: "CHARM20", percent: 20, minOrder: 999, desc: "20% off on orders above Rs. 999" },
-  { code: "FREESHIP", percent: 0, minOrder: 0, desc: "Free Shipping on all orders", freeShip: true }
+  { code: "WELCOME10", percent: 10, minOrder: 299, desc: "Get 10% off on your first order", type: "10% OFF" },
+  { code: "CHARM20", percent: 20, minOrder: 999, desc: "20% off on orders above Rs. 999", type: "20% OFF" },
+  { code: "FREESHIP", percent: 0, minOrder: 499, desc: "Free Shipping on orders above 499", freeShip: true, type: "FREE SHIP" },
+  { code: "COMBO300", percent: 15, minOrder: 1500, desc: "Save big on bulk orders", type: "15% OFF" }
 ];
 
 const REF_SIZE = 300; 
@@ -356,38 +381,136 @@ function renderItems() {
   });
 }
 
-// --- COUPON SYSTEM ---
+// --- NEW COUPON SYSTEM LOGIC ---
+
+// Helper: Calculate current cart value (Subtotal - Combo Savings) to check coupon eligibility
+function getDiscountableAmount() {
+  let bracelets = [];
+  let earrings = [];
+  const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
+  const getEPrice = () => BASE_PRICE;
+
+  cart.forEach(item => {
+    if(item.type === 'Bracelet') bracelets.push(getBPrice(item));
+    else if(item.type === 'Earrings') earrings.push(getEPrice());
+    else if(item.type.includes('Combo')) {
+      bracelets.push(getBPrice(item.bracelet));
+      earrings.push(getEPrice());
+    }
+  });
+
+  let subtotal = 0;
+  bracelets.forEach(p => subtotal += p);
+  earrings.forEach(p => subtotal += p);
+
+  // Recalculate Combo Savings locally just for this check
+  bracelets.sort((a,b) => a-b);
+  let comboDiscount = 0;
+  const pairs = Math.min(bracelets.length, earrings.length);
+  for(let i=0; i<pairs; i++) {
+    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
+  }
+
+  return subtotal - comboDiscount;
+}
+
 function renderCoupons() {
-  couponSheet.innerHTML = '';
-  COUPONS_DB.forEach(coupon => {
-    const card = document.createElement('div');
-    card.className = 'coupon-card';
-    card.onclick = () => selectCoupon(coupon);
-    card.innerHTML = `
-      <div class="coupon-info">
-        <h4>${coupon.code}</h4>
-        <p>${coupon.desc}</p>
+  const currentTotal = getDiscountableAmount();
+  const drawerList = document.getElementById('drawerList');
+  const featuredCard = document.getElementById('featuredCouponCard');
+  
+  drawerList.innerHTML = '';
+  
+  // 1. Logic to find the best "Featured" coupon for the inline view
+  // We prefer the first UNLOCKED coupon. If all locked, show first LOCKED one.
+  let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
+  
+  if (bestCoupon) {
+    const isLocked = currentTotal < bestCoupon.minOrder;
+    const diff = bestCoupon.minOrder - currentTotal;
+    
+    let btnHtml = isLocked 
+      ? `<span style="font-size:12px; color:#d97706; font-weight:600;">Add items worth ₹${diff}</span>` 
+      : `<button class="featured-apply-btn" onclick="selectCoupon('${bestCoupon.code}')">APPLY</button>`;
+
+    featuredCard.innerHTML = `
+      <div class="featured-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
       </div>
-      <div class="coupon-apply-text">APPLY</div>
+      <div class="featured-content">
+        <span class="featured-code">${bestCoupon.code}</span>
+        <div class="featured-desc">${bestCoupon.desc}</div>
+      </div>
+      ${btnHtml}
     `;
-    couponSheet.appendChild(card);
+  }
+
+  // 2. Render Drawer List
+  COUPONS_DB.forEach(coupon => {
+    const isLocked = currentTotal < coupon.minOrder;
+    const diff = coupon.minOrder - currentTotal;
+    
+    // UI Logic for Locked vs Unlocked
+    let actionBtn = isLocked 
+      ? `<button class="c-apply-btn" disabled>APPLY</button>` 
+      : `<button class="c-apply-btn" onclick="selectCoupon('${coupon.code}')">APPLY</button>`;
+      
+    let footerHtml = '';
+    if (isLocked) {
+      // Calculate progress percentage
+      const percent = Math.min(100, (currentTotal / coupon.minOrder) * 100);
+      footerHtml = `
+        <div class="c-progress-bar"><div class="c-progress-fill" style="width:${percent}%"></div></div>
+        <div class="c-progress-text">Add ₹${diff} more to unlock</div>
+      `;
+    } else {
+       footerHtml = `<div style="font-size:11px; color:#15803d; margin-top:8px;">You are eligible for this offer!</div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'swiss-coupon-card';
+    card.innerHTML = `
+      <div class="coupon-strip">
+        <span class="strip-text">${coupon.type}</span>
+      </div>
+      <div class="coupon-main">
+        <div class="coupon-top-row">
+          <span class="c-code">${coupon.code}</span>
+          ${actionBtn}
+        </div>
+        <div class="c-benefit">Save ${coupon.freeShip ? 'Shipping' : coupon.percent + '%'}</div>
+        <div class="c-desc">${coupon.desc}</div>
+        ${footerHtml}
+      </div>
+    `;
+    drawerList.appendChild(card);
   });
 }
 
-function toggleCouponSheet() {
-  couponSheet.classList.toggle('active');
-  const trigger = document.getElementById('couponTrigger');
-  trigger.style.display = couponSheet.classList.contains('active') ? 'none' : 'flex';
+// Drawer Controls
+function openCouponDrawer() {
+  document.getElementById('couponOverlay').classList.add('active');
+  document.getElementById('couponDrawer').classList.add('active');
+  // Re-render to ensure latest cart values
+  renderCoupons();
 }
 
-function selectCoupon(coupon) {
+function closeCouponDrawer() {
+  document.getElementById('couponOverlay').classList.remove('active');
+  document.getElementById('couponDrawer').classList.remove('active');
+}
+
+// Select/Remove Logic
+function selectCoupon(code) { // Changed argument to code string
+  const coupon = COUPONS_DB.find(c => c.code === code);
   activeCoupon = coupon;
-  toggleCouponSheet();
   
-  // Show Applied View
-  document.getElementById('couponTrigger').style.display = 'none';
+  closeCouponDrawer(); // Close drawer
+  
+  // Toggle Views
+  document.getElementById('couponSectionRaw').style.display = 'none';
   document.getElementById('appliedCouponView').style.display = 'flex';
-  document.getElementById('appliedCouponText').textContent = `Applied: ${coupon.code}`;
+  document.getElementById('appliedCouponText').textContent = `'${coupon.code}' applied`;
   
   calculateTotals();
 }
@@ -395,8 +518,17 @@ function selectCoupon(coupon) {
 function removeCoupon() {
   activeCoupon = null;
   document.getElementById('appliedCouponView').style.display = 'none';
-  document.getElementById('couponTrigger').style.display = 'flex';
+  document.getElementById('couponSectionRaw').style.display = 'block'; // Show featured again
   calculateTotals();
+  renderCoupons(); // Refresh logic
+}
+
+// Ensure renderCoupons is called in your existing init() function
+// Also, call renderCoupons() whenever item is deleted
+const originalDelete = deleteItem;
+deleteItem = function(index, subType) {
+    originalDelete(index, subType); // Call original
+    renderCoupons(); // Update progress bars
 }
 
 // --- MATH & ACTIONS ---
