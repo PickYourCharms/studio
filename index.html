@@ -66,42 +66,80 @@
   <div class="resume-btn">Let's finish →</div>
 </div>
 
-<script>
-window.addEventListener('pageshow', function(event) { checkState(); });
+<div id="verifyOrderModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+  <div class="modal-card" style="background: #fff; padding: 24px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+    <h3 style="margin: 0 0 12px; font-size: 18px; font-weight: 700;">Did you place the order?</h3>
+    <p style="color: #666; font-size: 14px; margin-bottom: 24px; line-height: 1.5;">Check your WhatsApp to see if the message was sent.</p>
+    <div style="display: flex; gap: 12px;">
+      <button onclick="handleOrderConfirm(false)" style="flex: 1; padding: 14px; border-radius: 99px; border: 1px solid #e5e5e5; background: #fff; color: #000; font-weight: 700; cursor: pointer;">No, not yet</button>
+      <button onclick="handleOrderConfirm(true)" style="flex: 1; padding: 14px; border-radius: 99px; border: none; background: #000; color: #fff; font-weight: 700; cursor: pointer;">Yes, Placed!</button>
+    </div>
+  </div>
+</div>
+  <script>
+window.addEventListener('pageshow', function(event) { 
+  checkState(); 
+  checkVerification(); 
+});
 
+// 1. Check if we just came from Checkout
+function checkVerification() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('verify') === 'true') {
+    document.getElementById('verifyOrderModal').style.display = 'flex';
+  }
+}
+
+// 2. Handle User Response
+function handleOrderConfirm(isPlaced) {
+  const modal = document.getElementById('verifyOrderModal');
+  modal.style.display = 'none';
+  
+  // Clean URL (remove ?verify=true) so refresh doesn't trigger it again
+  const newUrl = window.location.pathname;
+  window.history.replaceState({}, document.title, newUrl);
+
+  if (isPlaced) {
+    // SUCCESS: User confirmed. NOW we delete everything.
+    localStorage.removeItem('pyc_cart');
+    sessionStorage.removeItem('pyc_draft');
+    sessionStorage.removeItem('pyc_checkout_visited'); 
+    sessionStorage.removeItem('pyc_applied_coupon');
+    
+    // Refresh UI to show empty state
+    checkState();
+  } else {
+    // CANCEL: User said No. We keep the cart.
+    // The Bottom Sheet will appear automatically via checkState()
+  }
+}
+
+// 3. Normal State Checker (Bottom Sheet Logic)
 function checkState() {
   const resumeBar = document.getElementById('resumeBar');
   const cartBtn = document.getElementById('navCartBtn');
   
-  // 1. Get Data
-  const builderDraft = sessionStorage.getItem('pyc_draft'); // Builder State
-  const checkoutVisited = sessionStorage.getItem('pyc_checkout_visited'); // Checkout Flag
+  const builderDraft = sessionStorage.getItem('pyc_draft'); 
+  const checkoutVisited = sessionStorage.getItem('pyc_checkout_visited'); 
   const cartData = localStorage.getItem('pyc_cart');
   const cart = cartData ? JSON.parse(cartData) : [];
 
-  // 2. Logic Hierarchy
-  
-  // PRIORITY 1: Builder (User was just building something)
   if (builderDraft) {
     resumeBar.classList.add('show');
     document.querySelector('.resume-title').textContent = "I left something unfinished...";
     document.querySelector('.resume-btn').textContent = "Let's finish →";
     resumeBar.onclick = resumeDraft; 
   } 
-  // PRIORITY 2: Checkout (User reached checkout, has items, but left)
   else if (checkoutVisited && cart.length > 0) {
     resumeBar.classList.add('show');
     document.querySelector('.resume-title').textContent = "You're almost done! ✨";
     document.querySelector('.resume-btn').textContent = "Resume Checkout →";
-    // Fix: Go directly to Checkout, not Cart
     resumeBar.onclick = function() { window.location.href = 'checkout.html'; }; 
   } 
-  // Default: Hide
   else {
     resumeBar.classList.remove('show');
   }
 
-  // 3. Cart Badge Logic
   if (cart.length > 0) cartBtn.style.display = 'block';
   else cartBtn.style.display = 'none';
 }
@@ -121,9 +159,9 @@ function startFresh(url) {
   window.location.href = url;
 }
 </script>
-
 </body>
 </html>
+
 
 
 
