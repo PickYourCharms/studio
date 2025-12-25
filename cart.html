@@ -27,7 +27,7 @@
 </header>
 
 <div class="page-header">
-  <button onclick="window.location.href='index.html'">←</button>
+  <button onclick="goBack()">←</button>
   <h1>My Bag</h1>
   <div style="width: 24px;"></div>
 </div>
@@ -112,10 +112,6 @@ const COUPONS_DB = [
 const REF_SIZE = 300; 
 const PHYSICS = { 
   bracelet: { anchorX:23, anchorY:6, attachOffset:2 },
-  // FIXED EARRING PHYSICS FOR 70px THUMBNAIL
-  // Hook Image has been moved up in CSS (top: 20px)
-  // Charms need to hang from the loop of the hook.
-  // Calculated for 300px scale:
   earrings: { leftX: 42, rightX: 257, y: 153 } 
 };
 const B_ANGLES = { 1:[90], 2:[70,110], 3:[60,90,120], 4:[45,75,105,135], 5:[40,65,90,115,140] };
@@ -128,6 +124,11 @@ const cartCountBadge = document.getElementById('cartCountBadge');
 const emptyState = document.getElementById('emptyState');
 const cartContent = document.getElementById('cartContent');
 const couponSheet = document.getElementById('couponSheet');
+
+// FIX 2: Unified goBack function for consistent navigation
+function goBack() {
+  window.location.href = 'index.html';
+}
 
 function init() {
   cartCountBadge.textContent = cart.length;
@@ -143,13 +144,16 @@ function init() {
     renderCoupons();
     calculateTotals();
   }
-// === FIX: DELAYED HIJACK ===
+
+  // FIX 3: Robust History Handling for Device Back Button
   setTimeout(() => {
+    // Push a dummy state so we can catch the "back" action
     window.history.pushState(null, null, window.location.href);
   }, 100);
   
   window.onpopstate = function () {
-    window.location.href = 'index.html';
+    // Delegate to the unified function
+    goBack();
   };
 }
 
@@ -162,13 +166,10 @@ function buildMiniBracelet(metal, charms) {
   base.className = 'mini-base';
   base.src = `assets/bases/bracelet_base_${metal}.png`;
   
-  // FIX 1: Move the visual image UP (was 50% in CSS)
   base.style.top = '40%'; 
   
   container.appendChild(base);
 
-  // FIX 2: Move the calculation center UP by 30px to match the image
-  // 50% of 300px = 150px. 40% = 120px. Difference is 30px.
   const cx = REF_SIZE / 2;
   const cy = (REF_SIZE / 2) - 30; 
 
