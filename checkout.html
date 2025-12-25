@@ -8,450 +8,631 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=6.0">
+
+  <style>
+    /* === CHECKOUT SPECIFIC PREMIUM STYLES === */
+    /* (These overrides ensure the checkout looks perfect independently) */
+    
+    body { background-color: #ffffff; }
+    
+    .checkout-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px 120px 16px; /* Bottom padding for sticky footer */
+    }
+
+    /* SECTION HEADERS */
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-desc {
+      font-size: 13px;
+      color: #888;
+      margin-top: -8px;
+      margin-bottom: 16px;
+    }
+
+    /* PREMIUM INPUTS */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+      margin-left: 4px;
+    }
+    .premium-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      color: #111;
+      outline: none;
+      transition: all 0.2s ease;
+      appearance: none; /* Removes native iOS styles */
+    }
+    .premium-input:focus {
+      background: #fff;
+      border-color: #000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .premium-input::placeholder { color: #aaa; }
+    
+    .form-row { display: flex; gap: 12px; }
+    .form-col { flex: 1; }
+
+    /* VIBE SCROLLER (Instagram Style) */
+    .vibe-scroll-container {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin: 0 -16px 20px -16px; /* Bleed to edges */
+      padding-left: 16px; /* Restore padding */
+      padding-right: 16px;
+      scrollbar-width: none;
+    }
+    .vibe-scroll-container::-webkit-scrollbar { display: none; }
+    
+    .vibe-chip {
+      padding: 10px 20px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      transition: all 0.2s ease;
+    }
+    .vibe-chip.selected {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* IOS TOGGLE SWITCH */
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9f9f9;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: "";
+      height: 24px; width: 24px;
+      left: 2px; bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background-color: #000; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* GIFT SECTION ANIMATION */
+    .hidden-section {
+      display: none;
+      animation: slideDown 0.3s ease forwards;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RECEIPT STYLE SUMMARY */
+    .receipt-card {
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+      margin-top: 30px;
+    }
+    .summary-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f9f9f9;
+    }
+    .summary-thumb {
+      width: 48px; height: 48px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.05);
+      margin-right: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .summary-thumb img { width: 80%; height: 80%; object-fit: contain; }
+    
+    .summary-info { flex: 1; }
+    .s-title { font-size: 14px; font-weight: 700; color: #111; display: block; }
+    .s-desc { font-size: 12px; color: #888; }
+    .s-price { font-size: 14px; font-weight: 700; color: #333; }
+
+    .bill-row {
+      display: flex; justify-content: space-between;
+      margin-bottom: 10px; font-size: 14px; color: #555;
+    }
+    .bill-row.total {
+      margin-top: 16px; padding-top: 16px;
+      border-top: 1px dashed #ddd;
+      font-size: 18px; font-weight: 800; color: #000;
+    }
+    .discount-text { color: #15803d; }
+
+    /* STICKY FOOTER */
+    .sticky-footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      padding: 16px;
+      border-top: 1px solid #f0f0f0;
+      display: flex; justify-content: center;
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    }
+    .whatsapp-btn {
+      width: 100%; max-width: 500px;
+      background: #25D366;
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    }
+    .whatsapp-btn:active { transform: scale(0.98); }
+
+    /* HELPER TEXT */
+    .helper-text { font-size: 12px; color: #666; margin-top: 4px; }
+  </style>
 </head>
 
-<body class="checkout-body">
+<body>
 
-<header class="navbar">
+<div class="header">
+  <button onclick="window.location.href='cart.html'">←</button>
   <a href="index.html" class="logo-link">
     <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   </a>
   <div style="width: 24px;"></div> 
-</header>
-
-<div class="page-header">
-  <button onclick="handleBackNavigation()">←</button>
-  <h1>Checkout</h1>
-  <div style="width: 24px;"></div>
 </div>
 
-<div class="main-container checkout-container">
+<div class="checkout-container">
+  
+  <div style="margin-top: 20px;">
+    <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 24px;">Checkout</h1>
+  </div>
 
-  <div class="form-section">
-    <h3 class="section-title">What's the vibe? ☁️</h3>
-    <p class="section-desc" style="color:#888; font-size:13px; margin:-8px 0 16px;">Optional, but helps us pack it right.</p>
-    
-    <div class="vibe-scroller">
-      <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm 🌿</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic 🌹</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark 🖤</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful 🍭</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal ✨</button>
-      <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other ✏️</button>
+  <h3 class="section-title">What's the vibe? ☁️</h3>
+  <p class="section-desc">Helps us pack it right (Optional)</p>
+  
+  <div class="vibe-scroll-container">
+    <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm 🌿</button>
+    <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic 🌹</button>
+    <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark 🖤</button>
+    <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful 🍭</button>
+    <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal ✨</button>
+    <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other ✏️</button>
+  </div>
+  
+  <div id="otherVibeInput" class="form-group" style="display:none;">
+    <input type="text" id="vibeText" class="premium-input" placeholder="Type your vibe here..." oninput="saveDraft()">
+  </div>
+
+  <h3 class="section-title" style="margin-top: 30px;">Contact Info</h3>
+  
+  <div class="form-group">
+    <label class="form-label">Full Name</label>
+    <input type="text" id="customerName" class="premium-input" placeholder="e.g. Ananya Singh" oninput="saveDraft()">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Phone Number</label>
+    <input type="tel" id="customerPhone" class="premium-input" placeholder="+91 98765 43210" oninput="saveDraft()">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Email Address</label>
+    <input type="email" id="customerEmail" class="premium-input" placeholder="name@example.com" oninput="saveDraft()">
+  </div>
+
+  <div class="toggle-container" style="margin-top: 30px;">
+    <div>
+      <div style="font-weight: 700; font-size: 15px;">Is this a gift? 🎁</div>
+      <div style="font-size: 12px; color: #888;">We'll pack it extra special</div>
     </div>
-    
-    <div id="otherVibeContainer" class="input-wrapper" style="display:none; margin-top:16px;">
-      <input type="text" id="vibeCustomText" placeholder="Describe your vibe (e.g. Coquette)" oninput="saveDraft()">
+    <label class="switch">
+      <input type="checkbox" id="isGift" onchange="toggleGiftSection()">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div id="giftSection" class="hidden-section">
+    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
+      <input type="checkbox" id="copyDetails" onchange="copyContactDetails()" style="width:18px; height:18px;">
+      <label for="copyDetails" style="font-size:14px; font-weight:600;">Same as contact info</label>
+    </div>
+
+    <div class="form-row">
+      <div class="form-col">
+        <label class="form-label">Receiver Name</label>
+        <input type="text" id="receiverName" class="premium-input" oninput="saveDraft()">
+      </div>
+      <div class="form-col">
+        <label class="form-label">Receiver Phone</label>
+        <input type="tel" id="receiverPhone" class="premium-input" oninput="saveDraft()">
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-top: 16px;">
+      <div class="form-col">
+        <label class="form-label">Relation</label>
+        <input type="text" id="relation" class="premium-input" placeholder="Sister..." oninput="saveDraft()">
+      </div>
+      <div class="form-col">
+        <label class="form-label">Occasion</label>
+        <input type="text" id="occasion" class="premium-input" placeholder="Birthday..." oninput="saveDraft()">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top: 16px;">
+      <label class="form-label">Message on Card</label>
+      <input type="text" id="giftMessage" class="premium-input" placeholder="Write a short note..." oninput="saveDraft()">
     </div>
   </div>
 
-  <div class="form-section">
-    <h3 class="section-title">Contact Info</h3>
-    
-    <div class="input-wrapper">
-      <label>Full Name</label>
-      <input type="text" id="customerName" placeholder="e.g. Ananya Singh" oninput="saveDraft()">
-    </div>
-
-    <div class="input-wrapper">
-      <label>Phone Number</label>
-      <input type="tel" id="customerPhone" placeholder="+91 98765 43210" oninput="saveDraft()">
-    </div>
-    
-    <div class="input-wrapper">
-      <label>Email Address</label>
-      <input type="email" id="customerEmail" placeholder="name@example.com" oninput="saveDraft()">
-    </div>
+  <h3 class="section-title" style="margin-top: 30px;">Shipping Address</h3>
+  
+  <div class="form-group">
+    <label class="form-label">Flat / House No / Building</label>
+    <input type="text" id="shippingAddress" class="premium-input" placeholder="e.g. 104, Sunrise Apartments" oninput="saveDraft()">
   </div>
 
-  <div class="form-section">
-    <div class="toggle-row">
-      <div>
-        <h3 class="section-title" style="margin:0;">Is this a gift? 🎁</h3>
-        <p class="section-desc" style="margin:4px 0 0; color:#666; font-size:13px;">We'll pack it extra special.</p>
-      </div>
-      <label class="switch">
-        <input type="checkbox" id="isGift" onchange="toggleGiftSection()">
-        <span class="slider"></span>
-      </label>
+  <div class="form-row">
+    <div class="form-col">
+      <label class="form-label">City</label>
+      <input type="text" id="city" class="premium-input" placeholder="City" oninput="saveDraft()">
+    </div>
+    <div class="form-col">
+      <label class="form-label">Pincode</label>
+      <input type="number" id="pincode" class="premium-input" placeholder="560001" oninput="handlePincode()">
     </div>
   </div>
+  <div id="pincodeMsg" class="helper-text"></div>
 
-  <div id="giftReceiverDetails" class="form-section hidden">
-    <div class="checkbox-row">
-      <input type="checkbox" id="copyDetails" onchange="copyCustomerDetails()">
-      <label for="copyDetails">Same as my contact details</label>
-    </div>
-
-    <div class="form-row" style="display:flex; gap:12px;">
-        <div class="input-wrapper" style="flex:1;">
-          <label>Receiver Name</label>
-          <input type="text" id="receiverName" oninput="saveDraft()">
-        </div>
-        <div class="input-wrapper" style="flex:1;">
-          <label>Receiver Phone</label>
-          <input type="tel" id="receiverPhone" oninput="saveDraft()">
-        </div>
-    </div>
-
-    <div class="form-row" style="display:flex; gap:12px;">
-      <div class="input-wrapper" style="flex:1;">
-        <label>Relation</label>
-        <input type="text" id="relation" placeholder="Friend, Sister..." oninput="saveDraft()">
-      </div>
-      <div class="input-wrapper" style="flex:1;">
-        <label>Occasion</label>
-        <input type="text" id="occasion" placeholder="Birthday..." oninput="saveDraft()">
-      </div>
-    </div>
-    <div class="input-wrapper">
-      <label>Message on Card</label>
-      <textarea id="giftMessage" rows="2" placeholder="Write a sweet note..." oninput="saveDraft()"></textarea>
-    </div>
-  </div>
-
-  <div class="form-section">
-    <h3 class="section-title">Shipping Address</h3>
-
-    <div class="input-wrapper">
-      <label>Flat, House no., Building, Company, Apartment</label>
-      <textarea id="shippingAddress" rows="2" placeholder="e.g. 104, Sunrise Apartments" oninput="saveDraft()"></textarea>
-    </div>
-
-    <div class="form-row" style="display:flex; gap:12px;">
-      <div class="input-wrapper" style="flex:1;">
-        <label>City</label>
-        <input type="text" id="city" placeholder="City" oninput="saveDraft()">
-      </div>
-      <div class="input-wrapper" style="flex:1;">
-        <label>Pincode</label>
-        <input type="number" id="pincode" placeholder="560001" oninput="handlePincodeChange()">
-      </div>
-    </div>
-    <small id="pincodeHelper" class="helper-text" style="display:block; margin-top:-8px; font-size:12px;"></small>
-  </div>
-
-  <div class="order-summary-clean">
+  <div class="receipt-card">
     <h3 class="section-title" style="margin-bottom: 20px;">Receipt</h3>
+    <div id="summaryItems"></div>
     
-    <div id="summaryList"></div>
-    
-    <div class="bill-divider"></div>
-
-    <div class="math-row"> <span>Subtotal</span> <span id="subtotalVal">Rs. 0</span> </div>
-    <div class="math-row discount-row" id="comboRow" style="display:none;"> <span>Combo Savings</span> <span id="comboVal">-Rs. 0</span> </div>
-    <div class="math-row discount-row" id="couponRow" style="display:none;"> <span>Coupon</span> <span id="couponVal">-Rs. 0</span> </div>
-    <div class="math-row"> <span>Shipping</span> <span id="shippingVal">Rs. 80</span> </div>
-    
-    <div class="bill-divider"></div>
-    
-    <div class="math-row total-row"> <span>Total Payable</span> <span id="finalTotal">Rs. 0</span> </div>
+    <div style="margin-top: 20px;">
+      <div class="bill-row"><span>Subtotal</span><span id="subtotalVal">Rs. 0</span></div>
+      <div class="bill-row discount-text" id="comboRow" style="display:none;"><span>Combo Savings</span><span id="comboVal">-Rs. 0</span></div>
+      <div class="bill-row discount-text" id="couponRow" style="display:none;"><span>Coupon</span><span id="couponVal">-Rs. 0</span></div>
+      <div class="bill-row"><span>Shipping</span><span id="shippingVal">Rs. 80</span></div>
+      <div class="bill-row total"><span>Total Payable</span><span id="finalTotal">Rs. 0</span></div>
+    </div>
   </div>
-
-  <div class="checkout-footer-spacer"></div>
 
 </div>
 
-<div class="checkout-footer">
-  <button class="whatsapp-btn-large" onclick="proceedToWhatsApp()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="margin-right:8px;">
+<div class="sticky-footer">
+  <button class="whatsapp-btn" onclick="proceedToWhatsApp()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
       <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
     </svg>
     Pay on WhatsApp
   </button>
 </div>
 
-<div id="confirmBackModal" class="modal">
-  <div class="modal-card">
-    <h3>Go back to cart?</h3>
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved.</p>
-    <div class="modal-actions">
-      <button class="secondary" onclick="confirmGoBack()">Go Back</button>
-      <button class="primary" onclick="closeModal()">Stay Here</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// === CONSTANTS ===
-const PHONE_NUMBER = "918910344676"; 
-const BASE_PRICE = 249;
-const EXTRA_CHARM_PRICE = 50;
+  // === CONFIG ===
+  const PHONE_NUMBER = "918910344676"; 
+  const BASE_PRICE = 249;
+  const EXTRA_CHARM_PRICE = 50;
 
-let cart = [];
-let appliedCoupon = null;
-let currentVibe = "";
-let shippingCost = 80;
-let isDraftDirty = false;
-
-function init() {
-  localStorage.setItem('checkout_started', 'true');
-  const cartData = localStorage.getItem('pyc_cart');
-  if (!cartData || JSON.parse(cartData).length === 0) {
-    window.location.href = 'cart.html';
-    return;
-  }
-  cart = JSON.parse(cartData);
-  const couponData = sessionStorage.getItem('pyc_applied_coupon');
-  if (couponData) appliedCoupon = JSON.parse(couponData);
-
-  renderOrderSummary();
-  const draft = sessionStorage.getItem('checkout_draft');
-  if (draft) prefillForm(JSON.parse(draft));
-  calculateTotals();
-}
-
-// Fixed: Better Summary with Images
-function renderOrderSummary() {
-  const container = document.getElementById('summaryList');
-  let html = '';
-  cart.forEach(item => {
-    let title = item.type;
-    let desc = "";
-    // Fallback image if specific thumbnail logic isn't used here
-    let imgSrc = item.image || 'assets/home/curated_teaser.png';
-
-    if (item.type.includes('Combo')) {
-        title = "Combo Set";
-        desc = `${item.bracelet.metal} Bracelet + ${item.earrings.metal} Earrings`;
-        imgSrc = 'assets/home/model_combo_mobile.png';
-    }
-    else if (item.type === 'Bracelet') {
-        title = `${item.metal} Bracelet`;
-        desc = `${item.charms.length} Charms`;
-        imgSrc = `assets/bases/bracelet_base_${item.metal}.png`;
-    }
-    else {
-        title = `${item.metal} Earrings`;
-        desc = "Custom Pair";
-        imgSrc = `assets/bases/LeftHook_${item.metal}.png`;
-    }
-    
-    html += `
-      <div class="simple-item">
-        <div class="si-img-box"><img src="${imgSrc}"></div>
-        <div class="si-info">
-            <span class="si-name">${title}</span>
-            <span class="si-desc">${desc}</span>
-        </div>
-        <span class="si-price">Rs. ${item.price}</span>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
-}
-
-function selectVibe(btn, vibe) {
-  document.querySelectorAll('.vibe-chip').forEach(c => c.classList.remove('selected'));
-  if (currentVibe === vibe) {
-    currentVibe = "";
-    document.getElementById('otherVibeContainer').style.display = 'none';
-  } else {
-    btn.classList.add('selected');
-    currentVibe = vibe;
-    document.getElementById('otherVibeContainer').style.display = vibe === 'Other' ? 'block' : 'none';
-  }
-  saveDraft();
-}
-
-function toggleGiftSection() {
-  const isGift = document.getElementById('isGift').checked;
-  const receiverSec = document.getElementById('giftReceiverDetails');
+  let cart = [];
+  let appliedCoupon = null;
+  let currentVibe = "";
   
-  if (isGift) {
-    receiverSec.classList.remove('hidden');
-    // Scroll to gift section smoothly
-    setTimeout(() => receiverSec.scrollIntoView({behavior: "smooth", block: "center"}), 100);
-  } else {
-    receiverSec.classList.add('hidden');
-  }
-  saveDraft();
-}
-
-function copyCustomerDetails() {
-    const isChecked = document.getElementById('copyDetails').checked;
-    if(isChecked) {
-        document.getElementById('receiverName').value = document.getElementById('customerName').value;
-        document.getElementById('receiverPhone').value = document.getElementById('customerPhone').value;
-    } else {
-        document.getElementById('receiverName').value = '';
-        document.getElementById('receiverPhone').value = '';
-    }
-    saveDraft();
-}
-
-function handlePincodeChange() {
-  const pincode = document.getElementById('pincode').value;
-  saveDraft(); 
-  if (pincode.length < 3) return calculateTotals();
-  calculateTotals(); 
-}
-
-function calculateTotals() {
-  let subtotal = 0;
-  let comboDiscount = 0;
-  let bracelets = [], earrings = [];
-  const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
-  
-  cart.forEach(item => {
-    if(item.type === 'Bracelet') bracelets.push(getBPrice(item));
-    else if(item.type === 'Earrings') earrings.push(BASE_PRICE);
-    else if(item.type.includes('Combo')) {
-      bracelets.push(getBPrice(item.bracelet));
-      earrings.push(BASE_PRICE);
-    }
-  });
-
-  bracelets.forEach(p => subtotal += p);
-  earrings.forEach(p => subtotal += p);
-
-  bracelets.sort((a,b) => a-b);
-  const pairs = Math.min(bracelets.length, earrings.length);
-  for(let i=0; i<pairs; i++) {
-    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
-  }
-
-  let discountable = subtotal - comboDiscount;
-  let couponDisc = 0;
-  let forceFreeShip = false;
-
-  if (appliedCoupon) {
-    if (appliedCoupon.freeShip) forceFreeShip = true;
-    else if (discountable >= appliedCoupon.minOrder) {
-      couponDisc = Math.floor(discountable * (appliedCoupon.percent / 100));
-    }
-  }
-
-  const pin = document.getElementById('pincode').value;
-  const helper = document.getElementById('pincodeHelper');
-  shippingCost = 80; 
-  helper.textContent = "Standard delivery";
-  helper.style.color = "#666";
-
-  if (forceFreeShip || (discountable - couponDisc >= 399)) {
-    shippingCost = 0;
-    helper.textContent = "Free shipping unlocked! ✨";
-    helper.style.color = "#15803d";
-  } else if (pin && pin.startsWith("560")) {
-    shippingCost = 50;
-    helper.textContent = "Local delivery applied 🛵";
-    helper.style.color = "#15803d";
-  }
-
-  document.getElementById('subtotalVal').textContent = `Rs. ${subtotal}`;
-  document.getElementById('comboRow').style.display = comboDiscount > 0 ? 'flex' : 'none';
-  document.getElementById('comboVal').textContent = `-Rs. ${comboDiscount}`;
-  document.getElementById('couponRow').style.display = (couponDisc > 0) ? 'flex' : 'none';
-  document.getElementById('couponVal').textContent = `-Rs. ${couponDisc}`;
-  const shipEl = document.getElementById('shippingVal');
-  shipEl.textContent = shippingCost === 0 ? 'FREE' : `Rs. ${shippingCost}`;
-  shipEl.style.color = shippingCost === 0 ? '#15803d' : '#111';
-
-  const total = subtotal - comboDiscount - couponDisc + shippingCost;
-  document.getElementById('finalTotal').textContent = `Rs. ${total}`;
-}
-
-function saveDraft() {
-  isDraftDirty = true;
-  const formData = {
-    customerName: document.getElementById('customerName').value,
-    customerPhone: document.getElementById('customerPhone').value,
-    customerEmail: document.getElementById('customerEmail').value,
-    shippingAddress: document.getElementById('shippingAddress').value,
-    city: document.getElementById('city').value,
-    pincode: document.getElementById('pincode').value,
-    vibe: currentVibe,
-    vibeText: document.getElementById('vibeCustomText').value,
-    isGift: document.getElementById('isGift').checked,
-    receiverName: document.getElementById('receiverName').value,
-    receiverPhone: document.getElementById('receiverPhone').value,
-    relation: document.getElementById('relation').value,
-    occasion: document.getElementById('occasion').value,
-    giftMessage: document.getElementById('giftMessage').value
-  };
-  sessionStorage.setItem('checkout_draft', JSON.stringify(formData));
-}
-
-function prefillForm(data) {
-  document.getElementById('customerName').value = data.customerName || '';
-  document.getElementById('customerPhone').value = data.customerPhone || '';
-  document.getElementById('customerEmail').value = data.customerEmail || '';
-  document.getElementById('shippingAddress').value = data.shippingAddress || '';
-  document.getElementById('city').value = data.city || '';
-  document.getElementById('pincode').value = data.pincode || '';
-  
-  if (data.vibe) {
-    const chips = document.querySelectorAll('.vibe-chip');
-    chips.forEach(chip => {
-      if (chip.textContent.includes(data.vibe)) selectVibe(chip, data.vibe);
-    });
-    if (data.vibe === 'Other') document.getElementById('vibeCustomText').value = data.vibeText || '';
-  }
-
-  if (data.isGift) {
-    document.getElementById('isGift').checked = true;
-    toggleGiftSection(); 
-    document.getElementById('receiverName').value = data.receiverName || '';
-    document.getElementById('receiverPhone').value = data.receiverPhone || '';
-    document.getElementById('relation').value = data.relation || '';
-    document.getElementById('occasion').value = data.occasion || '';
-    document.getElementById('giftMessage').value = data.giftMessage || '';
-  }
-  calculateTotals();
-}
-
-function proceedToWhatsApp() {
-  const reqFields = ['customerName', 'customerPhone', 'customerEmail', 'shippingAddress', 'city', 'pincode'];
-  for (let id of reqFields) {
-    if (!document.getElementById(id).value.trim()) {
-      alert("Please fill all required fields");
-      // Highlight the first missing field
-      document.getElementById(id).focus();
+  function init() {
+    const cartData = localStorage.getItem('pyc_cart');
+    if (!cartData || JSON.parse(cartData).length === 0) {
+      window.location.href = 'cart.html';
       return;
     }
+    cart = JSON.parse(cartData);
+    const couponData = sessionStorage.getItem('pyc_applied_coupon');
+    if (couponData) appliedCoupon = JSON.parse(couponData);
+
+    renderSummary();
+    restoreDraft();
+    calculateTotals();
   }
 
-  const data = JSON.parse(sessionStorage.getItem('checkout_draft'));
-  const total = document.getElementById('finalTotal').textContent;
-  
-  let itemStr = "";
-  cart.forEach((item, i) => {
-    let detail = item.type === 'Bracelet' ? `${item.charms.length} Charms` : '';
-    if(item.type.includes('Combo')) detail = "Set";
-    itemStr += `\n${i+1}. ${item.type} ${detail} (Rs. ${item.price})`;
-  });
+  // --- RENDER ITEMS ---
+  function renderSummary() {
+    const container = document.getElementById('summaryItems');
+    let html = '';
+    
+    cart.forEach(item => {
+      let title = item.type;
+      let sub = "";
+      let img = "";
 
-  let msg = `Hey PickYourCharms ✨ I’ve just placed an order!
+      if(item.type.includes('Combo')) {
+        title = "Combo Set";
+        sub = "Bracelet + Earrings";
+        img = "assets/home/model_combo_mobile.png";
+      } else if (item.type === 'Bracelet') {
+        title = item.metal + " Bracelet";
+        sub = item.charms.length + " Charms";
+        img = "assets/bases/bracelet_base_" + item.metal + ".png";
+      } else {
+        title = item.metal + " Earrings";
+        sub = "Custom Pair";
+        img = "assets/bases/LeftHook_" + item.metal + ".png";
+      }
 
-*Customer:*
-Name: ${data.customerName}
-Phone: ${data.customerPhone}
-Email: ${data.customerEmail}
+      html += `
+        <div class="summary-item">
+          <div class="summary-thumb"><img src="${img}"></div>
+          <div class="summary-info">
+            <span class="s-title">${title}</span>
+            <span class="s-desc">${sub}</span>
+          </div>
+          <span class="s-price">Rs. ${item.price}</span>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
 
-*Shipping:*
-${data.shippingAddress}, ${data.city} - ${data.pincode}
+  // --- CALCULATIONS ---
+  function calculateTotals() {
+    let subtotal = 0;
+    let bracelets = [], earrings = [];
+    
+    // Helper to get raw prices
+    const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
+    const getEPrice = () => BASE_PRICE;
 
-*Order:*${itemStr}
+    cart.forEach(item => {
+      if(item.type === 'Bracelet') bracelets.push(getBPrice(item));
+      else if(item.type === 'Earrings') earrings.push(getEPrice());
+      else if(item.type.includes('Combo')) {
+        bracelets.push(getBPrice(item.bracelet));
+        earrings.push(getEPrice());
+      }
+    });
 
-*Vibe:* ${data.vibe === 'Other' ? data.vibeText : (data.vibe || '-')}
+    bracelets.forEach(p => subtotal += p);
+    earrings.forEach(p => subtotal += p);
 
-*Gift:* ${data.isGift ? 'YES' : 'No'}
-${data.isGift ? `To: ${data.receiverName} (${data.receiverPhone})\nRelation: ${data.relation}\nOccasion: ${data.occasion}\nNote: ${data.giftMessage}` : ''}
+    // Calculate Combo Savings
+    bracelets.sort((a,b) => a-b);
+    let comboDiscount = 0;
+    const pairs = Math.min(bracelets.length, earrings.length);
+    for(let i=0; i<pairs; i++) {
+      comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
+    }
 
-*Total Payable: ${total}*`;
+    let discountable = subtotal - comboDiscount;
+    let couponDisc = 0;
+    let freeShip = false;
 
-  const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
+    if (appliedCoupon) {
+      if (appliedCoupon.freeShip) freeShip = true;
+      else if (discountable >= appliedCoupon.minOrder) {
+        couponDisc = Math.floor(discountable * (appliedCoupon.percent / 100));
+      }
+    }
 
-function handleBackNavigation() {
-  if (isDraftDirty) document.getElementById('confirmBackModal').style.display = 'flex';
-  else window.location.href = 'cart.html';
-}
-function confirmGoBack() { saveDraft(); window.location.href = 'cart.html'; }
-function closeModal() { document.getElementById('confirmBackModal').style.display = 'none'; }
+    // Shipping Logic
+    const pincode = document.getElementById('pincode').value;
+    let shipping = 80;
+    const msg = document.getElementById('pincodeMsg');
+    
+    if (freeShip || (discountable - couponDisc >= 399)) {
+      shipping = 0;
+      msg.textContent = "Free shipping applied! ✨";
+      msg.style.color = "#15803d";
+    } else if (pincode && pincode.startsWith("560")) {
+      shipping = 50;
+      msg.textContent = "Local delivery: Rs. 50 🛵";
+      msg.style.color = "#15803d";
+    } else {
+      msg.textContent = "Standard Shipping: Rs. 80";
+      msg.style.color = "#666";
+    }
 
-init();
+    const total = subtotal - comboDiscount - couponDisc + shipping;
+
+    document.getElementById('subtotalVal').textContent = `Rs. ${subtotal}`;
+    
+    const comboEl = document.getElementById('comboRow');
+    if(comboDiscount > 0) {
+      comboEl.style.display = 'flex';
+      document.getElementById('comboVal').textContent = `-Rs. ${comboDiscount}`;
+    } else comboEl.style.display = 'none';
+
+    const coupEl = document.getElementById('couponRow');
+    if(couponDisc > 0) {
+      coupEl.style.display = 'flex';
+      document.getElementById('couponVal').textContent = `-Rs. ${couponDisc}`;
+    } else coupEl.style.display = 'none';
+
+    document.getElementById('shippingVal').textContent = shipping === 0 ? "FREE" : `Rs. ${shipping}`;
+    document.getElementById('shippingVal').style.color = shipping === 0 ? "#15803d" : "#555";
+    
+    document.getElementById('finalTotal').textContent = `Rs. ${total}`;
+  }
+
+  // --- INTERACTION ---
+  function selectVibe(btn, vibe) {
+    document.querySelectorAll('.vibe-chip').forEach(b => b.classList.remove('selected'));
+    if(currentVibe === vibe) {
+      currentVibe = "";
+      document.getElementById('otherVibeInput').style.display = 'none';
+    } else {
+      btn.classList.add('selected');
+      currentVibe = vibe;
+      document.getElementById('otherVibeInput').style.display = vibe === 'Other' ? 'block' : 'none';
+    }
+    saveDraft();
+  }
+
+  function toggleGiftSection() {
+    const isGift = document.getElementById('isGift').checked;
+    const sec = document.getElementById('giftSection');
+    if(isGift) {
+      sec.style.display = 'block';
+      setTimeout(() => sec.scrollIntoView({behavior:"smooth", block:"center"}), 100);
+    } else {
+      sec.style.display = 'none';
+    }
+    saveDraft();
+  }
+
+  function copyContactDetails() {
+    if(document.getElementById('copyDetails').checked) {
+      document.getElementById('receiverName').value = document.getElementById('customerName').value;
+      document.getElementById('receiverPhone').value = document.getElementById('customerPhone').value;
+    } else {
+      document.getElementById('receiverName').value = '';
+      document.getElementById('receiverPhone').value = '';
+    }
+    saveDraft();
+  }
+
+  function handlePincode() {
+    saveDraft();
+    calculateTotals();
+  }
+
+  // --- DRAFT SAVING ---
+  function saveDraft() {
+    const data = {
+      name: document.getElementById('customerName').value,
+      phone: document.getElementById('customerPhone').value,
+      email: document.getElementById('customerEmail').value,
+      address: document.getElementById('shippingAddress').value,
+      city: document.getElementById('city').value,
+      pincode: document.getElementById('pincode').value,
+      vibe: currentVibe,
+      vibeText: document.getElementById('vibeText').value,
+      isGift: document.getElementById('isGift').checked,
+      receiverName: document.getElementById('receiverName').value,
+      receiverPhone: document.getElementById('receiverPhone').value,
+      relation: document.getElementById('relation').value,
+      occasion: document.getElementById('occasion').value,
+      giftMessage: document.getElementById('giftMessage').value
+    };
+    sessionStorage.setItem('checkout_draft_v2', JSON.stringify(data));
+  }
+
+  function restoreDraft() {
+    const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
+    if(!data) return;
+
+    document.getElementById('customerName').value = data.name || '';
+    document.getElementById('customerPhone').value = data.phone || '';
+    document.getElementById('customerEmail').value = data.email || '';
+    document.getElementById('shippingAddress').value = data.address || '';
+    document.getElementById('city').value = data.city || '';
+    document.getElementById('pincode').value = data.pincode || '';
+    
+    if(data.vibe) {
+      const chips = document.querySelectorAll('.vibe-chip');
+      chips.forEach(c => {
+        if(c.textContent.includes(data.vibe)) selectVibe(c, data.vibe);
+      });
+      if(data.vibe === 'Other') document.getElementById('vibeText').value = data.vibeText || '';
+    }
+
+    if(data.isGift) {
+      document.getElementById('isGift').checked = true;
+      toggleGiftSection();
+      document.getElementById('receiverName').value = data.receiverName || '';
+      document.getElementById('receiverPhone').value = data.receiverPhone || '';
+      document.getElementById('relation').value = data.relation || '';
+      document.getElementById('occasion').value = data.occasion || '';
+      document.getElementById('giftMessage').value = data.giftMessage || '';
+    }
+  }
+
+  // --- WHATSAPP LOGIC ---
+  function proceedToWhatsApp() {
+    // Basic Validation
+    const requiredIds = ['customerName', 'customerPhone', 'shippingAddress', 'city', 'pincode'];
+    for(let id of requiredIds) {
+      const el = document.getElementById(id);
+      if(!el.value.trim()) {
+        alert('Please fill all required fields');
+        el.focus();
+        return;
+      }
+    }
+
+    // Build Message
+    const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
+    const total = document.getElementById('finalTotal').textContent;
+
+    let itemsStr = "";
+    cart.forEach((item, i) => {
+      let desc = item.type;
+      if(item.type === 'Bracelet') desc += ` (${item.charms.length} charms)`;
+      else if(item.type.includes('Combo')) desc += ` (Combo)`;
+      itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
+    });
+
+    let msg = `*New Order: PickYourCharms* ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${data.address}\n${data.city} - ${data.pincode}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
+
+    if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
+    if(data.isGift) {
+      msg += `\n\n🎁 *GIFT ORDER*\nTo: ${data.receiverName}\nNote: ${data.giftMessage}`;
+    }
+
+    const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  }
+
+  init();
 </script>
+
 </body>
 </html>
