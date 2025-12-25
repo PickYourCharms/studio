@@ -92,7 +92,7 @@
 </div>
     
     <div class="cart-footer-spacer"></div>
-    <button id="checkoutBtn" class="checkout-pill" onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
+   <button id="checkoutBtn" class="checkout-pill" onclick="onCheckoutClick()">Proceed to Checkout</button>
   </div>
 </div>
 
@@ -686,6 +686,51 @@ function editItem(index, subType) {
   window.location.href = url;
 }
 init();
+
+  // === CHECKOUT POPUP LOGIC ===
+
+function onCheckoutClick() {
+  // 1. Check if user has seen this popup in this session
+  const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
+
+  // 2. If NOT seen yet, show popup and set the flag
+  if (!hasSeenUpsell) {
+    document.getElementById('checkoutUpsellModal').style.display = 'flex';
+    sessionStorage.setItem('pyc_upsell_seen', 'true'); // Mark as seen
+  } 
+  // 3. If ALREADY seen, go straight to checkout
+  else {
+    window.location.href = 'checkout.html';
+  }
+}
+
+// Function called by the "Maybe Later" link
+function forceCheckout() {
+  window.location.href = 'checkout.html';
+}
+
+// Close popup if clicking outside the card (Optional UX improvement)
+document.getElementById('checkoutUpsellModal').onclick = function(e) {
+  if (e.target === this) {
+    // If they click background, treat it as "Maybe Later" (proceed to checkout)
+    forceCheckout();
+  }
+};
 </script>
+
+ <div id="checkoutUpsellModal" class="upsell-modal-overlay">
+  <div class="upsell-modal-card">
+    <h3 style="margin: 0 0 12px; font-size: 18px;">Wait!</h3>
+    <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Your jewelry box looks a little lonely. Are you sure you're done?</p>
+    
+    <button class="primary-btn" style="width: 100%; margin-bottom: 12px;" onclick="window.location.href='index.html'">
+      Uggghhh! I want some more!
+    </button>
+    
+    <a href="#" class="secondary-link" onclick="forceCheckout()">
+      Maybe Later
+    </a>
+  </div>
+</div> 
 </body>
 </html>
