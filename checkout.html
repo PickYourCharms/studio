@@ -563,14 +563,20 @@
   function proceedToWhatsApp() {
     let isValid = true;
     let firstError = null;
+
+    // 1. Validate Fields (Same as before)
     const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
-    if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
+    if(document.getElementById('isGift').checked) {
+      mandatoryIds.push('receiverName', 'receiverPhone');
+    }
 
     mandatoryIds.forEach(id => {
       const el = document.getElementById(id);
       const val = el.value.trim();
       let error = false;
+      // Empty Check
       if(!val) error = true;
+      // Strict Length Check
       if(id.includes('Phone') && val.length !== 10) error = true;
       if(id === 'pincode' && val.length !== 6) error = true;
 
@@ -578,7 +584,9 @@
         el.classList.add('input-error');
         isValid = false;
         if(!firstError) firstError = el;
-      } else el.classList.remove('input-error');
+      } else {
+        el.classList.remove('input-error');
+      }
     });
 
     if(!isValid) {
@@ -587,9 +595,11 @@
       return; 
     }
 
+    // 2. Save Draft (So text isn't lost)
     saveDraft(); 
 
-    const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
+    // 3. Generate WhatsApp Message (Same as before)
+    const data = JSON.parse(sessionStorage.getItem('checkout_draft_v2'));
     const total = document.getElementById('finalTotal').textContent;
     const orderID = generateOrderID();
 
@@ -614,20 +624,17 @@
 
     const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
     
-    // === FINAL CLEANUP ===
-    // 1. Remove "Visited" flag so bottom sheet doesn't show next time
-    sessionStorage.removeItem('pyc_checkout_visited');
-    // 2. Clear Cart
-    localStorage.removeItem('pyc_cart');
-    // 3. Clear other Session Data (Drafts/Coupons)
-    sessionStorage.removeItem('pyc_draft');
-    sessionStorage.removeItem('pyc_applied_coupon');
-    
-    // Note: We intentionally DO NOT clear 'checkout_draft_persistent' from localStorage
-    // so it autofills next time.
+    // 4. SAVE PREFS FOR NEXT TIME
+    const prefs = {
+        name: data.name, phone: data.phone, email: data.email,
+        addressLine1: data.addressLine1, addressLine2: data.addressLine2,
+        landmark: data.landmark, city: data.city, state: data.state, pincode: data.pincode
+    };
+    localStorage.setItem('pyc_user_prefs', JSON.stringify(prefs));
 
+    // 5. OPEN WHATSAPP & REDIRECT TO HOME (Do NOT clear cart here)
     window.open(url, '_blank');
-    window.location.replace('index.html');
+    window.location.replace('index.html?verify=true');
   }
 
   function handleBackNavigation() {
