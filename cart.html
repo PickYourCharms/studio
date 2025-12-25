@@ -422,15 +422,22 @@ function renderCoupons() {
   drawerList.innerHTML = '';
   
   // 1. Logic to find the best "Featured" coupon for the inline view
-  // We prefer the first UNLOCKED coupon. If all locked, show first LOCKED one.
   let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
   
   if (bestCoupon) {
     const isLocked = currentTotal < bestCoupon.minOrder;
     const diff = bestCoupon.minOrder - currentTotal;
     
-    let btnHtml = isLocked 
-      ? `<span style="font-size:12px; color:#d97706; font-weight:600;">Add items worth ₹${diff}</span>` 
+    // Line 3: Condition text (Only shown if locked)
+    // We add margin-top to separate it slightly from the description
+    const conditionLine = isLocked 
+      ? `<div style="font-size:12px; color:#d97706; font-weight:600; margin-top:4px;">Add items worth ₹${diff} to avail</div>` 
+      : ``;
+
+    // Right Side: Apply Button (Only shown if unlocked)
+    // If locked, we leave the right side empty so the text can take up space
+    const actionBtn = isLocked 
+      ? `` 
       : `<button class="featured-apply-btn" onclick="selectCoupon('${bestCoupon.code}')">APPLY</button>`;
 
     featuredCard.innerHTML = `
@@ -439,25 +446,26 @@ function renderCoupons() {
       </div>
       <div class="featured-content">
         <span class="featured-code">${bestCoupon.code}</span>
+        
         <div class="featured-desc">${bestCoupon.desc}</div>
+        
+        ${conditionLine}
       </div>
-      ${btnHtml}
+      ${actionBtn}
     `;
   }
 
-  // 2. Render Drawer List
+  // 2. Render Drawer List (Rest of the function remains the same)
   COUPONS_DB.forEach(coupon => {
     const isLocked = currentTotal < coupon.minOrder;
     const diff = coupon.minOrder - currentTotal;
     
-    // UI Logic for Locked vs Unlocked
     let actionBtn = isLocked 
       ? `<button class="c-apply-btn" disabled>APPLY</button>` 
       : `<button class="c-apply-btn" onclick="selectCoupon('${coupon.code}')">APPLY</button>`;
       
     let footerHtml = '';
     if (isLocked) {
-      // Calculate progress percentage
       const percent = Math.min(100, (currentTotal / coupon.minOrder) * 100);
       footerHtml = `
         <div class="c-progress-bar"><div class="c-progress-fill" style="width:${percent}%"></div></div>
