@@ -687,26 +687,35 @@ function editItem(index, subType) {
 }
 init();
 
- // === CHECKOUT LOGIC ===
+// --- UPDATED CHECKOUT HANDLERS IN CART.HTML ---
 
-function onCheckoutClick() {
-  // 1. Check if user has seen this popup in this session
-  const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
-
-  // 2. If NOT seen yet, show popup and set the flag
-  if (!hasSeenUpsell) {
-    document.getElementById('checkoutUpsellModal').style.display = 'flex';
-    sessionStorage.setItem('pyc_upsell_seen', 'true'); // Mark as seen
-  } 
-  // 3. If ALREADY seen, go straight to checkout
-  else {
-    performCheckoutRedirect();
+function saveCartState() {
+  // 1. Save the applied coupon (if any) so checkout can see it
+  if (activeCoupon) {
+    sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(activeCoupon));
+  } else {
+    sessionStorage.removeItem('pyc_applied_coupon');
   }
 }
 
-// Function called by the "Maybe Later" link
+function onCheckoutClick() {
+  // Check upsell status
+  const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
+
+  if (!hasSeenUpsell) {
+    document.getElementById('checkoutUpsellModal').style.display = 'flex';
+    sessionStorage.setItem('pyc_upsell_seen', 'true');
+  } else {
+    // SAVE DATA BEFORE NAVIGATING
+    saveCartState();
+    window.location.href = 'checkout.html';
+  }
+}
+
 function forceCheckout() {
-  performCheckoutRedirect();
+  // SAVE DATA BEFORE NAVIGATING
+  saveCartState();
+  window.location.href = 'checkout.html';
 }
 
 // Helper to save coupon and go
