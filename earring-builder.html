@@ -74,7 +74,7 @@ h2 { margin: 8px 0 10px; text-align: center; }
 
 <div class="post-actions-container">
   <button class="action-btn btn-build-more" onclick="window.location.href='index.html'">Build More</button>
-  <button class="action-btn btn-view-cart" onclick="window.location.replace('cart.html')">View Cart</button>
+  <button class="action-btn btn-view-cart" onclick="window.location.href='cart.html'">View Cart</button>
 </div>
 
 <div id="modal" class="modal">
@@ -154,10 +154,15 @@ function init() {
   }, 100); 
 
 window.onpopstate = function (event) {
-  // STRICT PARITY: Delegate ALL logic to goBack().
-  // This ensures that saving drafts (in Combo mode) or redirecting (in Frozen mode)
-  // happens regardless of which back button the user pressed.
-  goBack();
+  // FIX: If the user is in the "Frozen" (Added to Cart) state, 
+  // the device back button must take them to Home, not back to the builder.
+  if (document.body.classList.contains('frozen-state')) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
+  // Default behavior for other states
+  goBack(); 
 };
 }
 
