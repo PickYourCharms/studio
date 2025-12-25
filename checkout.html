@@ -361,13 +361,19 @@
     restoreDraft();
     calculateTotals();
 
-    // === BACK BUTTON HIJACK ===
-    setTimeout(() => {
-      window.history.pushState(null, null, window.location.href);
-    }, 100);
-    window.onpopstate = function() {
+    // === BACK BUTTON HIJACK (TRAP) ===
+    // 1. Push a state immediately to "trap" the back button
+    window.history.pushState({ page: 'checkout' }, document.title, window.location.href);
+
+    // 2. Listen for when the user hits back
+    window.addEventListener('popstate', function(event) {
+      // 3. Immediately PUSH IT AGAIN so the browser url stays on checkout.html
+      // This stops the browser from actually going back to cart.html
+      window.history.pushState({ page: 'checkout' }, document.title, window.location.href);
+      
+      // 4. Now show our custom modal
       handleBackNavigation();
-    };
+    });
   }
 
   // --- CALCULATIONS ONLY ---
@@ -480,8 +486,8 @@
       document.getElementById('receiverPhone').value = phone;
       // Trigger update
       validateInput(document.getElementById('receiverName'));
-      // Manual trigger for validation
-      const e = { inputType: 'manual' }; // Dummy event
+      // Manual trigger for validation (simulate typing)
+      const e = { inputType: 'insertText' }; 
       handlePhoneInput(e, document.getElementById('receiverPhone')); 
     } else {
       document.getElementById('receiverName').value = '';
@@ -490,24 +496,22 @@
     saveDraft();
   }
 
-  // --- SMART PHONE HANDLER (FIXED) ---
+  // --- SMART PHONE HANDLER (FIXED FOR ALL DEVICES) ---
   
   function handlePhoneInput(e, el) {
-    // 1. Strip all non-digits
+    // 1. Clean the input (digits only)
     let val = el.value.replace(/\D/g, '');
     
-    // 2. Logic to detect Paste vs Type
-    const isPaste = e.inputType && e.inputType.includes('Paste');
+    // 2. Logic: detect Paste vs Type
+    const isPaste = e.inputType && e.inputType.toLowerCase().includes('paste');
     
-    // 3. APPLY RULES
+    // 3. Logic Application
     if (val.length > 10) {
         if (isPaste || val.length >= 12) {
-            // IF PASTE: User probably pasted +91 9876543210
-            // Take the LAST 10 digits
+            // IF PASTED (likely +91...), take LAST 10
             val = val.slice(-10);
         } else {
-            // IF TYPING: User just typed the 11th digit.
-            // Block it (Keep first 10)
+            // IF TYPED (11th digit), STOP at 10 (keep first 10)
             val = val.slice(0, 10);
         }
     }
@@ -723,7 +727,7 @@
     if(data.landmark) addressBlock += `Landmark: ${data.landmark}\n`;
     addressBlock += `${data.city}, ${data.state} - ${data.pincode}`;
 
-    let msg = `Hey PickYourCharms!✨\nI’ve just placed an order and here are the details 💌\n\n*Order ID:* ${orderID} ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
+    let msg = `*New Order: ${orderID}* ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
 
     if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
     if(data.isGift) {
@@ -736,11 +740,11 @@
 
   // --- NAVIGATION HIJACK ---
   function handleBackNavigation() {
-    // Consistent behavior: Show modal
     document.getElementById('confirmBackModal').style.display = 'flex';
   }
   function confirmGoBack() { 
     saveDraft(); 
+    // FORCE location change to break any history stack confusion
     window.location.href = 'cart.html'; 
   }
   function closeModal() { 
