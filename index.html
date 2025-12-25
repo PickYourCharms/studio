@@ -73,28 +73,31 @@ function checkState() {
   const resumeBar = document.getElementById('resumeBar');
   const cartBtn = document.getElementById('navCartBtn');
   
-  // 1. Get State
-  const draftStr = sessionStorage.getItem('pyc_draft'); // Builder Draft
+  // 1. Get Data
+  const builderDraft = sessionStorage.getItem('pyc_draft'); // Builder State
+  const checkoutVisited = sessionStorage.getItem('pyc_checkout_visited'); // Checkout Flag
   const cartData = localStorage.getItem('pyc_cart');
   const cart = cartData ? JSON.parse(cartData) : [];
 
-  // 2. Logic: Should we show the Resume Bar?
-  if (draftStr) {
-    // Case A: User has an unfinished Builder session
+  // 2. Logic Hierarchy
+  
+  // PRIORITY 1: Builder (User was just building something)
+  if (builderDraft) {
     resumeBar.classList.add('show');
     document.querySelector('.resume-title').textContent = "I left something unfinished...";
     document.querySelector('.resume-btn').textContent = "Let's finish →";
-    resumeBar.onclick = resumeDraft; // Link to builder
+    resumeBar.onclick = resumeDraft; 
   } 
-  else if (cart.length > 0) {
-    // Case B: User has items in Cart (Abandoned Checkout)
+  // PRIORITY 2: Checkout (User reached checkout, has items, but left)
+  else if (checkoutVisited && cart.length > 0) {
     resumeBar.classList.add('show');
-    document.querySelector('.resume-title').textContent = "You have items in your bag ✨";
-    document.querySelector('.resume-btn').textContent = "Checkout →";
-    resumeBar.onclick = function() { window.location.href = 'cart.html'; }; // Link to cart
+    document.querySelector('.resume-title').textContent = "You're almost done! ✨";
+    document.querySelector('.resume-btn').textContent = "Resume Checkout →";
+    // Fix: Go directly to Checkout, not Cart
+    resumeBar.onclick = function() { window.location.href = 'checkout.html'; }; 
   } 
+  // Default: Hide
   else {
-    // Case C: Clean Slate (Success or Empty)
     resumeBar.classList.remove('show');
   }
 
@@ -121,5 +124,6 @@ function startFresh(url) {
 
 </body>
 </html>
+
 
 
