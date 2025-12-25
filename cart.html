@@ -713,8 +713,14 @@ function onCheckoutClick() {
 }
 
 function forceCheckout() {
-  // SAVE DATA BEFORE NAVIGATING
-  saveCartState();
+  // CRITICAL: We must save the coupon data before navigating, 
+  // otherwise the checkout page won't know about the discount.
+  if (activeCoupon) {
+    sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(activeCoupon));
+  } else {
+    sessionStorage.removeItem('pyc_applied_coupon');
+  }
+  
   window.location.href = 'checkout.html';
 }
 
