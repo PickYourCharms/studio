@@ -562,66 +562,82 @@ body.frozen-state .post-actions-container { display: flex; }
   to { transform: scale(1); }
 }
 
-/* === CHECKOUT REVAMP (Premium Style) === */
-.checkout-body {
-  background: #ffffff; /* Clean white */
-}
-.checkout-container {
-  padding: 16px;
-  max-width: 600px;
-  margin: 0 auto;
-}
+/* === CHECKOUT REVAMP (FIXES) === */
 
-/* Scrollable Vibe Check (Hidden scrollbars) */
-.vibe-scroller {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-.vibe-scroller::-webkit-scrollbar { display: none; }
-.vibe-chip {
-  flex-shrink: 0;
-  padding: 10px 18px;
-  border: 1px solid #e5e5e5;
+/* 1. FIXED FOOTER CTA */
+.checkout-footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
   background: #fff;
-  color: #555;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-.vibe-chip.selected {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
 }
 
-/* Premium Form Fields */
-.input-wrapper {
-  margin-bottom: 16px;
+.checkout-footer-spacer {
+  height: 90px; /* Pushes content up so it's not hidden by footer */
+}
+
+/* 2. GREEN WHATSAPP BUTTON */
+.whatsapp-btn-large {
+  width: 100%;
+  max-width: 600px;
+  background: #25D366; /* Official WhatsApp Green */
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  transition: transform 0.2s ease;
 }
-.input-wrapper label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 6px;
-  margin-left: 4px;
+.whatsapp-btn-large:active {
+  transform: scale(0.98);
 }
+
+/* 3. MODAL FIXES (Ensure it stays hidden) */
+.modal {
+  display: none; /* Default state */
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+/* Ensure the modal is Flex when active (Handled by JS .style.display='flex') */
+
+/* 4. PREMIUM FORM STYLES (Refined) */
+.checkout-body { background: #fff; }
+.checkout-container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 12px;
+}
+
+/* Input Fields */
+.input-wrapper { margin-bottom: 16px; display: flex; flex-direction: column; }
+.input-wrapper label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; margin-left: 4px; }
 .input-wrapper input, .input-wrapper textarea {
   width: 100%;
   padding: 14px;
   background: #fafafa;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 16px; /* Prevents iOS Zoom */
+  font-size: 16px;
   color: #111;
   outline: none;
   transition: all 0.2s ease;
@@ -630,47 +646,23 @@ body.frozen-state .post-actions-container { display: flex; }
 .input-wrapper input:focus, .input-wrapper textarea:focus {
   background: #fff;
   border-color: #000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 .input-wrapper input::placeholder { color: #aaa; }
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.checkbox-row label { font-size: 14px; color: #555; }
-.checkbox-row input[type="checkbox"] { width: auto; }
 
 /* Order Summary Clean */
 .order-summary-clean {
   background: #fafafa;
   border-radius: 20px;
   padding: 20px;
-  margin-top: 20px;
-}
-.simple-item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  margin-top: 24px;
 }
 .simple-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  font-size: 14px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 12px;
 }
-.si-info { display: flex; flex-direction: column; }
-.si-name { font-weight: 700; color: #222; }
-.si-desc { font-size: 12px; color: #777; margin-top: 2px; }
-.si-price { font-weight: 600; color: #444; }
+.si-name { font-weight: 700; font-size: 14px; color: #222; }
+.si-desc { font-size: 12px; color: #777; display: block; margin-top: 2px; }
+.si-price { font-weight: 600; font-size: 14px; color: #444; }
 
-.bill-divider {
-  height: 1px;
-  background: #e5e5e5;
-  margin: 16px 0;
-}
-
-.checkout-footer-spacer { height: 100px; }
+.bill-divider { height: 1px; background: #e0e0e0; margin: 16px 0; }
