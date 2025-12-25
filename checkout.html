@@ -43,6 +43,14 @@
     }
     .premium-input:focus { background: #fff; border-color: #000; }
     
+    /* READONLY INPUTS (City/State) */
+    .premium-input[readonly] {
+      background-color: #e9ecef;
+      color: #666;
+      border-color: #e5e5e5;
+      pointer-events: none; /* Prevent clicks */
+    }
+
     /* PHONE INPUT SPECIFIC */
     .phone-wrapper { position: relative; }
     .phone-prefix {
@@ -191,7 +199,10 @@
     <label class="form-label">Phone Number <span class="required-star">*</span></label>
     <div class="phone-wrapper">
       <span class="phone-prefix">🇮🇳 +91</span>
-      <input type="tel" id="customerPhone" class="premium-input phone-field" placeholder="98765 43210" maxlength="10" oninput="handlePhoneInput(this); saveDraft()">
+      <input type="tel" id="customerPhone" class="premium-input phone-field" placeholder="98765 43210" 
+             onpaste="handlePhonePaste(event, this)" 
+             oninput="handlePhoneInput(this)" 
+             onblur="saveDraft()">
     </div>
   </div>
 
@@ -226,7 +237,10 @@
       <label class="form-label">Receiver Phone <span class="required-star">*</span></label>
       <div class="phone-wrapper">
         <span class="phone-prefix">🇮🇳 +91</span>
-        <input type="tel" id="receiverPhone" class="premium-input phone-field" maxlength="10" oninput="handlePhoneInput(this); saveDraft()">
+        <input type="tel" id="receiverPhone" class="premium-input phone-field" 
+               onpaste="handlePhonePaste(event, this)" 
+               oninput="handlePhoneInput(this)" 
+               onblur="saveDraft()">
       </div>
     </div>
 
@@ -272,12 +286,12 @@
 
   <div class="form-row">
     <div class="form-col">
-      <label class="form-label">City <span class="required-star">*</span></label>
-      <input type="text" id="city" class="premium-input" placeholder="City" oninput="validateInput(this); saveDraft()">
+      <label class="form-label">City</label>
+      <input type="text" id="city" class="premium-input" placeholder="City" readonly>
     </div>
     <div class="form-col">
-      <label class="form-label">State <span class="required-star">*</span></label>
-      <input type="text" id="state" class="premium-input" placeholder="State" oninput="validateInput(this); saveDraft()">
+      <label class="form-label">State</label>
+      <input type="text" id="state" class="premium-input" placeholder="State" readonly>
     </div>
   </div>
 
@@ -457,7 +471,9 @@
       document.getElementById('receiverPhone').value = phone;
       // Trigger update
       validateInput(document.getElementById('receiverName'));
-      handlePhoneInput(document.getElementById('receiverPhone')); 
+      // Manually trigger input handler to validate copied phone
+      const phoneInput = document.getElementById('receiverPhone');
+      handlePhoneInput(phoneInput);
     } else {
       document.getElementById('receiverName').value = '';
       document.getElementById('receiverPhone').value = '';
@@ -468,16 +484,34 @@
   // --- STRICT INPUT HANDLERS ---
   
   function handlePhoneInput(el) {
-    // 1. Remove anything that is NOT a number
+    // 1. Remove non-digits
     let val = el.value.replace(/\D/g, '');
     
-    // 2. Strict Length Cap (Slice FIRST 10 chars, ignore the rest)
+    // 2. Strict Length Cap (Left to Right) for Manual Typing
     if (val.length > 10) {
       val = val.slice(0, 10);
     }
     
     el.value = val;
     validateInput(el);
+    saveDraft();
+  }
+
+  function handlePhonePaste(e, el) {
+    e.preventDefault();
+    // Get pasted data
+    let pastedData = (e.clipboardData || window.clipboardData).getData('text');
+    // Remove non-digits
+    let clean = pastedData.replace(/\D/g, '');
+    
+    // SMART LOGIC: If paste > 10 chars, take LAST 10 (ignores prefix)
+    if(clean.length > 10) {
+      clean = clean.slice(-10);
+    }
+    
+    el.value = clean;
+    validateInput(el);
+    saveDraft();
   }
 
   function handlePincodeInput(el) {
@@ -522,7 +556,7 @@
       })
       .catch(err => {
         console.error("Pincode fetch error", err);
-        msg.textContent = ""; // Fail silently, allow manual entry
+        msg.textContent = ""; 
       });
   }
   
