@@ -19,7 +19,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       padding: 16px;
-      padding-bottom: 100px; /* Space for footer/scroll */
+      padding-bottom: 120px; /* Space for footer/scroll */
     }
 
     .prod-card {
@@ -36,9 +36,10 @@
 
     .prod-img-wrapper {
       position: relative;
-      aspect-ratio: 1 / 1.1; /* Slightly taller than square */
+      aspect-ratio: 1 / 1.1; 
       background: #f9f9f9;
       overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
     }
     .prod-img {
       width: 100%;
@@ -52,7 +53,6 @@
     .prod-price { font-size: 15px; font-weight: 800; color: #111; }
 
     /* === PDP DRAWER STYLES === */
-    /* Reusing logic from Coupon Drawer but customised for Product */
     .pdp-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.6);
@@ -70,7 +70,7 @@
       z-index: 101;
       transform: translateY(100%);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      max-height: 90vh;
+      height: 85vh; /* Fixed height for consistency */
       display: flex; flex-direction: column;
       box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
     }
@@ -78,14 +78,16 @@
 
     .pdp-scroll-content {
       overflow-y: auto;
-      padding-bottom: 90px; /* Space for sticky button */
+      flex: 1;
+      padding-bottom: 20px;
     }
 
     .pdp-image-container {
       width: 100%;
-      height: 320px;
+      height: 340px;
       background: #f4f4f4;
       position: relative;
+      flex-shrink: 0;
     }
     .pdp-main-img {
       width: 100%; height: 100%; object-fit: cover;
@@ -99,11 +101,12 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px; cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 2;
     }
 
     .pdp-details { padding: 20px; }
     .pdp-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .pdp-title { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.2; width: 75%; }
+    .pdp-title { font-size: 22px; font-weight: 800; margin: 0; line-height: 1.2; width: 70%; }
     .pdp-price { font-size: 20px; font-weight: 700; color: #15803d; }
     
     .pdp-metal-tag {
@@ -112,31 +115,34 @@
       background: #f3f4f6;
       border-radius: 6px;
       font-size: 12px; font-weight: 600; color: #555;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
-    .desc-section h4 { font-size: 14px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
-    .desc-section p, .desc-section li { font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 16px; }
-    .desc-section ul { padding-left: 20px; margin-top: 0; }
+    .desc-section h4 { font-size: 14px; font-weight: 700; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; border-bottom: 1px solid #f0f0f0; padding-bottom: 4px; display: inline-block;}
+    .desc-section h4:first-child { margin-top: 0; }
+    .desc-section p { font-size: 15px; line-height: 1.6; color: #444; margin: 0 0 16px; }
+    .desc-section ul { padding-left: 20px; margin: 0 0 16px; }
+    .desc-section li { font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 6px; }
 
     /* Sticky Action Bar */
     .pdp-action-bar {
-      position: absolute; bottom: 0; left: 0; right: 0;
       padding: 16px 20px 24px;
       background: #fff;
       border-top: 1px solid #f0f0f0;
       display: flex; align-items: center; justify-content: space-between;
       z-index: 102;
+      flex-shrink: 0; /* Prevents shrinking */
     }
 
     .add-to-bag-btn {
       width: 100%;
       background: #000; color: #fff;
       border: none;
-      padding: 16px;
+      padding: 18px;
       border-radius: 999px;
       font-size: 16px; font-weight: 700;
       cursor: pointer;
+      transition: all 0.2s;
     }
     .add-to-bag-btn:active { transform: scale(0.98); opacity: 0.9; }
   </style>
@@ -145,21 +151,19 @@
 <body>
 
 <header class="navbar">
-  <button onclick="window.location.href='index.html'" style="background:none; border:none; padding:8px;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+  <button onclick="window.location.href='index.html'" style="background:none; border:none; padding:8px; cursor: pointer;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
       <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
     </svg>
   </button>
   <a href="index.html" class="logo-link">
     <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   </a>
-  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'" style="opacity:0; pointer-events:none;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" /></svg>
-  </button>
+  <div style="width: 40px;"></div>
 </header>
 
-<div class="page-header" style="padding-left:16px;">
-  <h1 style="font-size:22px;">Curated Pieces ✨</h1>
+<div class="page-header" style="padding-left:16px; border:none;">
+  <h1 style="font-size:22px; margin-top:10px;">Curated Pieces ✨</h1>
 </div>
 
 <div id="productGrid" class="product-grid"></div>
@@ -193,6 +197,8 @@
           <li>Charm: 0.75 x 1 cm</li>
           <li>Length of chain: 13 cm + 2.5 cm Adjustable</li>
           <li>Comes with the GIVA Jewellery kit and authenticity certificate</li>
+          <li>Content: Bracelet</li>
+          <li>Net Qty- 1 unit</li>
         </ul>
 
         <h4>Styling Tip</h4>
@@ -215,7 +221,7 @@
       price: 249,
       metal: "Gold",
       type: "Ready-Made Bracelet",
-      title: "Golden Butterfly Bracelet"
+      title: "Gold Butterfly Bracelet" 
     },
     {
       id: "curated_b_2",
@@ -223,7 +229,7 @@
       price: 249,
       metal: "Gold",
       type: "Ready-Made Bracelet",
-      title: "Royal Gold Charm"
+      title: "Royal Gold Motif"
     },
     {
       id: "curated_e_1",
@@ -243,12 +249,13 @@
     }
   ];
 
+  // UPDATED: Now pointing to 'readymade' folder
+  const IMG_PATH = "assets/readymade/"; 
   let activeProduct = null;
 
   // === INIT ===
   function init() {
     renderGrid();
-    updateCartIcon();
   }
 
   function renderGrid() {
@@ -262,8 +269,8 @@
       
       card.innerHTML = `
         <div class="prod-img-wrapper">
-          <img src="assets/charms/${p.src}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
-          </div>
+          <img src="${IMG_PATH}${p.src}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
+        </div>
         <div class="prod-info">
           <h3 class="prod-title">${p.title}</h3>
           <div class="prod-meta">${p.metal} Base</div>
@@ -282,9 +289,7 @@
     document.getElementById('drawerTitle').textContent = product.title;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
     document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
-    // Note: Assuming images are in assets/charms based on prompt naming convention, 
-    // but if they are in a different folder, update this path.
-    document.getElementById('drawerImg').src = `assets/charms/${product.src}`; 
+    document.getElementById('drawerImg').src = `${IMG_PATH}${product.src}`; 
     
     // Show
     document.getElementById('pdpOverlay').classList.add('active');
@@ -298,6 +303,7 @@
     document.getElementById('pdpOverlay').classList.remove('active');
     document.getElementById('pdpDrawer').classList.remove('active');
     activeProduct = null;
+    // Handle history back if we are closing via button
     if(window.history.state && window.history.state.drawer) {
       window.history.back();
     }
@@ -306,6 +312,7 @@
   // Handle Back Button for Drawer
   window.onpopstate = function(event) {
     if (document.getElementById('pdpDrawer').classList.contains('active')) {
+      // Just close visually, history is already popped
       document.getElementById('pdpOverlay').classList.remove('active');
       document.getElementById('pdpDrawer').classList.remove('active');
       activeProduct = null;
@@ -314,18 +321,19 @@
     }
   };
 
-  // === CART LOGIC (Stubbed for UI, but functional structure) ===
+  // === CART LOGIC ===
   function addToBag() {
     if(!activeProduct) return;
     
+    // Creating the cart object
+    // Note: We include an empty charms array [] to prevent errors in existing Cart logic
     const cartItem = {
       id: Date.now(),
-      type: activeProduct.type, // e.g., "Ready-Made Bracelet"
+      type: "Ready-Made", 
       metal: activeProduct.metal,
       price: activeProduct.price,
-      image: `assets/charms/${activeProduct.src}`, // Path to image
+      image: `${IMG_PATH}${activeProduct.src}`, 
       title: activeProduct.title,
-      // IMPORTANT: Add empty charms array so Cart.html doesn't crash if it tries to access length
       charms: [], 
       isReadyMade: true
     };
@@ -340,8 +348,6 @@
     btn.textContent = "Added to Bag! 🛍️";
     btn.style.background = "#15803d"; // Green
     
-    updateCartIcon();
-
     setTimeout(() => {
       closeDrawer();
       // Reset Button after drawer closes
@@ -350,15 +356,6 @@
         btn.style.background = "#000";
       }, 300);
     }, 800);
-  }
-
-  function updateCartIcon() {
-    const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
-    const btn = document.getElementById('navCartBtn');
-    if(cart.length > 0) {
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
-    }
   }
 
   init();
