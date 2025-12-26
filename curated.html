@@ -234,11 +234,15 @@
   }
 
   function closeDrawer() {
-    document.getElementById('pdpOverlay').classList.remove('active');
-    document.getElementById('pdpDrawer').classList.remove('active');
-    activeProduct = null;
+    // 1. If we have a drawer history state, just go back. 
+    // The onpopstate event will handle the visual closing of the drawer.
     if(window.history.state && window.history.state.drawer) {
       window.history.back();
+    } else {
+      // 2. Fallback: If no history state exists (rare edge case), close manually
+      document.getElementById('pdpOverlay').classList.remove('active');
+      document.getElementById('pdpDrawer').classList.remove('active');
+      activeProduct = null;
     }
   }
   
