@@ -37,17 +37,30 @@ h2 { margin: 8px 0 10px; text-align: center; }
 </head>
 
 <body>
-<div class="header">
-  <button onclick="goBack()">← Back</button>
-  <a href="index.html" class="logo-link">
-    <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
-  </a>
-  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
-    </svg>
-  </button>
-</div>
+
+<header class="navbar">
+  <div class="nav-left">
+    <button class="nav-btn" onclick="goBack()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="nav-center">
+    <a href="index.html" class="logo-link">
+      <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+    </a>
+  </div>
+
+  <div class="nav-right">
+    <button id="navCartBtn" class="nav-btn" onclick="window.location.href='cart.html'">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
+      </svg>
+    </button>
+  </div>
+</header>
 
 <div class="main-container">
   <h2 id="pageTitle">Style My Earrings</h2>
