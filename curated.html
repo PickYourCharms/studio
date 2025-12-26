@@ -13,39 +13,23 @@
     /* === INTERNAL STYLES FOR BROWSE PAGE === */
     body { background: #fcfcfc; }
     
-    /* 2-Column Grid Layout */
     .product-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 16px;
-      padding-bottom: 120px; /* Space for footer/scroll */
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      padding: 16px; padding-bottom: 120px; 
     }
 
     .prod-card {
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: #fff; border: 1px solid #eee; border-radius: 16px;
+      overflow: hidden; display: flex; flex-direction: column;
+      cursor: pointer; transition: transform 0.2s ease;
     }
     .prod-card:active { transform: scale(0.98); }
 
     .prod-img-wrapper {
-      position: relative;
-      aspect-ratio: 1 / 1.1; 
-      background: #f9f9f9;
-      overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
+      position: relative; aspect-ratio: 1 / 1.1; background: #f9f9f9;
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
     }
-    .prod-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .prod-img { width: 100%; height: 100%; object-fit: cover; }
 
     .prod-info { padding: 12px; }
     .prod-title { font-size: 14px; font-weight: 700; margin: 0 0 4px; line-height: 1.3; color: #111; }
@@ -54,54 +38,32 @@
 
     /* === PDP DRAWER STYLES === */
     .pdp-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 100;
-      display: none;
-      opacity: 0; transition: opacity 0.3s;
-      backdrop-filter: blur(4px);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+      display: none; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(4px);
     }
     .pdp-overlay.active { display: block; opacity: 1; }
 
     .pdp-drawer {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #fff;
-      border-radius: 24px 24px 0 0;
-      z-index: 101;
-      transform: translateY(100%);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      height: 85vh; /* Fixed height for consistency */
-      display: flex; flex-direction: column;
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+      border-radius: 24px 24px 0 0; z-index: 101;
+      transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      height: 85vh; display: flex; flex-direction: column;
       box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
     }
     .pdp-drawer.active { transform: translateY(0); }
 
-    .pdp-scroll-content {
-      overflow-y: auto;
-      flex: 1;
-      padding-bottom: 20px;
-    }
+    .pdp-scroll-content { overflow-y: auto; flex: 1; padding-bottom: 20px; }
 
     .pdp-image-container {
-      width: 100%;
-      height: 340px;
-      background: #f4f4f4;
-      position: relative;
-      flex-shrink: 0;
+      width: 100%; height: 340px; background: #f4f4f4;
+      position: relative; flex-shrink: 0;
     }
-    .pdp-main-img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
+    .pdp-main-img { width: 100%; height: 100%; object-fit: cover; }
     .close-pdp-btn {
-      position: absolute; top: 16px; right: 16px;
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 50%;
-      border: none;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 2;
+      position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;
+      background: rgba(255,255,255,0.9); border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 2;
     }
 
     .pdp-details { padding: 20px; }
@@ -110,12 +72,8 @@
     .pdp-price { font-size: 20px; font-weight: 700; color: #15803d; }
     
     .pdp-metal-tag {
-      display: inline-block;
-      padding: 4px 10px;
-      background: #f3f4f6;
-      border-radius: 6px;
-      font-size: 12px; font-weight: 600; color: #555;
-      margin-bottom: 24px;
+      display: inline-block; padding: 4px 10px; background: #f3f4f6;
+      border-radius: 6px; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 24px;
     }
 
     .desc-section h4 { font-size: 14px; font-weight: 700; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; border-bottom: 1px solid #f0f0f0; padding-bottom: 4px; display: inline-block;}
@@ -126,25 +84,22 @@
 
     /* Sticky Action Bar */
     .pdp-action-bar {
-      padding: 16px 20px 24px;
-      background: #fff;
-      border-top: 1px solid #f0f0f0;
-      display: flex; align-items: center; justify-content: space-between;
-      z-index: 102;
-      flex-shrink: 0; /* Prevents shrinking */
+      padding: 16px 20px 24px; background: #fff; border-top: 1px solid #f0f0f0;
+      display: flex; gap: 12px; align-items: center; z-index: 102; flex-shrink: 0;
     }
 
-    .add-to-bag-btn {
-      width: 100%;
-      background: #000; color: #fff;
-      border: none;
-      padding: 18px;
-      border-radius: 999px;
-      font-size: 16px; font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
+    .primary-action-btn {
+      flex: 1; background: #000; color: #fff; border: none; padding: 18px;
+      border-radius: 999px; font-size: 16px; font-weight: 700; cursor: pointer;
+      text-align: center; transition: all 0.2s;
     }
-    .add-to-bag-btn:active { transform: scale(0.98); opacity: 0.9; }
+    .secondary-action-btn {
+      flex: 1; background: #f3f3f3; color: #000; border: none; padding: 18px;
+      border-radius: 999px; font-size: 16px; font-weight: 700; cursor: pointer;
+      text-align: center;
+    }
+    /* States */
+    .btn-hidden { display: none; }
   </style>
 </head>
 
@@ -159,7 +114,11 @@
   <a href="index.html" class="logo-link">
     <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
   </a>
-  <div style="width: 40px;"></div>
+  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'" style="opacity:0; pointer-events:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" />
+    </svg>
+  </button>
 </header>
 
 <div class="page-header" style="padding-left:16px; border:none;">
@@ -208,65 +167,37 @@
   </div>
 
   <div class="pdp-action-bar">
-    <button class="add-to-bag-btn" onclick="addToBag()">Add to Bag</button>
+    <button id="addToBagBtn" class="primary-action-btn" onclick="addToBag()">Add to Bag</button>
+    
+    <button id="shopMoreBtn" class="secondary-action-btn btn-hidden" onclick="closeDrawer()">Shop More</button>
+    <button id="viewCartBtn" class="primary-action-btn btn-hidden" onclick="window.location.href='cart.html'">View Cart</button>
   </div>
 </div>
 
 <script>
   // === DATA ===
   const PRODUCTS = [
-    {
-      id: "curated_b_1",
-      src: "TestReadyMadeBracelet1.png",
-      price: 249,
-      metal: "Gold",
-      type: "Ready-Made Bracelet",
-      title: "Gold Butterfly Bracelet" 
-    },
-    {
-      id: "curated_b_2",
-      src: "TestReadyMadeBracelet2.png",
-      price: 249,
-      metal: "Gold",
-      type: "Ready-Made Bracelet",
-      title: "Royal Gold Motif"
-    },
-    {
-      id: "curated_e_1",
-      src: "TestReadyMadeEarring1.png",
-      price: 249,
-      metal: "Silver",
-      type: "Ready-Made Earrings",
-      title: "Silver Flutter Studs"
-    },
-    {
-      id: "curated_e_2",
-      src: "TestReadyMadeEarring2.png",
-      price: 249,
-      metal: "Silver",
-      type: "Ready-Made Earrings",
-      title: "Crystal Wing Drops"
-    }
+    { id: "curated_b_1", src: "TestReadyMadeBracelet1.png", price: 249, metal: "Gold", title: "Gold Butterfly Bracelet" },
+    { id: "curated_b_2", src: "TestReadyMadeBracelet2.png", price: 249, metal: "Gold", title: "Royal Gold Motif" },
+    { id: "curated_e_1", src: "TestReadyMadeEarring1.png", price: 249, metal: "Silver", title: "Silver Flutter Studs" },
+    { id: "curated_e_2", src: "TestReadyMadeEarring2.png", price: 249, metal: "Silver", title: "Crystal Wing Drops" }
   ];
 
-  // UPDATED: Now pointing to 'readymade' folder
   const IMG_PATH = "assets/readymade/"; 
   let activeProduct = null;
 
-  // === INIT ===
   function init() {
     renderGrid();
+    updateCartIcon();
   }
 
   function renderGrid() {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
-    
     PRODUCTS.forEach(p => {
       const card = document.createElement('div');
       card.className = 'prod-card';
       card.onclick = () => openDrawer(p);
-      
       card.innerHTML = `
         <div class="prod-img-wrapper">
           <img src="${IMG_PATH}${p.src}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
@@ -281,21 +212,24 @@
     });
   }
 
-  // === DRAWER LOGIC ===
   function openDrawer(product) {
     activeProduct = product;
     
+    // Reset Buttons to Initial State
+    document.getElementById('addToBagBtn').classList.remove('btn-hidden');
+    document.getElementById('addToBagBtn').textContent = "Add to Bag";
+    document.getElementById('shopMoreBtn').classList.add('btn-hidden');
+    document.getElementById('viewCartBtn').classList.add('btn-hidden');
+
     // Populate Data
     document.getElementById('drawerTitle').textContent = product.title;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
     document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
     document.getElementById('drawerImg').src = `${IMG_PATH}${product.src}`; 
     
-    // Show
     document.getElementById('pdpOverlay').classList.add('active');
     document.getElementById('pdpDrawer').classList.add('active');
     
-    // Push history state to handle back button closing drawer
     window.history.pushState({ drawer: true }, null, "");
   }
 
@@ -303,16 +237,13 @@
     document.getElementById('pdpOverlay').classList.remove('active');
     document.getElementById('pdpDrawer').classList.remove('active');
     activeProduct = null;
-    // Handle history back if we are closing via button
     if(window.history.state && window.history.state.drawer) {
       window.history.back();
     }
   }
   
-  // Handle Back Button for Drawer
   window.onpopstate = function(event) {
     if (document.getElementById('pdpDrawer').classList.contains('active')) {
-      // Just close visually, history is already popped
       document.getElementById('pdpOverlay').classList.remove('active');
       document.getElementById('pdpDrawer').classList.remove('active');
       activeProduct = null;
@@ -321,12 +252,9 @@
     }
   };
 
-  // === CART LOGIC ===
   function addToBag() {
     if(!activeProduct) return;
     
-    // Creating the cart object
-    // Note: We include an empty charms array [] to prevent errors in existing Cart logic
     const cartItem = {
       id: Date.now(),
       type: "Ready-Made", 
@@ -342,20 +270,27 @@
     cart.push(cartItem);
     localStorage.setItem('pyc_cart', JSON.stringify(cart));
     
-    // Visual Feedback
-    const btn = document.querySelector('.add-to-bag-btn');
-    const originalText = btn.textContent;
-    btn.textContent = "Added to Bag! 🛍️";
-    btn.style.background = "#15803d"; // Green
-    
+    updateCartIcon();
+
+    // === SWITCH TO SUCCESS STATE ===
+    const addBtn = document.getElementById('addToBagBtn');
+    addBtn.textContent = "Added! ✨";
+    addBtn.style.background = "#15803d"; // Green
+
     setTimeout(() => {
-      closeDrawer();
-      // Reset Button after drawer closes
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.background = "#000";
-      }, 300);
-    }, 800);
+      addBtn.classList.add('btn-hidden');
+      document.getElementById('shopMoreBtn').classList.remove('btn-hidden');
+      document.getElementById('viewCartBtn').classList.remove('btn-hidden');
+    }, 600);
+  }
+
+  function updateCartIcon() {
+    const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    const btn = document.getElementById('navCartBtn');
+    if(cart.length > 0) {
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    }
   }
 
   init();
