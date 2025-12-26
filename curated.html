@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Curated Collection - PickYourCharms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2.4">
+  
+  <style>
+    /* === INTERNAL STYLES FOR BROWSE PAGE === */
+    body { background: #fcfcfc; }
+    
+    /* 2-Column Grid Layout */
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+      padding-bottom: 100px; /* Space for footer/scroll */
+    }
+
+    .prod-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .prod-card:active { transform: scale(0.98); }
+
+    .prod-img-wrapper {
+      position: relative;
+      aspect-ratio: 1 / 1.1; /* Slightly taller than square */
+      background: #f9f9f9;
+      overflow: hidden;
+    }
+    .prod-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .prod-info { padding: 12px; }
+    .prod-title { font-size: 14px; font-weight: 700; margin: 0 0 4px; line-height: 1.3; color: #111; }
+    .prod-meta { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .prod-price { font-size: 15px; font-weight: 800; color: #111; }
+
+    /* === PDP DRAWER STYLES === */
+    /* Reusing logic from Coupon Drawer but customised for Product */
+    .pdp-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      display: none;
+      opacity: 0; transition: opacity 0.3s;
+      backdrop-filter: blur(4px);
+    }
+    .pdp-overlay.active { display: block; opacity: 1; }
+
+    .pdp-drawer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-radius: 24px 24px 0 0;
+      z-index: 101;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+    }
+    .pdp-drawer.active { transform: translateY(0); }
+
+    .pdp-scroll-content {
+      overflow-y: auto;
+      padding-bottom: 90px; /* Space for sticky button */
+    }
+
+    .pdp-image-container {
+      width: 100%;
+      height: 320px;
+      background: #f4f4f4;
+      position: relative;
+    }
+    .pdp-main-img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .close-pdp-btn {
+      position: absolute; top: 16px; right: 16px;
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .pdp-details { padding: 20px; }
+    .pdp-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .pdp-title { font-size: 20px; font-weight: 800; margin: 0; line-height: 1.2; width: 75%; }
+    .pdp-price { font-size: 20px; font-weight: 700; color: #15803d; }
+    
+    .pdp-metal-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-size: 12px; font-weight: 600; color: #555;
+      margin-bottom: 20px;
+    }
+
+    .desc-section h4 { font-size: 14px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+    .desc-section p, .desc-section li { font-size: 14px; line-height: 1.6; color: #444; margin: 0 0 16px; }
+    .desc-section ul { padding-left: 20px; margin-top: 0; }
+
+    /* Sticky Action Bar */
+    .pdp-action-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 16px 20px 24px;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 102;
+    }
+
+    .add-to-bag-btn {
+      width: 100%;
+      background: #000; color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 999px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+    }
+    .add-to-bag-btn:active { transform: scale(0.98); opacity: 0.9; }
+  </style>
+</head>
+
+<body>
+
+<header class="navbar">
+  <button onclick="window.location.href='index.html'" style="background:none; border:none; padding:8px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+    </svg>
+  </button>
+  <a href="index.html" class="logo-link">
+    <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
+  </a>
+  <button id="navCartBtn" class="cart-icon-btn" onclick="window.location.href='cart.html'" style="opacity:0; pointer-events:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 5.68c.496 2.238.242 3.666-2.203 4.095-.97.17-2.025.218-3.116.218-1.09 0-2.146-.048-3.116-.218-2.445-.429-2.7-1.857-2.203-4.095l1.263-5.68c.24-1.08.385-1.92 2.053-2.008 2.025-.107 4.053-.107 6.078 0 1.668.088 1.813.928 2.053 2.008z" /></svg>
+  </button>
+</header>
+
+<div class="page-header" style="padding-left:16px;">
+  <h1 style="font-size:22px;">Curated Pieces ✨</h1>
+</div>
+
+<div id="productGrid" class="product-grid"></div>
+
+<div id="pdpOverlay" class="pdp-overlay" onclick="closeDrawer()"></div>
+<div id="pdpDrawer" class="pdp-drawer">
+  
+  <div class="pdp-scroll-content">
+    <div class="pdp-image-container">
+      <img id="drawerImg" src="" class="pdp-main-img">
+      <button class="close-pdp-btn" onclick="closeDrawer()">✕</button>
+    </div>
+
+    <div class="pdp-details">
+      <div class="pdp-header-row">
+        <h2 id="drawerTitle" class="pdp-title"></h2>
+        <span id="drawerPrice" class="pdp-price"></span>
+      </div>
+      <div id="drawerMetal" class="pdp-metal-tag"></div>
+
+      <div class="desc-section">
+        <h4>The Inspiration</h4>
+        <p>Made for fluttery giggles and happy twirls. This little butterfly bracelet is her tiny ticket to fairyland!</p>
+
+        <h4>The Design</h4>
+        <p>This silver kids bracelet features a butterfly motif. One side of the wings is coated with violet enamel, and the other side is studded with zircons.</p>
+        
+        <ul>
+          <li>925 Silver</li>
+          <li>Perfect for kids' sensitive skin</li>
+          <li>Charm: 0.75 x 1 cm</li>
+          <li>Length of chain: 13 cm + 2.5 cm Adjustable</li>
+          <li>Comes with the GIVA Jewellery kit and authenticity certificate</li>
+        </ul>
+
+        <h4>Styling Tip</h4>
+        <p>Pair this with butterfly-inspired studs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pdp-action-bar">
+    <button class="add-to-bag-btn" onclick="addToBag()">Add to Bag</button>
+  </div>
+</div>
+
+<script>
+  // === DATA ===
+  const PRODUCTS = [
+    {
+      id: "curated_b_1",
+      src: "TestReadyMadeBracelet1.png",
+      price: 249,
+      metal: "Gold",
+      type: "Ready-Made Bracelet",
+      title: "Golden Butterfly Bracelet"
+    },
+    {
+      id: "curated_b_2",
+      src: "TestReadyMadeBracelet2.png",
+      price: 249,
+      metal: "Gold",
+      type: "Ready-Made Bracelet",
+      title: "Royal Gold Charm"
+    },
+    {
+      id: "curated_e_1",
+      src: "TestReadyMadeEarring1.png",
+      price: 249,
+      metal: "Silver",
+      type: "Ready-Made Earrings",
+      title: "Silver Flutter Studs"
+    },
+    {
+      id: "curated_e_2",
+      src: "TestReadyMadeEarring2.png",
+      price: 249,
+      metal: "Silver",
+      type: "Ready-Made Earrings",
+      title: "Crystal Wing Drops"
+    }
+  ];
+
+  let activeProduct = null;
+
+  // === INIT ===
+  function init() {
+    renderGrid();
+    updateCartIcon();
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = '';
+    
+    PRODUCTS.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'prod-card';
+      card.onclick = () => openDrawer(p);
+      
+      card.innerHTML = `
+        <div class="prod-img-wrapper">
+          <img src="assets/charms/${p.src}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
+          </div>
+        <div class="prod-info">
+          <h3 class="prod-title">${p.title}</h3>
+          <div class="prod-meta">${p.metal} Base</div>
+          <div class="prod-price">Rs. ${p.price}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // === DRAWER LOGIC ===
+  function openDrawer(product) {
+    activeProduct = product;
+    
+    // Populate Data
+    document.getElementById('drawerTitle').textContent = product.title;
+    document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
+    document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
+    // Note: Assuming images are in assets/charms based on prompt naming convention, 
+    // but if they are in a different folder, update this path.
+    document.getElementById('drawerImg').src = `assets/charms/${product.src}`; 
+    
+    // Show
+    document.getElementById('pdpOverlay').classList.add('active');
+    document.getElementById('pdpDrawer').classList.add('active');
+    
+    // Push history state to handle back button closing drawer
+    window.history.pushState({ drawer: true }, null, "");
+  }
+
+  function closeDrawer() {
+    document.getElementById('pdpOverlay').classList.remove('active');
+    document.getElementById('pdpDrawer').classList.remove('active');
+    activeProduct = null;
+    if(window.history.state && window.history.state.drawer) {
+      window.history.back();
+    }
+  }
+  
+  // Handle Back Button for Drawer
+  window.onpopstate = function(event) {
+    if (document.getElementById('pdpDrawer').classList.contains('active')) {
+      document.getElementById('pdpOverlay').classList.remove('active');
+      document.getElementById('pdpDrawer').classList.remove('active');
+      activeProduct = null;
+    } else {
+      window.location.href = 'index.html';
+    }
+  };
+
+  // === CART LOGIC (Stubbed for UI, but functional structure) ===
+  function addToBag() {
+    if(!activeProduct) return;
+    
+    const cartItem = {
+      id: Date.now(),
+      type: activeProduct.type, // e.g., "Ready-Made Bracelet"
+      metal: activeProduct.metal,
+      price: activeProduct.price,
+      image: `assets/charms/${activeProduct.src}`, // Path to image
+      title: activeProduct.title,
+      // IMPORTANT: Add empty charms array so Cart.html doesn't crash if it tries to access length
+      charms: [], 
+      isReadyMade: true
+    };
+
+    let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    cart.push(cartItem);
+    localStorage.setItem('pyc_cart', JSON.stringify(cart));
+    
+    // Visual Feedback
+    const btn = document.querySelector('.add-to-bag-btn');
+    const originalText = btn.textContent;
+    btn.textContent = "Added to Bag! 🛍️";
+    btn.style.background = "#15803d"; // Green
+    
+    updateCartIcon();
+
+    setTimeout(() => {
+      closeDrawer();
+      // Reset Button after drawer closes
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = "#000";
+      }, 300);
+    }, 800);
+  }
+
+  function updateCartIcon() {
+    const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    const btn = document.getElementById('navCartBtn');
+    if(cart.length > 0) {
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
