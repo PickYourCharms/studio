@@ -344,6 +344,3 @@ body.frozen-state .post-actions-container { display: flex; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn { to { transform: scale(1); } }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-
-<link rel="stylesheet" href="desktop.css">
-<script src="desktop.js"></script>
