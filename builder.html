@@ -72,10 +72,11 @@ h2 { margin: 8px 0 10px; text-align: center; }
 
   <div class="builder-surface">
     <div class="canvas" id="canvas">
-      <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
-      <div id="pricePill" class="price-pill"></div>
-    </div>
-
+  <img id="bracelet" class="bracelet" src="assets/bases/bracelet_base_gold.png">
+  <div id="pricePill" class="price-pill"></div>
+  
+  <div id="premiumToast" class="premium-toast">💎 Premium Charm (+₹100)</div>
+</div>
     <div class="reset-row"> <button onclick="onResetClick()">Reset</button> </div>
     <div class="helper">Tap a charm to add • Tap charm to remove</div>
   </div>
@@ -102,12 +103,27 @@ h2 { margin: 8px 0 10px; text-align: center; }
 
 <div id="premiumToast" class="premium-toast">💎 Premium Charm Added (+Rs. 100)</div>
 <style>
-  .premium-toast {
-    position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
-    background: #000; color: #fff; padding: 10px 20px; border-radius: 999px;
-    font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 200;
+.premium-toast {
+    position: absolute;
+    background: transparent; /* No background */
+    color: #15803d; /* Deep Green */
+    padding: 0;
+    font-size: 11px; 
+    font-weight: 800; /* Extra bold to be visible */
+    white-space: nowrap;
+    opacity: 0; 
+    transition: all 0.3s ease; 
+    pointer-events: none; 
+    z-index: 200;
+    transform: translate(-50%, 0);
+    /* Optional: Adds a tiny white glow so text is readable if it overlaps a line */
+    text-shadow: 0 0 3px #ffffff; 
   }
-  .premium-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  
+  .premium-toast.show { 
+    opacity: 1; 
+    transform: translate(-50%, -5px); 
+  }
 </style>  
 
 <script>
@@ -202,14 +218,39 @@ function addCharm(file){
   if(charms.length>=5) return;
   charms.push(file);
   
-  const meta = CHARM_METADATA[file];
-  if(meta && meta.isPremium) showPremiumToast();
+  render(); // Render first to ensure physics are updated
   
-  render();
+  const meta = CHARM_METADATA[file];
+  if(meta && meta.isPremium) {
+    // Calculate position based on the LAST added slot
+    const slotIndex = charms.length - 1; // 0 to 4
+    // Get angle from the logic used in render()
+    const angles = SLOT_ANGLES[charms.length]; 
+    const a = angles[angles.length - 1 - slotIndex]; // Match the loop logic in render
+    
+    showPremiumToast(a);
+  }
   saveDraft(); 
 }
 
-function showPremiumToast() {
+function showPremiumToast(angle) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+  const radius = rect.width * 0.36;
+  
+  // Calculate position: Just below the charm
+  // Convert angle to radians
+  const rad = angle * Math.PI / 180;
+  
+  // Charm position relative to center
+  const x = cx + radius * Math.cos(rad);
+  const y = cy + radius * Math.sin(rad) + PHYSICS.attachOffset;
+  
+  // Offset the toast slightly below the charm (e.g., +35px)
+  premiumToast.style.left = x + 'px';
+  premiumToast.style.top = (y + 35) + 'px';
+  
   premiumToast.classList.add('show');
   setTimeout(() => premiumToast.classList.remove('show'), 2000);
 }
