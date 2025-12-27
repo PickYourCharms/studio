@@ -213,12 +213,8 @@
 </div>
 <script>
   // === DATA ===
-  const PRODUCTS = [
-    { id: "curated_b_1", src: "TestReadyMadeBracelet1.png", price: 249, metal: "Gold", title: "Gold Butterfly Bracelet", type: "Bracelet" },
-    { id: "curated_b_2", src: "TestReadyMadeBracelet2.png", price: 249, metal: "Gold", title: "Royal Gold Motif", type: "Bracelet" },
-    { id: "curated_e_1", src: "TestReadyMadeEarring1.png", price: 249, metal: "Silver", title: "Silver Flutter Studs", type: "Earring" },
-    { id: "curated_e_2", src: "TestReadyMadeEarring2.png", price: 249, metal: "Silver", title: "Crystal Wing Drops", type: "Earring" }
-  ];
+ // --- UPDATED: Load Products from Google Sheet ---
+const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
 
   const IMG_PATH = "assets/readymade/"; 
   let activeProduct = null;
