@@ -161,6 +161,16 @@ function init() {
   };
 }
 
+window.addEventListener('pageshow', function(event) {
+  // If the page is being restored from the BFCache (Back/Forward Cache)
+  if (event.persisted) {
+    // Force hide the modal
+    document.getElementById('checkoutUpsellModal').style.display = 'none';
+    
+    // Optional: Refresh the cart logic to ensure data is current
+    init();
+  }
+});
 // --- MINI BUILDERS ---
 function buildMiniBracelet(metal, charms) {
   const container = document.createElement('div');
@@ -760,14 +770,17 @@ function onCheckoutClick() {
 }
 
 function forceCheckout() {
-  // 1. Save the applied coupon so Checkout Page can see it
+  // 1. Close the modal explicitly so BFCache saves a clean state
+  document.getElementById('checkoutUpsellModal').style.display = 'none';
+
+  // 2. Save the applied coupon so Checkout Page can see it
   if (activeCoupon) {
     sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(activeCoupon));
   } else {
     sessionStorage.removeItem('pyc_applied_coupon');
   }
 
-  // 2. Redirect to checkout
+  // 3. Redirect to checkout
   window.location.href = 'checkout.html';
 }
 
