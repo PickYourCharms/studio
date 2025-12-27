@@ -80,6 +80,7 @@ h2 { margin: 8px 0 10px; text-align: center; }
       <div id="pricePill" class="price-pill"></div>
     </div>
     <div class="reset-row"> <button onclick="onResetClick()">Reset</button> </div>
+    <div id="premiumToast" class="premium-toast">💫 Premium Charm Added (+Rs. 100)</div>  
     <div class="helper">Tap a charm to add • Tap charm to remove</div>
   </div>
 
@@ -102,14 +103,32 @@ h2 { margin: 8px 0 10px; text-align: center; }
     </div>
   </div>
 </div>
-<div id="premiumToast" class="premium-toast">💎 Premium Charm Added (+Rs. 100)</div>
+<div id="premiumToast" class="premium-toast">💫 Premium Charm Added (+Rs. 100)</div>
 <style>
-  .premium-toast {
-    position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px);
-    background: #000; color: #fff; padding: 10px 20px; border-radius: 999px;
-    font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 200;
-  }
-  .premium-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.builder-surface { position: relative; }
+
+.premium-toast {
+  position: absolute;
+  bottom: 40px; 
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  color: #559e66; /* Soft green */
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+  z-index: 10;
+  letter-spacing: 0.3px;
+}
+
+.premium-toast.show {
+  opacity: 1;
+  bottom: 45px; 
+}
 </style>
 <script>
 const BASE_PRICE = 249; 
@@ -213,20 +232,31 @@ function loadTray(){
 }
 
 function addCharm(file){
-  if(!charms.left) charms.left=file;
-  else if(!charms.right) charms.right=file;
+  if(charms.length>=5) return;
+  charms.push(file);
   
+  // Render first
+  render();
+  
+  // Check Premium
   const meta = CHARM_METADATA[file];
-  if(meta && meta.isPremium) showPremiumToast();
-
-  render(); saveDraft(); 
+  if(meta && meta.isPremium) {
+    showPremiumToast();
+  }
+  
+  saveDraft(); 
 }
 
 function showPremiumToast() {
   premiumToast.classList.add('show');
-  setTimeout(() => premiumToast.classList.remove('show'), 2000);
+  
+  // Clear any existing timer to prevent flickering if clicked fast
+  if(window.premiumTimer) clearTimeout(window.premiumTimer);
+  
+  window.premiumTimer = setTimeout(() => {
+    premiumToast.classList.remove('show');
+  }, 2000);
 }
-
 function calculateCurrentPrice() {
   let total = BASE_PRICE;
   if (charms.left) total += (CHARM_METADATA[charms.left]?.price || 50);
