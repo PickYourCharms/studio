@@ -132,8 +132,9 @@ h2 { margin: 8px 0 10px; text-align: center; }
 </style>
 <script>
 const BASE_PRICE = 249; 
+const ALLOWANCE = 50; // The value of the standard charm included per ear
 
-// Using same metadata as Builder
+// Metadata for prices
 const CHARM_METADATA = {
   '3DBowRibbon_Charm_Gold.png': { price: 100, isPremium: true },
   'EvilEye_Charm_Gold.png': { price: 50, isPremium: false },
@@ -231,38 +232,47 @@ function loadTray(){
   });
 }
 
+// === FIX: Corrected Add Charm Logic for Earrings ===
 function addCharm(file){
-  // Logic: Fill Left first, then Right
-  if(!charms.left) charms.left = file;
-  else if(!charms.right) charms.right = file;
+  if(!charms.left) charms.left=file;
+  else if(!charms.right) charms.right=file;
   else return; // Both full
   
-  // Render first
   render();
   
-  // Check Premium
   const meta = CHARM_METADATA[file];
   if(meta && meta.isPremium) {
     showPremiumToast();
   }
-  
   saveDraft(); 
 }
 
 function showPremiumToast() {
   premiumToast.classList.add('show');
-  
-  // Clear any existing timer to prevent flickering if clicked fast
   if(window.premiumTimer) clearTimeout(window.premiumTimer);
-  
   window.premiumTimer = setTimeout(() => {
     premiumToast.classList.remove('show');
   }, 2000);
 }
+
+// === FIX: New Pricing Logic (Base + Difference) ===
 function calculateCurrentPrice() {
   let total = BASE_PRICE;
-  if (charms.left) total += (CHARM_METADATA[charms.left]?.price || 50);
-  if (charms.right) total += (CHARM_METADATA[charms.right]?.price || 50);
+  
+  // Left Ear
+  if (charms.left) {
+    const meta = CHARM_METADATA[charms.left] || { price: 50 };
+    // Only pay the difference if charm price > 50
+    total += Math.max(0, meta.price - ALLOWANCE);
+  }
+
+  // Right Ear
+  if (charms.right) {
+    const meta = CHARM_METADATA[charms.right] || { price: 50 };
+    // Only pay the difference if charm price > 50
+    total += Math.max(0, meta.price - ALLOWANCE);
+  }
+
   return total;
 }
 
