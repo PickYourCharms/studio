@@ -103,255 +103,333 @@ h2 { margin: 8px 0 10px; text-align: center; }
 </div>
 
 <script>
-const BASE_PRICE = 249;
-const EXTRA_CHARM_PRICE = 50;
-const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
-const SLOT_ANGLES = { 1:[90], 2:[70,110], 3:[60,90,120], 4:[45,75,105,135], 5:[40,65,90,115,140] };
-const CHARMS = {
-  gold: [ '3DBowRibbon_Charm_Gold.png', 'EvilEye_Charm_Gold.png', 'LetterA_Charm_Gold.png', 'NorthStar_Charm_Gold.png', 'RedCherry_Charm_Gold.png' ],
-  silver: [ '3DBowRibbon_Charm_Silver.png', 'EvilEye_Charm_Silver.png', 'LetterA_Charm_Silver.png', 'NorthStar_Charm_Silver.png', 'RedCherry_Charm_Silver.png' ]
-};
-
-let metal = 'gold';
-let charms = [];
-
-const canvas = document.getElementById('canvas');
-const bracelet = document.getElementById('bracelet');
-const tray = document.getElementById('tray');
-const pricePill = document.getElementById('pricePill');
-const cta = document.getElementById('cta');
-const modal = document.getElementById('modal');
-const modalText = document.getElementById('modalText');
-const modalConfirm = document.getElementById('modalConfirm');
-const navCartBtn = document.getElementById('navCartBtn');
-const pageTitle = document.getElementById('pageTitle');
-
-const urlParams = new URLSearchParams(window.location.search);
-const isCombo = urlParams.get('mode') === 'combo';
-const isResume = urlParams.get('resume') === 'true';
-
-function init() {
-  const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+  // --- CONFIG ---
+  // Note: BASE_PRICE and constants are now loaded from Google Sheets (APP_DATA)
   
-  // FIX: Strictly show/hide based on cart content on load
-  if (cart.length > 0) {
-    navCartBtn.style.display = 'block';
-  } else {
-    navCartBtn.style.display = 'none';
-  }
+  // Physics for rendering charms on the bracelet
+  const PHYSICS = { size:46, anchorX:23, anchorY:6, attachOffset:2 };
+  const SLOT_ANGLES = { 1:[90], 2:[70,110], 3:[60,90,120], 4:[45,75,105,135], 5:[40,65,90,115,140] };
 
-  if (isResume) {
-    const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
-    if (draft && draft.data) {
-      metal = draft.data.metal;
-      charms = draft.data.charms;
+  // State
+  let metal = 'gold';
+  let charms = []; // Now stores full charm objects, not just filenames
+
+  // DOM Elements
+  const canvas = document.getElementById('canvas');
+  const bracelet = document.getElementById('bracelet');
+  const tray = document.getElementById('tray');
+  const pricePill = document.getElementById('pricePill');
+  const cta = document.getElementById('cta');
+  const modal = document.getElementById('modal');
+  const modalText = document.getElementById('modalText');
+  const modalConfirm = document.getElementById('modalConfirm');
+  const navCartBtn = document.getElementById('navCartBtn');
+  const pageTitle = document.getElementById('pageTitle');
+
+  // URL Params
+  const urlParams = new URLSearchParams(window.location.search);
+  const isCombo = urlParams.get('mode') === 'combo';
+  const isResume = urlParams.get('resume') === 'true';
+
+  // --- INIT ---
+  function init() {
+    // 1. Check if Data is Loaded
+    if (!APP_DATA || APP_DATA.charms.length === 0) {
+      // If config.js hasn't finished loading yet, wait for the event
+      window.addEventListener('dataLoaded', init);
+      return;
     }
-  } 
-  else if (isCombo) {
-    const savedData = sessionStorage.getItem('combo_bracelet_data');
-    if (savedData) {
-      const data = JSON.parse(savedData);
-      metal = data.metal;
-      charms = data.charms;
+
+    // 2. Randomize Charms for display variety
+    // (Optional: check if already sorted to avoid re-shuffling on re-renders)
+    if (!window.hasSortedCharms) {
+      APP_DATA.charms.sort(() => Math.random() - 0.5);
+      window.hasSortedCharms = true;
     }
-    cta.textContent = "Continue to Earrings →";
-  }
-  updateMetal(); 
-  
-  setTimeout(() => {
-    window.history.pushState({ page: 'loaded' }, null, window.location.href);
-  }, 100);
 
-window.onpopstate = function (event) {
-  // FIX: If the user is in the "Frozen" (Added to Cart) state, 
-  // the device back button must take them to Home, not back to the builder.
-  if (document.body.classList.contains('frozen-state')) {
-    window.location.href = 'index.html';
-    return;
-  }
-  
-  // Default behavior for other states
-  goBack(); 
-};
-}
+    // 3. Cart Badge Visibility
+    const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    navCartBtn.style.display = cart.length > 0 ? 'block' : 'none';
 
-function saveDraft() {
-  if (charms.length === 0) {
-    sessionStorage.removeItem('pyc_draft');
-    return;
-  }
-  const draftData = {
-    url: 'builder.html' + window.location.search,
-    data: { metal, charms },
-    timestamp: Date.now()
-  };
-  sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
-}
+    // 4. Handle Resume/Combo Logic
+    if (isResume) {
+      const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
+      if (draft && draft.data) {
+        metal = draft.data.metal;
+        charms = draft.data.charms;
+      }
+    } else if (isCombo) {
+      const savedData = sessionStorage.getItem('combo_bracelet_data');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        metal = data.metal;
+        charms = data.charms;
+      }
+      cta.textContent = "Continue to Earrings →";
+    }
 
-function goBack() {
-  if (document.body.classList.contains('frozen-state')) {
-    window.location.href = 'index.html';
-    return;
-  }
-  if (isCombo) {
-    window.location.href = 'index.html'; 
-  } else {
-    history.back();
-  }
-}
-
-function loadTray(){
-  tray.innerHTML='';
-  CHARMS[metal].forEach(file=>{
-    const img=document.createElement('img');
-    img.src='assets/charms/'+file;
-    img.onclick=()=>addCharm(file);
-    tray.appendChild(img);
-  });
-}
-
-function addCharm(file){
-  if(charms.length>=5) return;
-  charms.push(file);
-  render();
-  saveDraft(); 
-}
-
-function render(){
-  document.querySelectorAll('.charm').forEach(el=>el.remove());
-
-  if(charms.length===0){
-    pricePill.classList.remove('show');
-    cta.classList.remove('show');
-    return;
-  }
-
-  const totalPrice = BASE_PRICE + (charms.length-1)*EXTRA_CHARM_PRICE;
-  pricePill.textContent='Rs. '+ totalPrice;
-  pricePill.classList.add('show');
-  cta.classList.add('show');
-
-  if (isCombo) {
-    cta.textContent = "Continue to Earrings →";
-  } else {
-    cta.textContent = "Love it · Add to Bag";
-  }
-
-  const rect=canvas.getBoundingClientRect();
-  const cx=rect.width/2, cy=rect.height/2;
-  const radius=rect.width*0.36;
-  const angles=SLOT_ANGLES[charms.length];
-
-  charms.forEach((file,i)=>{
-    const a=angles[angles.length-1-i];
-    const rad=a*Math.PI/180;
-    const x=cx+radius*Math.cos(rad);
-    const y=cy+radius*Math.sin(rad)+PHYSICS.attachOffset;
-
-    const w=document.createElement('div');
-    w.className='charm';
-    w.style.left=(x-PHYSICS.anchorX)+'px';
-    w.style.top=(y-PHYSICS.anchorY)+'px';
-    w.style.transform='rotate('+(a-90)+'deg)';
+    // 5. Setup UI
+    updateMetal();
     
-    const img=document.createElement('img');
-    img.src='assets/charms/'+file;
-    w.appendChild(img);
-    w.onclick=()=>{
-      if(document.body.classList.contains('frozen-state')) return;
-      charms.splice(i,1);render();saveDraft();
-    }; 
-    canvas.appendChild(w);
-  });
-}
+    // 6. History State for Back Button handling
+    setTimeout(() => {
+      window.history.pushState({ page: 'loaded' }, null, window.location.href);
+    }, 100);
 
-function onMetalClick(next){
-  if(next===metal) return;
-  if(charms.length>0){
-    showModal('Switching metal will reset your design.',()=>{
-      charms=[];
-      metal=next;
-      updateMetal();
-      saveDraft(); 
+    window.onpopstate = function (event) {
+      if (document.body.classList.contains('frozen-state')) {
+        window.location.href = 'index.html';
+        return;
+      }
+      goBack(); 
+    };
+  }
+
+  // --- CORE FUNCTIONS ---
+
+  function loadTray() {
+    tray.innerHTML = '';
+    
+    // Filter: Match current metal OR 'Both'
+    const visibleCharms = APP_DATA.charms.filter(c => {
+      const m = c.metal.toLowerCase();
+      // Ensure we match case-insensitive
+      return m === metal.toLowerCase() || m === 'both';
     });
-  } else { metal=next;updateMetal(); saveDraft(); }
-}
 
-function onResetClick(){
-  if(charms.length===0) return;
-  showModal('Reset bracelet design?',()=>{
-    charms=[];
+    visibleCharms.forEach(charmObj => {
+      const img = document.createElement('img');
+      img.src = 'assets/charms/' + charmObj.image_filename;
+      img.onclick = () => addCharm(charmObj); // Pass full object
+      tray.appendChild(img);
+    });
+  }
+
+  function addCharm(charmObj) {
+    if (charms.length >= 5) return;
+    
+    charms.push(charmObj);
+    
+    // Check Premium Status for Toast
+    // Sheet value might be "Yes", "yes", or boolean true
+    const isPrem = String(charmObj.is_premium).toLowerCase() === 'yes';
+    if (isPrem) {
+      const lbl = document.getElementById('premiumLabel');
+      if(lbl) {
+        lbl.classList.add('show');
+        setTimeout(() => lbl.classList.remove('show'), 2000);
+      }
+    }
+
     render();
     saveDraft(); 
-  });
-}
+  }
 
-function updateMetal(){
-  bracelet.src='assets/bases/bracelet_base_'+metal+'.png';
-  document.getElementById('goldBtn').classList.toggle('active',metal==='gold');
-  document.getElementById('silverBtn').classList.toggle('active',metal==='silver');
-  loadTray();
-  render();
-}
+  function render() {
+    // Clear current charms on canvas
+    document.querySelectorAll('.charm').forEach(el => el.remove());
 
-cta.onclick = function() {
-  if(!cta.classList.contains('show')) return;
-
-  if (isCombo) {
-    const state = { metal, charms };
-    sessionStorage.setItem('combo_bracelet_data', JSON.stringify(state));
-    
-    // FIX: Check if we have stashed earring data (from a previous edit/cart flow)
-    // If we do, use it. If not, use the default empty start.
-    let nextEarringState = { metal: 'gold', charms: {left:null,right:null} };
-    const stashedEarrings = sessionStorage.getItem('combo_earring_data');
-    if (stashedEarrings) {
-      nextEarringState = JSON.parse(stashedEarrings);
+    if (charms.length === 0) {
+      pricePill.classList.remove('show');
+      cta.classList.remove('show');
+      return;
     }
 
+    // --- PRICING LOGIC (Base + Allowance) ---
+    const basePrice = Number(APP_DATA.config.bracelet_base_price || 249);
+    const allowance = Number(APP_DATA.config.bracelet_base_charm_allowance || 50);
+    
+    let total = basePrice;
+
+    charms.forEach((c, index) => {
+      const price = Number(c.price || 0);
+      
+      if (index === 0) {
+        // First charm: Pay difference if it exceeds allowance
+        const extra = Math.max(0, price - allowance);
+        total += extra;
+      } else {
+        // Subsequent charms: Pay full price
+        total += price;
+      }
+    });
+
+    pricePill.textContent = 'Rs. ' + total;
+    pricePill.classList.add('show');
+    cta.classList.add('show');
+
+    // Button Text Update
+    if (isCombo) {
+      cta.textContent = "Continue to Earrings →";
+    } else {
+      cta.textContent = "Love it · Add to Bag";
+    }
+
+    // --- DRAWING LOGIC ---
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.width / 2, cy = rect.height / 2;
+    const radius = rect.width * 0.36;
+    const angles = SLOT_ANGLES[charms.length] || [];
+
+    charms.forEach((charmObj, i) => {
+      const a = angles[angles.length - 1 - i];
+      const rad = a * Math.PI / 180;
+      const x = cx + radius * Math.cos(rad);
+      const y = cy + radius * Math.sin(rad) + PHYSICS.attachOffset;
+
+      const w = document.createElement('div');
+      w.className = 'charm';
+      w.style.left = (x - PHYSICS.anchorX) + 'px';
+      w.style.top = (y - PHYSICS.anchorY) + 'px';
+      w.style.transform = 'rotate(' + (a - 90) + 'deg)';
+      
+      const img = document.createElement('img');
+      img.src = 'assets/charms/' + charmObj.image_filename;
+      w.appendChild(img);
+
+      // Remove on click
+      w.onclick = () => {
+        if (document.body.classList.contains('frozen-state')) return;
+        charms.splice(i, 1);
+        render();
+        saveDraft();
+      }; 
+      canvas.appendChild(w);
+    });
+  }
+
+  function updateMetal() {
+    bracelet.src = 'assets/bases/bracelet_base_' + metal + '.png';
+    document.getElementById('goldBtn').classList.toggle('active', metal === 'gold');
+    document.getElementById('silverBtn').classList.toggle('active', metal === 'silver');
+    loadTray();
+    render();
+  }
+
+  function onMetalClick(next) {
+    if (next === metal) return;
+    if (charms.length > 0) {
+      showModal('Switching metal will reset your design.', () => {
+        charms = [];
+        metal = next;
+        updateMetal();
+        saveDraft(); 
+      });
+    } else { 
+      metal = next; 
+      updateMetal(); 
+      saveDraft(); 
+    }
+  }
+
+  function onResetClick() {
+    if (charms.length === 0) return;
+    showModal('Reset bracelet design?', () => {
+      charms = [];
+      render();
+      saveDraft(); 
+    });
+  }
+
+  // --- NAVIGATION & SAVING ---
+
+  function saveDraft() {
+    if (charms.length === 0) {
+      sessionStorage.removeItem('pyc_draft');
+      return;
+    }
     const draftData = {
-      url: 'earring-builder.html?mode=combo',
-      data: nextEarringState, // Use the recovered data here
-      comboContext: { bracelet: state }
+      url: 'builder.html' + window.location.search,
+      data: { metal, charms },
+      timestamp: Date.now()
     };
     sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
-    window.location.href = 'earring-builder.html?mode=combo';
-  } else {
-    // ... single bracelet logic ...
-    const product = {
-      id: Date.now(),
-      type: 'Bracelet',
-      metal: metal,
-      charms: charms,
-      price: BASE_PRICE + (charms.length-1)*EXTRA_CHARM_PRICE,
-      image: 'assets/bases/bracelet_base_'+metal+'.png'
-    };
-    addToCart(product);
   }
-};
 
-function addToCart(item) {
-  // === FORCE HISTORY ENTRY ON USER CLICK (Reliable on all phones) ===
-  window.history.pushState({ page: 'frozen' }, null, window.location.href);
-  let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
-  cart.push(item);
-  localStorage.setItem('pyc_cart', JSON.stringify(cart));
-  sessionStorage.removeItem('pyc_draft');
-  document.body.classList.add('frozen-state');
-  navCartBtn.style.display = 'block';
+  function goBack() {
+    if (document.body.classList.contains('frozen-state')) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (isCombo) {
+      window.location.href = 'index.html'; 
+    } else {
+      history.back();
+    }
+  }
 
-  // FIX: Update Copy for Single Flow
-  pageTitle.textContent = "Added to Bag ✨";
-}
+  // --- ADD TO CART ---
 
-function showModal(text,confirmFn){
-  modalText.textContent=text;
-  modalConfirm.onclick=()=>{ closeModal(); confirmFn(); };
-  modal.style.display='flex';
-}
-function closeModal(){ modal.style.display='none'; }
+  cta.onclick = function() {
+    if (!cta.classList.contains('show')) return;
 
-init();
+    if (isCombo) {
+      // Combo Logic: Save Bracelet state and go to Earrings
+      const state = { metal, charms };
+      sessionStorage.setItem('combo_bracelet_data', JSON.stringify(state));
+      
+      let nextEarringState = { metal: 'gold', charms: {left:null, right:null} };
+      const stashedEarrings = sessionStorage.getItem('combo_earring_data');
+      if (stashedEarrings) {
+        nextEarringState = JSON.parse(stashedEarrings);
+      }
+
+      const draftData = {
+        url: 'earring-builder.html?mode=combo',
+        data: nextEarringState,
+        comboContext: { bracelet: state }
+      };
+      sessionStorage.setItem('pyc_draft', JSON.stringify(draftData));
+      window.location.href = 'earring-builder.html?mode=combo';
+
+    } else {
+      // Single Bracelet Logic
+      
+      // Calculate Final Price again for Cart Object
+      const basePrice = Number(APP_DATA.config.bracelet_base_price);
+      const allowance = Number(APP_DATA.config.bracelet_base_charm_allowance);
+      let finalPrice = basePrice;
+      
+      charms.forEach((c, index) => {
+        if(index === 0) finalPrice += Math.max(0, Number(c.price) - allowance);
+        else finalPrice += Number(c.price);
+      });
+
+      const product = {
+        id: Date.now(),
+        type: 'Bracelet',
+        metal: metal,
+        charms: charms, // Stores full objects
+        price: finalPrice,
+        image: 'assets/bases/bracelet_base_' + metal + '.png'
+      };
+      
+      addToCart(product);
+    }
+  };
+
+  function addToCart(item) {
+    window.history.pushState({ page: 'frozen' }, null, window.location.href);
+    let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    cart.push(item);
+    localStorage.setItem('pyc_cart', JSON.stringify(cart));
+    sessionStorage.removeItem('pyc_draft');
+    
+    document.body.classList.add('frozen-state');
+    navCartBtn.style.display = 'block';
+    pageTitle.textContent = "Added to Bag ✨";
+  }
+
+  // --- MODAL UTILS ---
+  function showModal(text, confirmFn) {
+    modalText.textContent = text;
+    modalConfirm.onclick = () => { closeModal(); confirmFn(); };
+    modal.style.display = 'flex';
+  }
+  function closeModal() { modal.style.display = 'none'; }
+
+  // Start
+  init();
 </script>
 </body>
 </html>
