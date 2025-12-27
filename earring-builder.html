@@ -215,12 +215,32 @@ function goBack() {
   } else { history.back(); }
 }
 
-function loadTray(){
-  tray.innerHTML='';
-  CHARMS[metal].forEach(file=>{
-    const img=document.createElement('img');
-    img.src='assets/charms/'+file;
-    img.onclick=()=>addCharm(file);
+function loadTray() {
+  // 1. Re-fetch data from storage to ensure we have the latest
+  const latestGold = JSON.parse(localStorage.getItem('pyc_charms_gold') || "[]");
+  const latestSilver = JSON.parse(localStorage.getItem('pyc_charms_silver') || "[]");
+
+  if (CHARMS) {
+    CHARMS.gold = latestGold;
+    CHARMS.silver = latestSilver;
+  }
+
+  const list = CHARMS[metal];
+  tray.innerHTML = '';
+
+  // 2. Auto-Retry if data hasn't arrived from Sheet yet
+  if (!list || list.length === 0) {
+    console.log("Data not ready... retrying in 500ms");
+    tray.innerHTML = '<div style="font-size:12px; color:#888; width:100%; text-align:center; padding:20px;">Loading charms...</div>';
+    setTimeout(loadTray, 500); 
+    return;
+  }
+
+  // 3. Render
+  list.forEach(file => {
+    const img = document.createElement('img');
+    img.src = 'assets/charms/' + file;
+    img.onclick = () => addCharm(file);
     tray.appendChild(img);
   });
 }
@@ -380,11 +400,16 @@ cta.onclick = function() {
 };
 
 function calculateBraceletPrice(bCharms) {
-  let total = BASE_PRICE; 
-  const ALLOWANCE_B = 50;
+  // FIX: Explicitly use Bracelet Base Price (e.g., 249), NOT Earring Base Price (199)
+  const braceletBase = Number(CONFIG.bracelet_base_price) || 249;
+  const braceletAllow = Number(CONFIG.bracelet_base_charm_allowance) || 50;
+  
+  let total = braceletBase; 
+
   bCharms.forEach((file, index) => {
     const meta = CHARM_METADATA[file] || { price: 50 };
-    if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
+    // Apply allowance logic to the first charm
+    if (index === 0) total += Math.max(0, meta.price - braceletAllow);
     else total += meta.price;
   });
   return total;
