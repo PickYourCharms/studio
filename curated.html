@@ -102,6 +102,16 @@
     }
     /* States */
     .btn-hidden { display: none; }
+.filter-bar {
+      display: flex; gap: 8px; padding: 0 16px 16px; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      background: #fff; border: 1px solid #e5e5e5; color: #555; white-space: nowrap; cursor: pointer;
+    }
+    .filter-chip.active { background: #000; color: #fff; border-color: #000; }    
   </style>
 </head>
 
@@ -134,7 +144,13 @@
 <div class="page-header" style="padding-left:16px; border:none;">
   <h1 style="font-size:22px; margin-top:10px;">Curated Pieces ✨</h1>
 </div>
-
+<div class="filter-bar">
+  <button class="filter-chip active" onclick="applyFilter('all', this)">All</button>
+  <button class="filter-chip" onclick="applyFilter('Gold', this)">Gold</button>
+  <button class="filter-chip" onclick="applyFilter('Silver', this)">Silver</button>
+  <button class="filter-chip" onclick="applyFilter('Bracelet', this)">Bracelets</button>
+  <button class="filter-chip" onclick="applyFilter('Earring', this)">Earrings</button>
+</div>
 <div id="productGrid" class="product-grid"></div>
 
 <div id="pdpOverlay" class="pdp-overlay" onclick="closeDrawer()"></div>
@@ -183,28 +199,44 @@
     <button id="viewCartBtn" class="primary-action-btn btn-hidden" onclick="window.location.href='cart.html'">View Cart</button>
   </div>
 </div>
-
 <script>
-  // === DATA ===
+  // === DATA with Type property added ===
   const PRODUCTS = [
-    { id: "curated_b_1", src: "TestReadyMadeBracelet1.png", price: 249, metal: "Gold", title: "Gold Butterfly Bracelet" },
-    { id: "curated_b_2", src: "TestReadyMadeBracelet2.png", price: 249, metal: "Gold", title: "Royal Gold Motif" },
-    { id: "curated_e_1", src: "TestReadyMadeEarring1.png", price: 249, metal: "Silver", title: "Silver Flutter Studs" },
-    { id: "curated_e_2", src: "TestReadyMadeEarring2.png", price: 249, metal: "Silver", title: "Crystal Wing Drops" }
+    { id: "curated_b_1", src: "TestReadyMadeBracelet1.png", price: 249, metal: "Gold", title: "Gold Butterfly Bracelet", type: "Bracelet" },
+    { id: "curated_b_2", src: "TestReadyMadeBracelet2.png", price: 249, metal: "Gold", title: "Royal Gold Motif", type: "Bracelet" },
+    { id: "curated_e_1", src: "TestReadyMadeEarring1.png", price: 249, metal: "Silver", title: "Silver Flutter Studs", type: "Earring" },
+    { id: "curated_e_2", src: "TestReadyMadeEarring2.png", price: 249, metal: "Silver", title: "Crystal Wing Drops", type: "Earring" }
   ];
 
   const IMG_PATH = "assets/readymade/"; 
   let activeProduct = null;
+  let currentFilter = 'all';
 
   function init() {
     renderGrid();
     updateCartIcon();
   }
 
+  function applyFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid();
+  }
+
   function renderGrid() {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
-    PRODUCTS.forEach(p => {
+    
+    // Filter Logic
+    const filtered = PRODUCTS.filter(p => {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'Gold' || currentFilter === 'Silver') return p.metal === currentFilter;
+      if (currentFilter === 'Bracelet' || currentFilter === 'Earring') return p.type === currentFilter;
+      return true;
+    });
+
+    filtered.forEach(p => {
       const card = document.createElement('div');
       card.className = 'prod-card';
       card.onclick = () => openDrawer(p);
@@ -224,14 +256,11 @@
 
   function openDrawer(product) {
     activeProduct = product;
-    
-    // Reset Buttons to Initial State
     document.getElementById('addToBagBtn').classList.remove('btn-hidden');
     document.getElementById('addToBagBtn').textContent = "Add to Bag";
     document.getElementById('shopMoreBtn').classList.add('btn-hidden');
     document.getElementById('viewCartBtn').classList.add('btn-hidden');
 
-    // Populate Data
     document.getElementById('drawerTitle').textContent = product.title;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
     document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
@@ -239,17 +268,13 @@
     
     document.getElementById('pdpOverlay').classList.add('active');
     document.getElementById('pdpDrawer').classList.add('active');
-    
     window.history.pushState({ drawer: true }, null, "");
   }
 
   function closeDrawer() {
-    // 1. If we have a drawer history state, just go back. 
-    // The onpopstate event will handle the visual closing of the drawer.
     if(window.history.state && window.history.state.drawer) {
       window.history.back();
     } else {
-      // 2. Fallback: If no history state exists (rare edge case), close manually
       document.getElementById('pdpOverlay').classList.remove('active');
       document.getElementById('pdpDrawer').classList.remove('active');
       activeProduct = null;
@@ -286,10 +311,9 @@
     
     updateCartIcon();
 
-    // === SWITCH TO SUCCESS STATE ===
     const addBtn = document.getElementById('addToBagBtn');
     addBtn.textContent = "Added! ✨";
-    addBtn.style.background = "#15803d"; // Green
+    addBtn.style.background = "#15803d"; 
 
     setTimeout(() => {
       addBtn.classList.add('btn-hidden');
