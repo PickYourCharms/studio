@@ -395,7 +395,8 @@ function calculateTotals() {
     subtotal += readyMadeTotal; // 3. NEW: Add to final subtotal
 
     // ... The rest of the logic remains exactly the same ...
-    bracelets.sort((a,b) => a-b);
+bracelets.sort((a,b) => a-b);
+    earrings.sort((a,b) => a-b); // <--- ADD THIS LINE
     let comboDiscount = 0;
     const pairs = Math.min(bracelets.length, earrings.length);
     for(let i=0; i<pairs; i++) comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
