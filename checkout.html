@@ -1,685 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Checkout - PickYourCharms</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=6.3">
-  <link rel="stylesheet" href="desktop.css">
-  <script src="desktop.js"></script>
 
-  <style>
-    /* === INTERNAL OVERRIDES FOR CHECKOUT === */
-    body { background-color: #ffffff; }
+document.addEventListener("DOMContentLoaded", function() {
     
-    .checkout-container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 0 16px 120px 16px;
+    // 1. Check if we are on a Desktop
+    const isDesktop = window.matchMedia("(min-width: 1025px)").matches;
+
+    if (isDesktop) {
+        optimizeForDesktop();
+        hijackWhatsAppForDesktop();
     }
 
-    /* === FORM STYLES === */
-    .section-title {
-      font-size: 15px; font-weight: 700; color: #111;
-      margin-bottom: 12px; margin-top: 24px;
-    }
-    .section-desc { font-size: 13px; color: #888; margin-top: -8px; margin-bottom: 16px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block; font-size: 13px; font-weight: 600; color: #444;
-      margin-bottom: 6px; margin-left: 4px;
-    }
-    .required-star { color: #dc2626; margin-left: 2px; }
-    .optional-tag { color: #999; font-weight: 400; font-size: 12px; margin-left: 4px; }
-
-    .premium-input {
-      width: 100%; padding: 14px 16px;
-      background: #fafafa; border: 1px solid #e5e5e5;
-      border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 16px; color: #111; outline: none;
-      transition: all 0.2s ease; appearance: none;
-    }
-    .premium-input:focus { background: #fff; border-color: #000; box-shadow: 0 0 0 1px #000; }
-    .premium-input[readonly] { background-color: #f3f4f6; color: #888; border-color: #e5e5e5; pointer-events: none; }
-    .premium-input.input-error { border-color: #dc2626 !important; background-color: #fef2f2 !important; animation: shake 0.3s ease; }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-
-    /* Phone & Errors */
-    .phone-wrapper { position: relative; }
-    .phone-prefix {
-      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-      font-size: 16px; color: #111; font-weight: 500; pointer-events: none;
-      display: flex; align-items: center; gap: 6px;
-    }
-    input.phone-field { padding-left: 85px; }
-    
-    .form-row { display: flex; gap: 12px; }
-    .form-col { flex: 1; }
-
-    /* Vibe & Toggle */
-    .vibe-scroll-container {
-      display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
-      margin: 0 -16px 20px -16px; padding-left: 16px; padding-right: 16px; scrollbar-width: none;
-    }
-    .vibe-scroll-container::-webkit-scrollbar { display: none; }
-    .vibe-chip {
-      padding: 10px 20px; background: #fff; border: 1px solid #eee;
-      border-radius: 999px; font-size: 14px; font-weight: 600; color: #555;
-      white-space: nowrap; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    }
-    .vibe-chip.selected { background: #000; color: #fff; border-color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-    .toggle-container {
-      display: flex; justify-content: space-between; align-items: center;
-      background: #f9f9f9; padding: 16px; border-radius: 16px; margin-bottom: 24px;
-    }
-    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 24px; width: 24px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    input:checked + .slider { background-color: #000; }
-    input:checked + .slider:before { transform: translateX(22px); }
-
-    .hidden-section { display: none; animation: slideDown 0.3s ease forwards; }
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Receipt */
-    .receipt-card {
-      background: #fff; border: 1px solid #f0f0f0; border-radius: 20px;
-      padding: 24px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); margin-top: 30px;
-    }
-    .bill-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #555; }
-    .bill-row.total { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #ddd; font-size: 18px; font-weight: 800; color: #000; }
-    .discount-text { color: #15803d; }
-
-    /* Footer & Button */
-    .sticky-footer {
-      position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
-      padding: 16px; border-top: 1px solid #f0f0f0; display: flex; justify-content: center;
-      z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-    }
-    
-    /* === WHATSAPP BUTTON === */
-    .whatsapp-btn {
-      width: 100%; max-width: 500px; 
-      background: #25D366; 
-      color: #fff;
-      border: none; padding: 16px 24px; 
-      border-radius: 999px; 
-      font-size: 16px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; 
-      gap: 12px; cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s;
-      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.25);
-    }
-    .whatsapp-btn:active { transform: scale(0.98); opacity: 0.9; }
-
-    .helper-text { font-size: 12px; color: #666; margin-top: 4px; }
-    
-    /* Modals */
-    .modal {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px);
-    }
-    .modal-card {
-      background: #fff; border-radius: 18px; padding: 24px; width: 86%; max-width: 320px; text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-    .modal h3 { margin: 0 0 8px; font-size: 18px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
-    .modal-actions button { flex: 1; padding: 14px; border-radius: 999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px;}
-    .primary { background: #000; color: #fff; }
-    .secondary { background: #f0f0f0; color: #000; }
-  </style>
-</head>
-
-<body>
-
-<header class="navbar">
-  <div class="nav-left">
-    <button class="nav-btn" onclick="handleBackNavigation()">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-      </svg>
-    </button>
-  </div>
-
-  <div class="nav-center">
-    <span style="font-weight: 700; font-size: 16px;">Checkout</span>
-  </div>
-
-  <div class="nav-right">
-    <div style="width: 40px;"></div>
-  </div>
-</header>
-
-<div class="checkout-container">
-  
-  <h3 class="section-title" style="margin-top: 20px;">What's the vibe? ☁️</h3>
-  <p class="section-desc">Helps us pack it right (Optional)</p>
-  
-  <div class="vibe-scroll-container">
-    <button class="vibe-chip" onclick="selectVibe(this, 'Calm')">Calm 🌿</button>
-    <button class="vibe-chip" onclick="selectVibe(this, 'Romantic')">Romantic 🌹</button>
-    <button class="vibe-chip" onclick="selectVibe(this, 'Dark')">Dark 🖤</button>
-    <button class="vibe-chip" onclick="selectVibe(this, 'Playful')">Playful 🍭</button>
-    <button class="vibe-chip" onclick="selectVibe(this, 'Minimal')">Minimal ✨</button>
-    <button class="vibe-chip" onclick="selectVibe(this, 'Other')">Other ✏️</button>
-  </div>
-  <div id="otherVibeInput" class="form-group" style="display:none;">
-    <input type="text" id="vibeText" class="premium-input" placeholder="Type your vibe here..." oninput="saveDraft()">
-  </div>
-
-  <h3 class="section-title" style="margin-top: 30px;">Contact Info</h3>
-  
-  <div class="form-group">
-    <label class="form-label">Full Name <span class="required-star">*</span></label>
-    <input type="text" id="customerName" class="premium-input" placeholder="e.g. Ananya Singh" 
-           autocomplete="name" 
-           oninput="validateInput(this); saveDraft()">
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Phone Number <span class="required-star">*</span></label>
-    <div class="phone-wrapper">
-      <span class="phone-prefix">🇮🇳 +91</span>
-      <input type="tel" id="customerPhone" class="premium-input phone-field" placeholder="98765 43210" 
-             autocomplete="tel"
-             oninput="handlePhoneInput(event, this)" 
-             onblur="saveDraft()">
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Email Address <span class="required-star">*</span></label>
-    <input type="email" id="customerEmail" class="premium-input" placeholder="name@example.com" 
-           autocomplete="email"
-           oninput="validateInput(this); saveDraft()">
-  </div>
-
-  <div class="toggle-container" style="margin-top: 30px;">
-    <div>
-      <div style="font-weight: 700; font-size: 15px;">Is this a gift? 🎁</div>
-      <div style="font-size: 12px; color: #888;">We'll pack it extra special</div>
-    </div>
-    <label class="switch">
-      <input type="checkbox" id="isGift" onchange="toggleGiftSection()">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <div id="giftSection" class="hidden-section">
-    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-bottom:20px;">
-      <input type="checkbox" id="copyDetails" onchange="copyContactDetails()" style="width:18px; height:18px;">
-      <label for="copyDetails" style="font-size:14px; font-weight:600;">Same as contact info</label>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Receiver Name <span class="required-star">*</span></label>
-      <input type="text" id="receiverName" class="premium-input" oninput="validateInput(this); saveDraft()">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Receiver Phone <span class="required-star">*</span></label>
-      <div class="phone-wrapper">
-        <span class="phone-prefix">🇮🇳 +91</span>
-        <input type="tel" id="receiverPhone" class="premium-input phone-field" 
-               oninput="handlePhoneInput(event, this)" 
-               onblur="saveDraft()">
-      </div>
-    </div>
-
-    <div class="form-row" style="margin-top: 16px;">
-      <div class="form-col">
-        <label class="form-label">Relation <span class="optional-tag">(Optional)</span></label>
-        <input type="text" id="relation" class="premium-input" placeholder="Sister..." oninput="saveDraft()">
-      </div>
-      <div class="form-col">
-        <label class="form-label">Occasion <span class="optional-tag">(Optional)</span></label>
-        <input type="text" id="occasion" class="premium-input" placeholder="Birthday..." oninput="saveDraft()">
-      </div>
-    </div>
-
-    <div class="form-group" style="margin-top: 16px;">
-      <label class="form-label">Message on Card <span class="optional-tag">(Optional)</span></label>
-      <input type="text" id="giftMessage" class="premium-input" placeholder="Write a short note..." oninput="saveDraft()">
-    </div>
-  </div>
-
-  <h3 class="section-title" style="margin-top: 30px;">Shipping Address</h3>
-  
-  <div class="form-group">
-    <label class="form-label">Flat / House No / Building <span class="required-star">*</span></label>
-    <input type="text" id="addressLine1" class="premium-input" placeholder="e.g. 104, Sunrise Apartments" 
-           autocomplete="address-line1"
-           oninput="validateInput(this); saveDraft()">
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Road Name / Area / Colony <span class="required-star">*</span></label>
-    <input type="text" id="addressLine2" class="premium-input" placeholder="e.g. MG Road, Indiranagar" 
-           autocomplete="address-line2"
-           oninput="validateInput(this); saveDraft()">
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Landmark <span class="optional-tag">(Optional)</span></label>
-    <input type="text" id="landmark" class="premium-input" placeholder="e.g. Near Metro Station" oninput="saveDraft()">
-  </div>
-
-  <div class="form-group">
-    <label class="form-label">Pincode <span class="required-star">*</span></label>
-    <input type="tel" id="pincode" class="premium-input" placeholder="560001" maxlength="6" 
-           autocomplete="postal-code"
-           oninput="handlePincodeInput(this)">
-    <div id="pincodeMsg" class="helper-text"></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-col">
-      <label class="form-label">City</label>
-      <input type="text" id="city" class="premium-input" placeholder="City" readonly autocomplete="address-level2">
-    </div>
-    <div class="form-col">
-      <label class="form-label">State</label>
-      <input type="text" id="state" class="premium-input" placeholder="State" readonly autocomplete="address-level1">
-    </div>
-  </div>
-
-  <div class="receipt-card">
-    <h3 class="section-title" style="margin-top:0; margin-bottom: 20px;">Payment Summary</h3>
-    
-    <div>
-      <div class="bill-row"><span>Subtotal</span><span id="subtotalVal">Rs. 0</span></div>
-      <div class="bill-row discount-text" id="comboRow" style="display:none;"><span>Combo Savings</span><span id="comboVal">-Rs. 0</span></div>
-      <div class="bill-row discount-text" id="couponRow" style="display:none;"><span>Coupon</span><span id="couponVal">-Rs. 0</span></div>
-      <div class="bill-row"><span>Shipping</span><span id="shippingVal">Rs. 80</span></div>
-      <div class="bill-row total"><span>Total Payable</span><span id="finalTotal">Rs. 0</span></div>
-    </div>
-  </div>
-
-</div>
-
-<div class="sticky-footer">
-  <button class="whatsapp-btn" onclick="proceedToWhatsApp()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-    </svg>
-    Pay on WhatsApp
-  </button>
-</div>
-
-<div id="confirmBackModal" class="modal">
-  <div class="modal-card">
-    <h3>Go back to cart?</h3>
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved.</p>
-    <div class="modal-actions">
-      <button class="secondary" onclick="confirmGoBack()">Go Back</button>
-      <button class="primary" onclick="closeModal()">Stay Here</button>
-    </div>
-  </div>
-</div>
-
-<div id="orderConfirmationModal" class="modal">
-  <div class="modal-card">
-    <h3>Did you place the order?</h3>
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">Help us update your cart status.</p>
-    <div class="modal-actions">
-      <button class="secondary" onclick="dismissOrderConfirmation()">No, I didn't</button>
-      <button class="primary" onclick="confirmOrderPlaced()">Yes, Placed!</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // === CONFIG ===
-  const PHONE_NUMBER = "918910344676"; 
-  const BASE_PRICE = 249;
-  const EXTRA_CHARM_PRICE = 50;
-
-  let cart = [];
-  let appliedCoupon = null;
-  let currentVibe = "";
-  
-  // Flag to track if the back action came from the Device Button
-  let isDeviceBack = false;
-  
-  function init() {
-    const cartData = localStorage.getItem('pyc_cart');
-    if (!cartData || JSON.parse(cartData).length === 0) {
-      window.location.href = 'cart.html';
-      return;
-    }
-    cart = JSON.parse(cartData);
-    const couponData = sessionStorage.getItem('pyc_applied_coupon');
-    if (couponData) appliedCoupon = JSON.parse(couponData);
-
-    sessionStorage.setItem('pyc_checkout_visited', 'true');
-
-    restoreDraft();
-    calculateTotals();
-
-    // === ROBUST BACK BUTTON TRAP ===
-    // 1. Immediately push a "dummy" state to trap the first back button press
-    setTimeout(() => {
-      window.history.pushState({ page: 'checkout' }, null, window.location.href);
-    }, 100);
-
-    // 2. Listen for the Pop event (Triggered by Device Back Button)
-    window.onpopstate = function(event) {
-      isDeviceBack = true; // Mark that this came from the device
-      handleBackNavigation();
-    };
-  }
-
-  // --- CALCULATION LOGIC (Updated to include Ready-Made) ---
-  function calculateTotals() {
-    let subtotal = 0;
-    let readyMadeTotal = 0; // Track curated items
-    let bracelets = [], earrings = [];
-
-    const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
-    const getEPrice = () => BASE_PRICE;
-    
-    cart.forEach(item => {
-      // 1. INCLUDE CURATED ITEMS IN TOTAL
-      if (item.isReadyMade) {
-        readyMadeTotal += item.price;
-      }
-      else if(item.type === 'Bracelet') bracelets.push(getBPrice(item));
-      else if(item.type === 'Earrings') earrings.push(getEPrice());
-      else if(item.type.includes('Combo')) {
-        bracelets.push(getBPrice(item.bracelet));
-        earrings.push(getEPrice());
-      }
-    });
-
-    // 2. Add curated items to subtotal
-    subtotal += readyMadeTotal;
-
-    // 3. Add Custom Items
-    bracelets.forEach(p => subtotal += p);
-    earrings.forEach(p => subtotal += p);
-    
-    // 4. Calculate Discounts
-    bracelets.sort((a,b) => a-b);
-    let comboDiscount = 0;
-    const pairs = Math.min(bracelets.length, earrings.length);
-    for(let i=0; i<pairs; i++) comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
-    
-    let discountable = subtotal - comboDiscount;
-    let couponDisc = 0;
-    let freeShip = false;
-    
-    if (appliedCoupon) {
-      if (appliedCoupon.freeShip) freeShip = true;
-      else if (discountable >= appliedCoupon.minOrder) couponDisc = Math.floor(discountable * (appliedCoupon.percent / 100));
-    }
-    
-    const pincode = document.getElementById('pincode').value;
-    let shipping = 80;
-    const msg = document.getElementById('pincodeMsg');
-    
-    if (freeShip || (discountable - couponDisc >= 399)) {
-      shipping = 0; msg.textContent = "Free shipping applied! ✨"; msg.style.color = "#15803d";
-    } else if (pincode && pincode.startsWith("560")) {
-      shipping = 50; msg.textContent = "Local delivery: Rs. 50 🛵"; msg.style.color = "#15803d";
-    } else {
-      msg.textContent = "Standard Shipping: Rs. 80"; msg.style.color = "#666";
-    }
-    
-    const total = subtotal - comboDiscount - couponDisc + shipping;
-    
-    document.getElementById('subtotalVal').textContent = `Rs. ${subtotal}`;
-    
-    const comboEl = document.getElementById('comboRow');
-    if(comboDiscount > 0) { comboEl.style.display = 'flex'; document.getElementById('comboVal').textContent = `-Rs. ${comboDiscount}`; } else comboEl.style.display = 'none';
-    
-    const coupEl = document.getElementById('couponRow');
-    if(couponDisc > 0) { coupEl.style.display = 'flex'; document.getElementById('couponVal').textContent = `-Rs. ${couponDisc}`; } else coupEl.style.display = 'none';
-    
-    document.getElementById('shippingVal').textContent = shipping === 0 ? "FREE" : `Rs. ${shipping}`;
-    document.getElementById('shippingVal').style.color = shipping === 0 ? "#15803d" : "#555";
-    document.getElementById('finalTotal').textContent = `Rs. ${total}`;
-  }
-
-  // --- STANDARD FORM LOGIC ---
-  function selectVibe(btn, vibe) {
-    document.querySelectorAll('.vibe-chip').forEach(b => b.classList.remove('selected'));
-    if(currentVibe === vibe) { currentVibe = ""; document.getElementById('otherVibeInput').style.display = 'none'; } 
-    else { btn.classList.add('selected'); currentVibe = vibe; document.getElementById('otherVibeInput').style.display = vibe === 'Other' ? 'block' : 'none'; }
-    saveDraft();
-  }
-  function toggleGiftSection() {
-    const isGift = document.getElementById('isGift').checked;
-    const sec = document.getElementById('giftSection');
-    if(isGift) { sec.style.display = 'block'; setTimeout(() => sec.scrollIntoView({behavior:"smooth", block:"center"}), 100); } 
-    else { sec.style.display = 'none'; }
-    saveDraft();
-  }
-  function copyContactDetails() {
-    if(document.getElementById('copyDetails').checked) {
-      document.getElementById('receiverName').value = document.getElementById('customerName').value;
-      const phone = document.getElementById('customerPhone').value;
-      document.getElementById('receiverPhone').value = phone;
-      validateInput(document.getElementById('receiverName'));
-      const e = { inputType: 'insertText' }; handlePhoneInput(e, document.getElementById('receiverPhone')); 
-    } else {
-      document.getElementById('receiverName').value = ''; document.getElementById('receiverPhone').value = '';
-    }
-    saveDraft();
-  }
-  function handlePhoneInput(e, el) {
-    let val = el.value.replace(/\D/g, '');
-    const isPaste = e.inputType && e.inputType.toLowerCase().includes('paste');
-    if (val.length > 10) { if (isPaste || val.length >= 12) val = val.slice(-10); else val = val.slice(0, 10); }
-    el.value = val; validateInput(el); saveDraft();
-  }
-  function handlePincodeInput(el) {
-    let val = el.value.replace(/\D/g, '');
-    if (val.length > 6) val = val.slice(0, 6);
-    el.value = val;
-    if(val.length === 6) fetchPincodeDetails(val);
-    validateInput(el); saveDraft(); calculateTotals();
-  }
-  function fetchPincodeDetails(pincode) {
-    const msg = document.getElementById('pincodeMsg'); msg.textContent = "Fetching location..."; msg.style.color = "#888";
-    fetch(`https://api.postalpincode.in/pincode/${pincode}`).then(res => res.json()).then(data => {
-        if(data[0].Status === 'Success') {
-          const details = data[0].PostOffice[0];
-          document.getElementById('city').value = details.District; document.getElementById('state').value = details.State;
-          validateInput(document.getElementById('city')); validateInput(document.getElementById('state'));
-          msg.textContent = ""; saveDraft();
-        } else { msg.textContent = "Invalid Pincode"; msg.style.color = "#dc2626"; }
-      }).catch(err => { console.error(err); msg.textContent = ""; });
-  }
-  function validateInput(el) { if(el.value.trim() !== "") el.classList.remove('input-error'); }
-
-  // --- STORAGE (Fixed to prevent crashing) ---
-  function saveDraft() {
-    const getVal = (id) => {
-      const el = document.getElementById(id);
-      return el ? el.value : '';
-    };
-
-    const data = {
-      name: getVal('customerName'),
-      phone: getVal('customerPhone'),
-      email: getVal('customerEmail'),
-      addressLine1: getVal('addressLine1'),
-      addressLine2: getVal('addressLine2'),
-      landmark: getVal('landmark'),
-      city: getVal('city'),
-      state: getVal('state'),
-      pincode: getVal('pincode'),
-      vibe: currentVibe || "",
-      vibeText: getVal('vibeText'),
-      isGift: document.getElementById('isGift') ? document.getElementById('isGift').checked : false,
-      receiverName: getVal('receiverName'),
-      receiverPhone: getVal('receiverPhone'),
-      relation: getVal('relation'),
-      occasion: getVal('occasion'),
-      giftMessage: getVal('giftMessage')
-    };
-
-    try {
-      localStorage.setItem('checkout_draft_persistent', JSON.stringify(data));
-    } catch (e) {
-      console.warn("Local Storage full or disabled", e);
-    }
-  }
-
-  function restoreDraft() {
-    const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
-    if(!data) return;
-    document.getElementById('customerName').value = data.name || '';
-    document.getElementById('customerPhone').value = data.phone || '';
-    document.getElementById('customerEmail').value = data.email || '';
-    document.getElementById('addressLine1').value = data.addressLine1 || '';
-    document.getElementById('addressLine2').value = data.addressLine2 || '';
-    document.getElementById('landmark').value = data.landmark || '';
-    document.getElementById('city').value = data.city || '';
-    document.getElementById('state').value = data.state || '';
-    document.getElementById('pincode').value = data.pincode || '';
-    if(data.vibe) {
-      document.querySelectorAll('.vibe-chip').forEach(c => {
-        if(c.textContent.includes(data.vibe)) selectVibe(c, data.vibe);
-      });
-      if(data.vibe === 'Other') document.getElementById('vibeText').value = data.vibeText || '';
-    }
-    if(data.isGift) {
-      document.getElementById('isGift').checked = true;
-      toggleGiftSection();
-      document.getElementById('receiverName').value = data.receiverName || '';
-      document.getElementById('receiverPhone').value = data.receiverPhone || '';
-      document.getElementById('relation').value = data.relation || '';
-      document.getElementById('occasion').value = data.occasion || '';
-      document.getElementById('giftMessage').value = data.giftMessage || '';
-    }
-  }
-
-  // --- WHATSAPP LOGIC ---
-  function generateOrderID() {
-    const now = new Date();
-    const dd = String(now.getDate()).padStart(2, '0');
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const yyyy = now.getFullYear();
-    const HH = String(now.getHours()).padStart(2, '0');
-    const MM = String(now.getMinutes()).padStart(2, '0');
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let rand = '';
-    for(let i=0; i<5; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
-    
-    let hasCustom = false; let hasReady = false;
-    cart.forEach(item => {
-        if (item.isReadyMade) {
-          hasReady = true;
-        } else {
-          const t = item.type.toLowerCase();
-          if(t.includes('bracelet') || t.includes('earring') || t.includes('combo')) hasCustom = true;
-          else hasReady = true; 
+    // --- LOGIC: MOVE CHECKOUT BUTTON (CART PAGE) ---
+    function optimizeForDesktop() {
+        // On Cart page, move the fixed bottom button into the summary box
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const summaryBox = document.querySelector('.bill-summary');
+        
+        if (checkoutBtn && summaryBox) {
+            // Append button inside the summary box
+            summaryBox.appendChild(checkoutBtn);
         }
-    });
-    let typeCode = 'CM'; 
-    if(hasCustom && hasReady) typeCode = 'MX';
-    else if(!hasCustom && hasReady) typeCode = 'RM';
-    return `PYC-${typeCode}-${dd}${mm}${yyyy}-${HH}${MM}-${rand}`;
-  }
-
-  function proceedToWhatsApp() {
-    let isValid = true;
-    let firstError = null;
-    const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
-    if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
-    mandatoryIds.forEach(id => {
-      const el = document.getElementById(id);
-      const val = el.value.trim();
-      let error = false;
-      if(!val) error = true;
-      if(id.includes('Phone') && val.length !== 10) error = true;
-      if(id === 'pincode' && val.length !== 6) error = true;
-      if(error) { el.classList.add('input-error'); isValid = false; if(!firstError) firstError = el; } 
-      else el.classList.remove('input-error');
-    });
-    if(!isValid) { firstError.scrollIntoView({behavior: 'smooth', block: 'center'}); firstError.focus(); return; }
-
-    saveDraft(); 
-
-    const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
-    const total = document.getElementById('finalTotal').textContent;
-    const orderID = generateOrderID();
-    let itemsStr = "";
-    
-    cart.forEach((item, i) => {
-      let desc = "";
-      // Proper naming in WhatsApp message
-      if(item.isReadyMade) {
-        desc = item.title || "Ready-Made Piece"; 
-      }
-      else if(item.type === 'Bracelet') desc = `Bracelet (${item.charms.length} charms)`;
-      else if(item.type.includes('Combo')) desc = `Combo Set`;
-      else desc = item.type;
-      
-      itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
-    });
-
-    let addressBlock = `${data.addressLine1}\n${data.addressLine2}\n`;
-    if(data.landmark) addressBlock += `Landmark: ${data.landmark}\n`;
-    addressBlock += `${data.city}, ${data.state} - ${data.pincode}`;
-    let msg = `Hey PickYourCharms!✨\nI’ve just placed an order and here are the details 💌\n\n*Order ID:* ${orderID} ✨\n\n*Customer:* ${data.name}\nPhone: ${data.phone}\nEmail: ${data.email}\n\n*Address:*\n${addressBlock}\n\n*Order Details:*${itemsStr}\n\n*Total Payable: ${total}*`;
-    if(data.vibe) msg += `\n\n*Vibe:* ${data.vibe === 'Other' ? data.vibeText : data.vibe}`;
-    if(data.isGift) { msg += `\n\n🎁 *GIFT ORDER*\nTo: ${data.receiverName}\nPhone: ${data.receiverPhone}\nRelation: ${data.relation}\nOccasion: ${data.occasion}\nNote: ${data.giftMessage}`; }
-
-    const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-    document.getElementById('orderConfirmationModal').style.display = 'flex';
-  }
-
-  // === NAVIGATION LOGIC (Robust for Repeated Clicks) ===
-  
-  // 1. Triggered by BOTH Device Back Button (popstate) and In-App Button
-  function handleBackNavigation() {
-    // Show the modal
-    document.getElementById('confirmBackModal').style.display = 'flex';
-  }
-
-  // 2. User clicked "Stay Here"
-  function closeModal() { 
-    document.getElementById('confirmBackModal').style.display = 'none'; 
-    
-    // CRITICAL: If they came here via the Device Back Button (history popped), 
-    // we must push the state AGAIN to restore the "Trap".
-    if(isDeviceBack) {
-      window.history.pushState({ page: 'checkout' }, null, window.location.href);
-      isDeviceBack = false; // Reset flag so In-App buttons don't double-push
     }
-  }
 
-  // 3. User clicked "Go Back"
-  function confirmGoBack() { 
-    saveDraft(); 
-    window.location.href = 'cart.html'; 
-  }
+    // --- LOGIC: INTERCEPT WHATSAPP CLICK ---
+    function hijackWhatsAppForDesktop() {
+        const originalOpen = window.open;
 
-  // === ORDER CONFIRMATION MODAL ===
-  function confirmOrderPlaced() {
-    sessionStorage.removeItem('pyc_checkout_visited');
-    localStorage.removeItem('pyc_cart');
-    sessionStorage.removeItem('pyc_draft');
-    sessionStorage.removeItem('pyc_applied_coupon');
-    window.location.replace('index.html');
-  }
+        window.open = function(url, target) {
+            // Check if the URL is trying to go to WhatsApp
+            if (url && (url.includes('wa.me') || url.includes('whatsapp.com'))) {
+                // STOP! Show QR Code instead.
+                showQRCode(url);
+                return null; // Prevent the tab from opening
+            } else {
+                return originalOpen(url, target);
+            }
+        };
+    }
 
-  function dismissOrderConfirmation() {
-    document.getElementById('orderConfirmationModal').style.display = 'none';
-  }
+    // --- LOGIC: GENERATE & SHOW QR MODAL ---
+    function showQRCode(waUrl) {
+        // 1. Create the overlay structure
+        const overlay = document.createElement('div');
+        overlay.className = 'qr-modal-overlay';
+        overlay.style.display = 'flex';
+        
+        // 2. Generate QR Code URL
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&bgcolor=ffffff&data=${encodeURIComponent(waUrl)}`;
 
-  init();
-</script>
+        // 3. Populate HTML with Close Button (X)
+        overlay.innerHTML = `
+            <div class="qr-card">
+                <button class="qr-close-icon">&times;</button>
+                <h3 class="qr-title">Scan to Pay 📱</h3>
+                <p class="qr-desc">
+                    Since you are on a desktop, open your phone camera and scan this code to send the order via WhatsApp.
+                </p>
+                <img src="${qrApiUrl}" class="qr-image" alt="Order QR Code">
+                <div style="font-size:13px; color:#888; margin-top:8px;">Waiting for scan...</div>
+            </div>
+        `;
 
-</body>
-</html>
+        // 4. Append to body
+        document.body.appendChild(overlay);
+
+        // 5. Handle Closing (X Button)
+        const closeBtn = overlay.querySelector('.qr-close-icon');
+        closeBtn.onclick = function() {
+            overlay.remove();
+        };
+
+        // Close on background click
+        overlay.onclick = function(e) {
+            if (e.target === overlay) overlay.remove();
+        }
+    }
+});
