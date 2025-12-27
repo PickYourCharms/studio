@@ -200,36 +200,76 @@
 </div>
 
 <script>
-  // === DATA ===
-  const PRODUCTS = [
-    { id: "curated_b_1", src: "TestReadyMadeBracelet1.png", price: 249, metal: "Gold", title: "Gold Butterfly Bracelet" },
-    { id: "curated_b_2", src: "TestReadyMadeBracelet2.png", price: 249, metal: "Gold", title: "Royal Gold Motif" },
-    { id: "curated_e_1", src: "TestReadyMadeEarring1.png", price: 249, metal: "Silver", title: "Silver Flutter Studs" },
-    { id: "curated_e_2", src: "TestReadyMadeEarring2.png", price: 249, metal: "Silver", title: "Crystal Wing Drops" }
-  ];
-
-  const IMG_PATH = "assets/readymade/"; 
+  // --- CONFIG ---
+  // API_URL and APP_DATA are loaded via config.js
+  
   let activeProduct = null;
+  let currentImageIndex = 0; // For carousel
 
+  // --- INIT ---
   function init() {
-    renderGrid();
+    // 1. Check Data Load
+    if (!APP_DATA || APP_DATA.readymade.length === 0) {
+      window.addEventListener('dataLoaded', init);
+      return;
+    }
+    
+    // 2. Initial Render
+    applyFilters();
     updateCartIcon();
+    
+    // 3. Setup Back Button
+    window.onpopstate = function(event) {
+      if (document.getElementById('pdpDrawer').classList.contains('active')) {
+        closeDrawer();
+      } else {
+        window.location.href = 'index.html';
+      }
+    };
   }
 
-  function renderGrid() {
+  // --- FILTER & RENDER ---
+  function applyFilters() {
+    const metal = document.getElementById('metalFilter').value;
+    const cat = document.getElementById('catFilter').value;
+    
+    const filtered = APP_DATA.readymade.filter(p => {
+      // Column 'metal' in sheet: Gold, Silver, Rose Gold
+      // Column 'category' in sheet: Earrings, Bracelet, Set
+      
+      const mMatch = (metal === 'All') || (p.metal === metal);
+      const cMatch = (cat === 'All') || (p.category === cat);
+      
+      return mMatch && cMatch;
+    });
+    
+    renderGrid(filtered);
+  }
+
+  function renderGrid(products) {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
-    PRODUCTS.forEach(p => {
+    
+    if(products.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">No items found matching filters.</div>';
+      return;
+    }
+
+    products.forEach(p => {
+      // Parse CSV Images
+      const images = p.image_filenames ? p.image_filenames.split(',').map(s => s.trim()) : ['placeholder.png'];
+      const mainImg = 'assets/readymade/' + images[0];
+
       const card = document.createElement('div');
       card.className = 'prod-card';
       card.onclick = () => openDrawer(p);
       card.innerHTML = `
         <div class="prod-img-wrapper">
-          <img src="${IMG_PATH}${p.src}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
+          <img src="${mainImg}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
         </div>
         <div class="prod-info">
-          <h3 class="prod-title">${p.title}</h3>
-          <div class="prod-meta">${p.metal} Base</div>
+          <h3 class="prod-title">${p.product_name}</h3>
+          <div class="prod-meta">${p.metal} | ${p.category}</div>
           <div class="prod-price">Rs. ${p.price}</div>
         </div>
       `;
@@ -237,60 +277,96 @@
     });
   }
 
+  // --- DRAWER LOGIC ---
   function openDrawer(product) {
     activeProduct = product;
+    currentImageIndex = 0;
     
-    // Reset Buttons to Initial State
+    // Reset UI
     document.getElementById('addToBagBtn').classList.remove('btn-hidden');
     document.getElementById('addToBagBtn').textContent = "Add to Bag";
+    document.getElementById('addToBagBtn').style.background = "#000";
     document.getElementById('shopMoreBtn').classList.add('btn-hidden');
     document.getElementById('viewCartBtn').classList.add('btn-hidden');
 
-    // Populate Data
-    document.getElementById('drawerTitle').textContent = product.title;
+    // Populate Info
+    document.getElementById('drawerTitle').textContent = product.product_name;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
-    document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
-    document.getElementById('drawerImg').src = `${IMG_PATH}${product.src}`; 
+    document.getElementById('drawerMetal').textContent = `${product.metal} • ${product.category}`;
+    
+    // Description (Handle newlines)
+    const descHTML = product.description.replace(/\n/g, '<br>');
+    document.getElementById('drawerDesc').innerHTML = descHTML; // Ensure you have this ID in HTML or map correctly
+
+    // Carousel Setup
+    renderCarouselImages();
     
     document.getElementById('pdpOverlay').classList.add('active');
     document.getElementById('pdpDrawer').classList.add('active');
     
+    // Push History State
     window.history.pushState({ drawer: true }, null, "");
   }
 
+  function renderCarouselImages() {
+    const images = activeProduct.image_filenames ? activeProduct.image_filenames.split(',').map(s => s.trim()) : [];
+    const container = document.getElementById('pdpImageContainer');
+    
+    // Clear previous
+    container.innerHTML = ''; 
+    
+    // Create Image Element
+    const imgEl = document.createElement('img');
+    imgEl.className = 'pdp-main-img';
+    imgEl.src = 'assets/readymade/' + images[currentImageIndex];
+    
+    // Add Click to Advance
+    if (images.length > 1) {
+      imgEl.onclick = nextImage;
+      // Add visual hint
+      const hint = document.createElement('div');
+      hint.className = 'carousel-hint';
+      hint.textContent = `${currentImageIndex + 1} / ${images.length}`;
+      hint.style.cssText = "position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.5); color:#fff; padding:4px 8px; border-radius:12px; font-size:12px;";
+      container.appendChild(hint);
+    }
+    
+    container.appendChild(imgEl);
+    
+    // Add Close Button back (since we cleared container)
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-pdp-btn';
+    closeBtn.textContent = '✕';
+    closeBtn.onclick = (e) => { e.stopPropagation(); closeDrawer(); };
+    container.appendChild(closeBtn);
+  }
+
+  function nextImage() {
+    const images = activeProduct.image_filenames.split(',');
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+    renderCarouselImages();
+  }
+
   function closeDrawer() {
-    // 1. If we have a drawer history state, just go back. 
-    // The onpopstate event will handle the visual closing of the drawer.
     if(window.history.state && window.history.state.drawer) {
       window.history.back();
     } else {
-      // 2. Fallback: If no history state exists (rare edge case), close manually
       document.getElementById('pdpOverlay').classList.remove('active');
       document.getElementById('pdpDrawer').classList.remove('active');
       activeProduct = null;
     }
   }
-  
-  window.onpopstate = function(event) {
-    if (document.getElementById('pdpDrawer').classList.contains('active')) {
-      document.getElementById('pdpOverlay').classList.remove('active');
-      document.getElementById('pdpDrawer').classList.remove('active');
-      activeProduct = null;
-    } else {
-      window.location.href = 'index.html';
-    }
-  };
 
   function addToBag() {
     if(!activeProduct) return;
     
     const cartItem = {
-      id: Date.now(),
+      id: activeProduct.product_id, // Important: Use ID from Sheet
       type: "Ready-Made", 
       metal: activeProduct.metal,
-      price: activeProduct.price,
-      image: `${IMG_PATH}${activeProduct.src}`, 
-      title: activeProduct.title,
+      price: Number(activeProduct.price),
+      image: 'assets/readymade/' + activeProduct.image_filenames.split(',')[0].trim(),
+      title: activeProduct.product_name,
       charms: [], 
       isReadyMade: true
     };
@@ -301,7 +377,7 @@
     
     updateCartIcon();
 
-    // === SWITCH TO SUCCESS STATE ===
+    // Success State
     const addBtn = document.getElementById('addToBagBtn');
     addBtn.textContent = "Added! ✨";
     addBtn.style.background = "#15803d"; // Green
