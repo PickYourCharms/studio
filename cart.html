@@ -501,10 +501,19 @@ function renderCoupons() {
 
   drawerList.innerHTML = '';
   
-  // 1. Calculate Real Savings & Prepare Data
+  // 1. Get Config Values
   const shipFee = Number(CONFIG.shipping_fee_default) || 0;
+  const freeShipThreshold = Number(CONFIG.free_shipping_above) || 0;
   
-  const sortedCoupons = COUPONS_DB.map(c => {
+  // Check if the user ALREADY qualifies for automatic free shipping
+  const alreadyHasFreeShipping = currentTotal >= freeShipThreshold;
+
+  // 2. Filter & Sort Coupons
+  const sortedCoupons = COUPONS_DB.filter(c => {
+    // LOGIC: If user already has free shipping, HIDE "Free Shipping" coupons
+    if (alreadyHasFreeShipping && c.freeShip) return false;
+    return true;
+  }).map(c => {
     let savings = 0;
     if (c.freeShip) {
       savings = shipFee;
@@ -519,15 +528,12 @@ function renderCoupons() {
       missingAmount: c.minOrder - currentTotal
     };
   }).sort((a, b) => {
-    // SORTING LOGIC:
-    // 1. Unlocked coupons always show before Locked coupons
+    // Sort: Unlocked first, then by highest savings
     if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1;
-    
-    // 2. Within those groups, sort by Savings Amount (High to Low)
     return b.currentSavings - a.currentSavings;
   });
 
-  // 2. Featured Coupon (Pick the #1 from our sorted list)
+  // 3. Featured Coupon (Top 1)
   let bestCoupon = sortedCoupons[0];
   
   if (bestCoupon) {
@@ -553,17 +559,19 @@ function renderCoupons() {
       </div>
       ${actionBtn}
     `;
+  } else {
+    // If no coupons are left (e.g., only had free ship coupons and they are hidden), hide featured card content
+    featuredCard.innerHTML = `<div style="padding:10px; color:#888; font-size:13px;">No coupons available for this order.</div>`;
   }
 
-  // 3. Render the Sorted List
+  // 4. Render List
   sortedCoupons.forEach(coupon => {
     if(String(coupon.active).toUpperCase() !== 'TRUE') return;
 
     const isLocked = coupon.isLocked;
     const diff = coupon.missingAmount;
     
-    // LOGIC: Show "Save ₹Amount" if unlocked, otherwise keep "%" or "Free Ship"
-    // This prevents showing "Save ₹0" for locked coupons
+    // Smart Text: "Save ₹Amount" vs "Save %"
     let benefitText = "";
     if (isLocked) {
        benefitText = coupon.freeShip ? 'Free Shipping' : `Save ${coupon.percent}%`;
