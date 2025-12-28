@@ -497,14 +497,42 @@ function renderCoupons() {
   const currentTotal = getDiscountableAmount();
   const drawerList = document.getElementById('drawerList');
   const featuredCard = document.getElementById('featuredCouponCard');
-  
+  if(!drawerList || !featuredCard) return;
+
   drawerList.innerHTML = '';
   
-  let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
+  // 1. Calculate Real Savings & Prepare Data
+  const shipFee = Number(CONFIG.shipping_fee_default) || 0;
+  
+  const sortedCoupons = COUPONS_DB.map(c => {
+    let savings = 0;
+    if (c.freeShip) {
+      savings = shipFee;
+    } else {
+      savings = Math.floor(currentTotal * (c.percent / 100));
+    }
+    
+    return {
+      ...c,
+      currentSavings: savings,
+      isLocked: currentTotal < c.minOrder,
+      missingAmount: c.minOrder - currentTotal
+    };
+  }).sort((a, b) => {
+    // SORTING LOGIC:
+    // 1. Unlocked coupons always show before Locked coupons
+    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1;
+    
+    // 2. Within those groups, sort by Savings Amount (High to Low)
+    return b.currentSavings - a.currentSavings;
+  });
+
+  // 2. Featured Coupon (Pick the #1 from our sorted list)
+  let bestCoupon = sortedCoupons[0];
   
   if (bestCoupon) {
-    const isLocked = currentTotal < bestCoupon.minOrder;
-    const diff = bestCoupon.minOrder - currentTotal;
+    const isLocked = bestCoupon.isLocked;
+    const diff = bestCoupon.missingAmount;
     
     const conditionLine = isLocked 
       ? `<div style="font-size:12px; color:#7D5C29; font-weight:600; margin-top:4px;">Add items worth ₹${diff} to avail</div>` 
@@ -527,9 +555,21 @@ function renderCoupons() {
     `;
   }
 
-  COUPONS_DB.forEach(coupon => {
-    const isLocked = currentTotal < coupon.minOrder;
-    const diff = coupon.minOrder - currentTotal;
+  // 3. Render the Sorted List
+  sortedCoupons.forEach(coupon => {
+    if(String(coupon.active).toUpperCase() !== 'TRUE') return;
+
+    const isLocked = coupon.isLocked;
+    const diff = coupon.missingAmount;
+    
+    // LOGIC: Show "Save ₹Amount" if unlocked, otherwise keep "%" or "Free Ship"
+    // This prevents showing "Save ₹0" for locked coupons
+    let benefitText = "";
+    if (isLocked) {
+       benefitText = coupon.freeShip ? 'Free Shipping' : `Save ${coupon.percent}%`;
+    } else {
+       benefitText = `Save ₹${coupon.currentSavings} with this code`;
+    }
     
     let actionBtn = isLocked 
       ? `<button class="c-apply-btn" disabled>APPLY</button>` 
@@ -557,7 +597,7 @@ function renderCoupons() {
           <span class="c-code">${coupon.code}</span>
           ${actionBtn}
         </div>
-        <div class="c-benefit">Save ${coupon.freeShip ? 'Shipping' : coupon.percent + '%'}</div>
+        <div class="c-benefit">${benefitText}</div>
         <div class="c-desc">${coupon.desc}</div>
         ${footerHtml}
       </div>
