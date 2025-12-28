@@ -137,8 +137,8 @@ h2 { margin: 8px 0 10px; text-align: center; }
 <script>
 // --- UPDATED: Load from Google Sheet Data ---
 const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249; 
-const ALLOWANCE = Number(CONFIG.bracelet_base_charm_allowance) || 50;
+const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 0; 
+const ALLOWANCE = Number(CONFIG.bracelet_base_charm_allowance) || 0;
 
 // Metadata: Define prices and premium status here
 const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
@@ -267,7 +267,7 @@ function calculateCurrentPrice() {
   let total = BASE_PRICE;
   
   charms.forEach((file, index) => {
-    const meta = CHARM_METADATA[file] || { price: 50 }; 
+    const meta = CHARM_METADATA[file] || { price: 0 }; 
     if (index === 0) {
       // First charm logic
       total += Math.max(0, meta.price - ALLOWANCE);
