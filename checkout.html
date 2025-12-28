@@ -334,17 +334,23 @@
 </div>
 
 <script>
-  // === CONFIG ===
-  // --- UPDATED CONFIG ---
-const API_URL = window.SCRIPT_URL || "https://script.google.com/macros/s/AKfycbwdvv7OsOR7zlwkQSCEpvm2o6m0IpDXmUuHI9wLmf6SzXQl9kwBv1HlIyBwYNmU4pEq/exec"; // <--- IMPORTANT: Paste the URL you got in Step 2 here!
-const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-const PHONE_NUMBER = "918910344676"; // Your WhatsApp Number
-const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 0;
+  // ===================================
+  // ✅ CHECKOUT LOGIC: MATCHING CART EXACTLY
+  // ===================================
+
+  // --- CONFIG & CONSTANTS ---
+  const API_URL = window.SCRIPT_URL || "https://script.google.com/macros/s/AKfycbwdvv7OsOR7zlwkQSCEpvm2o6m0IpDXmUuHI9wLmf6SzXQl9kwBv1HlIyBwYNmU4pEq/exec"; 
+  const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
+  const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
+  const PHONE_NUMBER = "918910344676"; // Your WhatsApp Number
+
+  // Pricing Basics
+  const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 0;
+  const EARRING_BASE_PRICE = Number(CONFIG.earring_base_price) || 0;
 
   let cart = [];
   let appliedCoupon = null;
   let currentVibe = "";
-  // New Flag to track back button source
   let isDeviceBack = false;
   
   function init() {
@@ -362,67 +368,127 @@ const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 0;
     restoreDraft();
     calculateTotals();
 
-    // === BACK BUTTON INTERCEPTION SETUP ===
-    // 1. Push a dummy state so we have something to pop
+    // === BACK BUTTON INTERCEPTION ===
     setTimeout(() => {
       window.history.pushState({ page: 'checkout' }, null, window.location.href);
     }, 100);
 
-    // 2. Listen for the Pop event (Device Back Button)
     window.onpopstate = function(event) {
-      isDeviceBack = true; // Mark that this came from the device button
+      isDeviceBack = true; 
       handleBackNavigation();
     };
   }
 
-  // ... (Keep existing Logic Functions: calculateTotals, selectVibe, etc.) ...
-// --- UPDATED CHECKOUT CALCULATION ---
-function calculateTotals() {
-    let totalRaw = 0;
-    cart.forEach(i => totalRaw += i.price);
+  // ===================================
+  // ✅ HELPER: PRICING FUNCTIONS (Need these to calc Gross Total)
+  // ===================================
+  
+  function getBPrice(b) {
+    let total = BASE_PRICE;
+    const ALLOWANCE = Number(CONFIG.bracelet_base_charm_allowance) || 0;
+    
+    b.charms.forEach((file, index) => {
+      const meta = CHARM_METADATA[file] || { price: 0 };
+      if (index === 0) {
+        total += Math.max(0, meta.price - ALLOWANCE);
+      } else {
+        total += meta.price;
+      }
+    });
+    return total;
+  }
 
-    const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
+  function getEPrice(e) {
+    let total = EARRING_BASE_PRICE;
+    const ALLOWANCE = Number(CONFIG.earring_base_charm_allowance) || 0;
     
-    let singleBracelets = cart.filter(i => i.type === 'Bracelet').map(i => i.price);
-    let singleEarrings = cart.filter(i => i.type === 'Earrings').map(i => i.price);
-    singleBracelets.sort((a,b) => a-b);
-    singleEarrings.sort((a,b) => a-b);
+    if (e.charms.left) {
+      const meta = CHARM_METADATA[e.charms.left] || { price: 0 };
+      total += Math.max(0, meta.price - ALLOWANCE);
+    }
+    if (e.charms.right) {
+      const meta = CHARM_METADATA[e.charms.right] || { price: 0 };
+      total += Math.max(0, meta.price - ALLOWANCE);
+    }
+    return total;
+  }
+
+  // ===================================
+  // ✅ UPDATED MATH: Shows True Value & Combo Savings Explicitly
+  // ===================================
+
+  function calculateTotals() {
+    let grossTotal = 0; // The price of all items IF bought individually
     
+    let allBracelets = [];
+    let allEarrings = [];
+
+    // 1. EXTRACT ALL ITEMS AT FULL SINGLE PRICE
+    cart.forEach(item => {
+      if (item.type.includes('Combo')) {
+        const bPrice = getBPrice(item.bracelet);
+        const ePrice = getEPrice(item.earrings);
+        
+        grossTotal += (bPrice + ePrice);
+        
+        allBracelets.push(bPrice);
+        allEarrings.push(ePrice);
+      } 
+      else if (item.type === 'Bracelet') {
+        const price = getBPrice(item);
+        grossTotal += price;
+        allBracelets.push(price);
+      } 
+      else if (item.type === 'Earrings') {
+        const price = getEPrice(item);
+        grossTotal += price;
+        allEarrings.push(price);
+      }
+      else if (item.isReadyMade) {
+        grossTotal += item.price;
+      }
+    });
+
+    // 2. CALCULATE COMBO SAVINGS
+    allBracelets.sort((a,b) => a-b);
+    allEarrings.sort((a,b) => a-b);
+
     let comboSavings = 0;
-    const pairs = Math.min(singleBracelets.length, singleEarrings.length);
+    const comboPercent = Number(CONFIG.combo_discount_percent) || 0;
+    
+    const pairs = Math.min(allBracelets.length, allEarrings.length);
     for(let i=0; i<pairs; i++) {
-      comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (COMBO_PERCENT / 100));
+      comboSavings += Math.floor((allBracelets[i] + allEarrings[i]) * (comboPercent / 100));
     }
 
-    const displayCartValue = totalRaw + comboSavings;
-    let subtotalAfterCombo = totalRaw - comboSavings;
-    
+    // 3. CALCULATE SUBTOTAL (After Combo, Before Coupon)
+    let subtotalAfterCombo = grossTotal - comboSavings;
+
+    // 4. CALCULATE COUPON DISCOUNT
     let couponDisc = 0;
-    let freeShip = false;
-    
+    let forceFreeShip = false;
+
     if (appliedCoupon) {
       if (appliedCoupon.freeShip) {
-        freeShip = true;
+        forceFreeShip = true;
       } 
       else if (subtotalAfterCombo >= appliedCoupon.minOrder) {
-        
-        // ✅ NEW: Flat Amount Check in Checkout
-        if (appliedCoupon.flatAmount && Number(appliedCoupon.flatAmount) > 0) {
+         if (appliedCoupon.flatAmount && Number(appliedCoupon.flatAmount) > 0) {
            couponDisc = Number(appliedCoupon.flatAmount);
-        } else {
-           // Standard % Logic
+         } else {
            let rawDisc = Math.floor(subtotalAfterCombo * (appliedCoupon.percent / 100));
            if (appliedCoupon.maxDiscount && Number(appliedCoupon.maxDiscount) > 0) {
-              rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
+             rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
            }
            couponDisc = rawDisc;
-        }
+         }
       }
     }
-    
+
     let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
 
-    // --- LEVERS: Shipping ---
+    // 5. CALCULATE SHIPPING
+    // Use Pincode logic if available, otherwise default
     const pincode = document.getElementById('pincode').value;
     const msg = document.getElementById('pincodeMsg');
     
@@ -432,37 +498,60 @@ function calculateTotals() {
     const localPrefix = String(CONFIG.local_pincode_prefix || "560");
 
     let shipping = defaultFee;
-    
-    if (freeShip || (subtotalPostDiscount >= freeThreshold)) {
+    let shippingText = "";
+    let shippingColor = "#111";
+
+    if (forceFreeShip || (subtotalPostDiscount >= freeThreshold)) {
       shipping = 0; 
-      msg.textContent = "Free shipping applied! ✨"; 
-      msg.style.color = "#15803d";
+      shippingText = "Free shipping applied! ✨"; 
+      shippingColor = "#15803d";
     } else if (pincode && pincode.startsWith(localPrefix)) {
       shipping = localFee; 
-      msg.textContent = `Local delivery: Rs. ${localFee} 🛵`; 
-      msg.style.color = "#15803d";
+      shippingText = `Local delivery: Rs. ${localFee} 🛵`; 
+      shippingColor = "#15803d";
     } else {
-      msg.textContent = `Standard Shipping: Rs. ${defaultFee}`; 
-      msg.style.color = "#666";
+      shippingText = `Standard Shipping: Rs. ${defaultFee}`; 
+      shippingColor = "#666";
     }
     
+    if(msg) {
+      msg.textContent = shippingText;
+      msg.style.color = shippingColor;
+    }
+
     const finalTotal = subtotalPostDiscount + shipping;
-    
-    // Render
-    document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
+
+    // --- RENDER TO HTML ---
+    document.getElementById('cartValueVal').textContent = `Rs. ${grossTotal}`;
     
     const comboEl = document.getElementById('comboRow');
-    if(comboSavings > 0) { comboEl.style.display = 'flex'; document.getElementById('comboVal').textContent = `-Rs. ${comboSavings}`; } 
-    else comboEl.style.display = 'none';
+    if(comboSavings > 0) { 
+      comboEl.style.display = 'flex'; 
+      document.getElementById('comboVal').textContent = `- Rs. ${comboSavings}`; 
+    } else {
+      comboEl.style.display = 'none';
+    }
 
     const coupEl = document.getElementById('couponRow');
-    if(couponDisc > 0) { coupEl.style.display = 'flex'; document.getElementById('couponVal').textContent = `-Rs. ${couponDisc}`; } 
-    else coupEl.style.display = 'none';
+    if(couponDisc > 0 || forceFreeShip) { 
+      coupEl.style.display = 'flex'; 
+      if (forceFreeShip) {
+         document.getElementById('couponVal').textContent = 'Free Shipping';
+      } else {
+         document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+      }
+    } else {
+      coupEl.style.display = 'none';
+    }
 
     document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
     document.getElementById('shippingVal').textContent = shipping === 0 ? "FREE" : `Rs. ${shipping}`;
     document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
-}
+  }
+
+  // ===================================
+  // ✅ EXISTING UI HANDLERS (Unchanged)
+  // ===================================
 
   function selectVibe(btn, vibe) {
     document.querySelectorAll('.vibe-chip').forEach(b => b.classList.remove('selected'));
@@ -509,7 +598,7 @@ function calculateTotals() {
           const details = data[0].PostOffice[0];
           document.getElementById('city').value = details.District; document.getElementById('state').value = details.State;
           validateInput(document.getElementById('city')); validateInput(document.getElementById('state'));
-          msg.textContent = ""; saveDraft();
+          msg.textContent = ""; saveDraft(); calculateTotals(); // Recalculate to update shipping msg
         } else { msg.textContent = "Invalid Pincode"; msg.style.color = "#dc2626"; }
       }).catch(err => { console.error(err); msg.textContent = ""; });
   }
@@ -578,150 +667,156 @@ function calculateTotals() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let rand = '';
     for(let i=0; i<5; i++) rand += chars.charAt(Math.floor(Math.random() * chars.length));
-    let hasCustom = false; let hasReady = false;
+    
+    // Determine type code based on content
+    let hasCustom = false; 
+    let hasReady = false;
     cart.forEach(item => {
         const t = item.type.toLowerCase();
         if(t.includes('bracelet') || t.includes('earring') || t.includes('combo')) hasCustom = true;
-        else hasReady = true; 
+        else if (item.isReadyMade) hasReady = true; 
     });
-    let typeCode = 'CM'; 
-    if(hasCustom && hasReady) typeCode = 'MX';
-    else if(!hasCustom && hasReady) typeCode = 'RM';
+    
+    let typeCode = 'CM'; // Custom
+    if(hasCustom && hasReady) typeCode = 'MX'; // Mixed
+    else if(!hasCustom && hasReady) typeCode = 'RM'; // Readymade
+    
     return `PYC-${typeCode}-${dd}${mm}${yyyy}-${HH}${MM}-${rand}`;
   }
 
   function proceedToWhatsApp() {
-  // 1. Validation 
-  let isValid = true;
-  let firstError = null;
-  const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
-  if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
-  
-  mandatoryIds.forEach(id => {
-    const el = document.getElementById(id);
-    const val = el.value.trim();
-    let error = false;
-    if(!val) error = true;
-    if(id.includes('Phone') && val.length !== 10) error = true;
-    if(id === 'pincode' && val.length !== 6) error = true;
-    if(error) { el.classList.add('input-error'); isValid = false; if(!firstError) firstError = el; } 
-    else el.classList.remove('input-error');
-  });
-
-  if(!isValid) { firstError.scrollIntoView({behavior: 'smooth', block: 'center'}); firstError.focus(); return; }
-
-  saveDraft(); 
-  
-  // Show Loading State
-  const btn = document.querySelector('.whatsapp-btn');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = "Processing Order... ↻";
-  btn.disabled = true;
-
-  // 2. Prepare Data
-  const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
-  const orderID = generateOrderID(); 
-  
-  // Clean up Cart Items for Sheet
-  const itemsClean = cart.map(item => {
-    return {
-      type: item.type,
-      metal: item.metal || (item.bracelet ? item.bracelet.metal : ''),
-      price: item.price,
-      charms: item.charms || [], 
-      title: item.title || ''
-    };
-  });
-
-  const payload = {
-    order_id: orderID,
-    order_type: "WhatsApp Checkout",
-    customer_name: data.name,
-    customer_phone: data.phone,
-    customer_email: data.email,
-    shipping_address: data.addressLine1 + ", " + data.addressLine2 + (data.landmark ? ", " + data.landmark : ""),
-    city: data.city,
-    pincode: data.pincode,
-    vibe: data.vibe,
-    vibe_custom_text: data.vibeText,
-    is_gift: data.isGift,
-    receiver_name: data.receiverName,
-    receiver_phone: data.receiverPhone,
-    relation: data.relation,
-    occasion: data.occasion,
-    gift_message: data.giftMessage,
-    items_json: itemsClean,
-    combo_applied: document.getElementById('comboRow').style.display !== 'none',
-    subtotal: document.getElementById('subtotalVal').textContent,
-    combo_discount: document.getElementById('comboVal').textContent,
-    coupon_code: appliedCoupon ? appliedCoupon.code : "",
-    coupon_discount: document.getElementById('couponVal').textContent,
-    shipping_fee: document.getElementById('shippingVal').textContent,
-    final_amount: document.getElementById('finalTotal').textContent,
-    device_type: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-    utm_source: "direct", 
-    utm_campaign: ""
-  };
-
-  // 3. Send to Google Sheet
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
-  .then(response => response.json())
-  .then(result => {
-    console.log("Order Saved:", result);
+    // 1. Validation 
+    let isValid = true;
+    let firstError = null;
+    const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
+    if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
     
-    // Construct WhatsApp Message
-    let itemsStr = "";
-    cart.forEach((item, i) => {
-      let desc = item.type;
-      if(item.type === 'Bracelet') desc += ` (${item.charms.length} charms)`;
-      else if(item.type.includes('Combo')) desc += ` (Combo)`;
-      itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
+    mandatoryIds.forEach(id => {
+      const el = document.getElementById(id);
+      const val = el.value.trim();
+      let error = false;
+      if(!val) error = true;
+      if(id.includes('Phone') && val.length !== 10) error = true;
+      if(id === 'pincode' && val.length !== 6) error = true;
+      if(error) { el.classList.add('input-error'); isValid = false; if(!firstError) firstError = el; } 
+      else el.classList.remove('input-error');
     });
-    
-    let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${data.name}\n\n*Items:*${itemsStr}\n\n*Total:* ${payload.final_amount}`;
-    
-    const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-    
-    document.getElementById('orderConfirmationModal').style.display = 'flex';
-    
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  })
-  .catch(error => {
-    console.error('Error saving order:', error);
-    alert("Network error. Opening WhatsApp anyway...");
-    const url = `https://wa.me/${PHONE_NUMBER}?text=Order%20${orderID}%20(Error%20Saving%20Data)`;
-    window.open(url, '_blank');
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  });
-}
 
-  // === NAVIGATION LOGIC (Device + In-App Back) ===
-  
-  // 1. Triggered by BOTH Device Back Button and In-App Back Button
+    if(!isValid) { firstError.scrollIntoView({behavior: 'smooth', block: 'center'}); firstError.focus(); return; }
+
+    saveDraft(); 
+    
+    // Show Loading State
+    const btn = document.querySelector('.whatsapp-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "Processing Order... ↻";
+    btn.disabled = true;
+
+    // 2. Prepare Data
+    const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
+    const orderID = generateOrderID(); 
+    
+    // Clean up Cart Items for Sheet
+    const itemsClean = cart.map(item => {
+      // Basic fields
+      let cleanItem = {
+        type: item.type,
+        metal: item.metal || (item.bracelet ? item.bracelet.metal : ''),
+        price: item.price,
+        charms: item.charms || [], 
+        title: item.title || ''
+      };
+      // Note: We send the 'item.price' which is the individual price (discounted if it's a combo stored that way, 
+      // but strictly speaking, the backend just needs to know WHAT was ordered).
+      return cleanItem;
+    });
+
+    const payload = {
+      order_id: orderID,
+      order_type: "WhatsApp Checkout",
+      customer_name: data.name,
+      customer_phone: data.phone,
+      customer_email: data.email,
+      shipping_address: data.addressLine1 + ", " + data.addressLine2 + (data.landmark ? ", " + data.landmark : ""),
+      city: data.city,
+      pincode: data.pincode,
+      vibe: data.vibe,
+      vibe_custom_text: data.vibeText,
+      is_gift: data.isGift,
+      receiver_name: data.receiverName,
+      receiver_phone: data.receiverPhone,
+      relation: data.relation,
+      occasion: data.occasion,
+      gift_message: data.giftMessage,
+      items_json: itemsClean,
+      
+      // Pass the EXACT values shown on screen
+      combo_applied: document.getElementById('comboRow').style.display !== 'none',
+      subtotal: document.getElementById('subtotalVal').textContent, // Post-discount
+      combo_discount: document.getElementById('comboVal').textContent,
+      coupon_code: appliedCoupon ? appliedCoupon.code : "",
+      coupon_discount: document.getElementById('couponVal').textContent,
+      shipping_fee: document.getElementById('shippingVal').textContent,
+      final_amount: document.getElementById('finalTotal').textContent,
+      
+      device_type: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+      utm_source: "direct", 
+      utm_campaign: ""
+    };
+
+    // 3. Send to Google Sheet
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log("Order Saved:", result);
+      
+      // Construct WhatsApp Message
+      let itemsStr = "";
+      cart.forEach((item, i) => {
+        let desc = item.type;
+        if(item.type === 'Bracelet') desc += ` (${item.charms.length} charms)`;
+        else if(item.type.includes('Combo')) desc += ` (Combo)`;
+        else if(item.isReadyMade) desc += ` (${item.title})`;
+        
+        itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
+      });
+      
+      let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${data.name}\n\n*Items:*${itemsStr}\n\n*Total:* ${payload.final_amount}`;
+      
+      const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+      
+      document.getElementById('orderConfirmationModal').style.display = 'flex';
+      
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    })
+    .catch(error => {
+      console.error('Error saving order:', error);
+      alert("Network error. Opening WhatsApp anyway...");
+      const url = `https://wa.me/${PHONE_NUMBER}?text=Order%20${orderID}%20(Error%20Saving%20Data)`;
+      window.open(url, '_blank');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    });
+  }
+
+  // === NAVIGATION LOGIC ===
   function handleBackNavigation() {
-    // Show the modal asking "Go back to cart?"
     document.getElementById('confirmBackModal').style.display = 'flex';
   }
 
-  // 2. User clicked "Stay Here" in the modal
   function closeModal() { 
     document.getElementById('confirmBackModal').style.display = 'none'; 
-    
-    // CRITICAL: If they came here via the Device Back Button, the history stack is now empty.
-    // We must push the state AGAIN to re-arm the back button protection.
     if(isDeviceBack) {
       window.history.pushState({ page: 'checkout' }, null, window.location.href);
-      isDeviceBack = false; // Reset flag
+      isDeviceBack = false;
     }
   }
 
-  // 3. User clicked "Go Back" in the modal
   function confirmGoBack() { 
     saveDraft(); 
     window.location.href = 'cart.html'; 
@@ -742,6 +837,5 @@ function calculateTotals() {
 
   init();
 </script>
-
 </body>
 </html>
