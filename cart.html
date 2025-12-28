@@ -130,7 +130,7 @@
   
 <script>
 // ===================================
-// ✅ FULLY FIXED: ALL GOOGLE SHEET DRIVEN
+// ✅ FULLY FIXED: PERSISTENT COUPONS & SHEET DRIVEN
 // ===================================
 
 // --- LOAD CONFIGURATION FROM GOOGLE SHEET ---
@@ -167,6 +167,22 @@ function init() {
   } else {
     emptyState.style.display = 'none';
     cartContent.style.display = 'block';
+    
+    // ✅ 1. RESTORE COUPON FROM SESSION STORAGE
+    const savedCoupon = sessionStorage.getItem('pyc_applied_coupon');
+    if (savedCoupon) {
+      try {
+        activeCoupon = JSON.parse(savedCoupon);
+        // Restore UI State
+        document.getElementById('couponSectionRaw').style.display = 'none';
+        document.getElementById('appliedCouponView').style.display = 'flex';
+        document.getElementById('appliedCouponText').textContent = `'${activeCoupon.code}' applied`;
+      } catch (e) {
+        console.error("Error restoring coupon", e);
+        sessionStorage.removeItem('pyc_applied_coupon');
+      }
+    }
+
     renderItems();
     renderCoupons();
     calculateTotals();
@@ -493,7 +509,7 @@ function getDiscountableAmount() {
   return subtotal - comboDiscount;
 }
 
-// ✅ NEW: Added public_listing check
+// ✅ ADDED: public_listing check
 function renderCoupons() {
   const currentTotal = getDiscountableAmount();
   const drawerList = document.getElementById('drawerList');
@@ -511,7 +527,7 @@ function renderCoupons() {
     // 1. Must be Active
     if(String(c.active).toUpperCase() !== 'TRUE') return false;
     
-    // 2. ✅ NEW: Check if 'public_listing' is TRUE
+    // 2. Check if 'public_listing' is TRUE
     if(String(c.public_listing).toUpperCase() !== 'TRUE') return false;
 
     // 3. Free ship check
@@ -666,6 +682,9 @@ function selectCoupon(code) {
   const coupon = COUPONS_DB.find(c => c.code === code);
   activeCoupon = coupon;
   
+  // ✅ 2. SAVE TO SESSION STORAGE
+  sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(coupon));
+
   closeCouponDrawer();
   
   document.getElementById('couponSectionRaw').style.display = 'none';
@@ -677,6 +696,9 @@ function selectCoupon(code) {
 
 function removeCoupon() {
   activeCoupon = null;
+  // ✅ 3. REMOVE FROM SESSION STORAGE
+  sessionStorage.removeItem('pyc_applied_coupon');
+
   document.getElementById('appliedCouponView').style.display = 'none';
   document.getElementById('couponSectionRaw').style.display = 'block';
   calculateTotals();
@@ -987,6 +1009,5 @@ document.getElementById('checkoutUpsellModal').onclick = function(e) {
   }
 };
 </script>
-
 </body>
 </html>
