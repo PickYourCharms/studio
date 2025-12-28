@@ -377,25 +377,27 @@ const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249;
   }
 
   // ... (Keep existing Logic Functions: calculateTotals, selectVibe, etc.) ...
+// --- UPDATED CHECKOUT CALCULATION ---
 function calculateTotals() {
     let totalRaw = 0;
     cart.forEach(i => totalRaw += i.price);
 
-    // Recalculate dynamic combo savings
+    // Dynamic Combo Savings (Sheet Lever)
+    const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
+    
     let singleBracelets = cart.filter(i => i.type === 'Bracelet').map(i => i.price);
     let singleEarrings = cart.filter(i => i.type === 'Earrings').map(i => i.price);
     singleBracelets.sort((a,b) => a-b);
     singleEarrings.sort((a,b) => a-b);
     
     let comboSavings = 0;
-    const comboPercent = Number(CONFIG.combo_discount_percent) || 10;
     const pairs = Math.min(singleBracelets.length, singleEarrings.length);
     for(let i=0; i<pairs; i++) {
-      comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (comboPercent / 100));
+      comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (COMBO_PERCENT / 100));
     }
 
     const displayCartValue = totalRaw + comboSavings;
-    let subtotalAfterCombo = displayCartValue - comboSavings;
+    let subtotalAfterCombo = totalRaw - comboSavings;
     
     let couponDisc = 0;
     let freeShip = false;
@@ -407,7 +409,7 @@ function calculateTotals() {
     
     let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
 
-    // --- SHEET SHIPPING LOGIC ---
+    // --- LEVERS: Shipping ---
     const pincode = document.getElementById('pincode').value;
     const msg = document.getElementById('pincodeMsg');
     
@@ -446,7 +448,6 @@ function calculateTotals() {
 
     document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
     document.getElementById('shippingVal').textContent = shipping === 0 ? "FREE" : `Rs. ${shipping}`;
-    document.getElementById('shippingVal').style.color = shipping === 0 ? "#15803d" : "#555";
     document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
 }
 
