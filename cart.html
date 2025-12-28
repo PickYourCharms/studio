@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3.7">
   <link rel="stylesheet" href="desktop.css">
-  
   <script src="store_data.js"></script>
   <script src="desktop.js"></script>
   <script src="navigation.js"></script>
@@ -56,7 +55,6 @@
     <div id="cartItemsList" class="cart-list"></div>
 
     <div class="bill-summary">
-      
       <div id="couponSectionRaw" class="coupon-section-container">
         <div class="featured-coupon-card" id="featuredCouponCard"></div>
         <div class="view-more-coupons" onclick="openCouponDrawer()">
@@ -111,35 +109,15 @@
 </div>
 
 <script>
-// --- 1. SAFE CONFIG LOADING (Fixes White Screen) ---
-let CONFIG = {};
-let COUPONS_DB = [];
-try {
-  // Try to load from Google Sheet data
-  CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-  COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
-} catch (e) {
-  console.log("Config load failed, using defaults");
-}
+// --- LOAD CONFIG & COUPONS ---
+const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
+const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
 
-// Fallback Coupons if Sheet is empty (Keeps your working code logic)
-if (COUPONS_DB.length === 0) {
-  COUPONS_DB = [
-    { code: "WELCOME10", percent: 10, minOrder: 299, desc: "Get 10% off on your first order", type: "10% OFF" },
-    { code: "CHARM20", percent: 20, minOrder: 999, desc: "20% off on orders above Rs. 999", type: "20% OFF" },
-    { code: "FREESHIP", percent: 0, minOrder: 499, desc: "Free Shipping on orders above 499", freeShip: true, type: "FREE SHIP" },
-    { code: "COMBO300", percent: 15, minOrder: 1500, desc: "Save big on bulk orders", type: "15% OFF" }
-  ];
-}
-
-// --- 2. DYNAMIC PRICING VARIABLES ---
-// We map the Sheet variables to your preferred variable names
-const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249; 
+// Dynamic Base Prices from Config
+const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249;
 const EARRING_BASE_PRICE = Number(CONFIG.earring_base_price) || 199;
-const EXTRA_CHARM_PRICE = 50; 
+const EXTRA_CHARM_PRICE = 50;
 const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
-const SHIPPING_FEE = Number(CONFIG.shipping_fee_default) || 80;
-const FREE_SHIPPING_THRESHOLD = Number(CONFIG.free_shipping_above) || 399;
 
 const REF_SIZE = 300; 
 const PHYSICS = { 
@@ -157,29 +135,20 @@ const emptyState = document.getElementById('emptyState');
 const cartContent = document.getElementById('cartContent');
 
 function init() {
-  try {
-    cartCountBadge.textContent = cart.length;
-    document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
+  cartCountBadge.textContent = cart.length;
+  document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
 
-    if (cart.length === 0) {
-      emptyState.style.display = 'flex';
-      cartContent.style.display = 'none';
-    } else {
-      emptyState.style.display = 'none';
-      cartContent.style.display = 'block'; // This un-hides the white screen
-      renderItems();
-      renderCoupons();
-      calculateTotals();
-    }
-  } catch (error) {
-    console.error("Critical Cart Error:", error);
-    // Emergency Un-hide so user doesn't see white screen even if JS fails
-    if (cart.length > 0) {
-        emptyState.style.display = 'none';
-        cartContent.style.display = 'block';
-    }
+  if (cart.length === 0) {
+    emptyState.style.display = 'flex';
+    cartContent.style.display = 'none';
+  } else {
+    emptyState.style.display = 'none';
+    cartContent.style.display = 'block';
+    renderItems();
+    renderCoupons();
+    calculateTotals();
   }
-
+  
   setTimeout(() => {
     window.history.pushState(null, null, window.location.href);
   }, 100);
@@ -382,6 +351,7 @@ function renderItems() {
         img.style.objectFit = 'contain'; 
         img.style.width = '100%';
         img.style.height = '100%';
+        img.style.transform = 'none'; 
         img.style.top = '0';
         img.style.left = '0';
         
@@ -428,15 +398,16 @@ function renderItems() {
   });
 }
 
-// --- COUPON & CALCULATION SYSTEM ---
+// --- COUPON SYSTEM (FIXED LOGIC) ---
 
 function getDiscountableAmount() {
   let bracelets = [];
   let earrings = [];
   let readyMadeTotal = 0; 
 
-  const getBPrice = (b) => BASE_PRICE + (b.charms.length > 1 ? (b.charms.length-1)*EXTRA_CHARM_PRICE : 0);
-  const getEPrice = () => EARRING_BASE_PRICE; // Use correct variable
+  // FIX: Accurate pricing for eligibility calculation
+  const getBPrice = (b) => BASE_PRICE + (b.charms.length-1)*EXTRA_CHARM_PRICE;
+  const getEPrice = () => EARRING_BASE_PRICE; // Fixed: uses earring price now
 
   cart.forEach(item => {
     if (item.isReadyMade) {
@@ -454,6 +425,7 @@ function getDiscountableAmount() {
   bracelets.forEach(p => subtotal += p);
   earrings.forEach(p => subtotal += p);
 
+  // Recalculate Combo Savings locally
   bracelets.sort((a,b) => a-b);
   earrings.sort((a,b) => a-b); 
   let comboDiscount = 0;
@@ -472,13 +444,14 @@ function renderCoupons() {
   
   drawerList.innerHTML = '';
   
-  // No need for safety check here because we set Fallbacks at the top of the script
-
-  let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
+  // Find best coupon for inline view
+  // FIX: Force minOrder to be a Number
+  let bestCoupon = COUPONS_DB.find(c => currentTotal >= Number(c.minOrder)) || COUPONS_DB[0];
   
   if (bestCoupon) {
-    const isLocked = currentTotal < bestCoupon.minOrder;
-    const diff = bestCoupon.minOrder - currentTotal;
+    const minOrderVal = Number(bestCoupon.minOrder) || 0;
+    const isLocked = currentTotal < minOrderVal;
+    const diff = minOrderVal - currentTotal;
     
     const conditionLine = isLocked 
       ? `<div style="font-size:12px; color:#7D5C29; font-weight:600; margin-top:4px;">Add items worth ₹${diff} to avail</div>` 
@@ -501,9 +474,11 @@ function renderCoupons() {
     `;
   }
 
+  // Render Drawer List
   COUPONS_DB.forEach(coupon => {
-    const isLocked = currentTotal < coupon.minOrder;
-    const diff = coupon.minOrder - currentTotal;
+    const minOrderVal = Number(coupon.minOrder) || 0;
+    const isLocked = currentTotal < minOrderVal;
+    const diff = minOrderVal - currentTotal;
     
     let actionBtn = isLocked 
       ? `<button class="c-apply-btn" disabled>APPLY</button>` 
@@ -511,7 +486,7 @@ function renderCoupons() {
       
     let footerHtml = '';
     if (isLocked) {
-      const percent = Math.min(100, (currentTotal / coupon.minOrder) * 100);
+      const percent = Math.min(100, (currentTotal / minOrderVal) * 100);
       footerHtml = `
         <div class="c-progress-bar"><div class="c-progress-fill" style="width:${percent}%"></div></div>
         <div class="c-progress-text">Add ₹${diff} more to unlock</div>
@@ -524,7 +499,7 @@ function renderCoupons() {
     card.className = 'swiss-coupon-card';
     card.innerHTML = `
       <div class="coupon-strip">
-        <span class="strip-text">${coupon.type || 'OFFER'}</span>
+        <span class="strip-text">${coupon.type}</span>
       </div>
       <div class="coupon-main">
         <div class="coupon-top-row">
@@ -545,10 +520,12 @@ function openCouponDrawer() {
   document.getElementById('couponDrawer').classList.add('active');
   renderCoupons();
 }
+
 function closeCouponDrawer() {
   document.getElementById('couponOverlay').classList.remove('active');
   document.getElementById('couponDrawer').classList.remove('active');
 }
+
 function selectCoupon(code) {
   const coupon = COUPONS_DB.find(c => c.code === code);
   activeCoupon = coupon;
@@ -558,6 +535,7 @@ function selectCoupon(code) {
   document.getElementById('appliedCouponText').textContent = `'${coupon.code}' applied`;
   calculateTotals();
 }
+
 function removeCoupon() {
   activeCoupon = null;
   document.getElementById('appliedCouponView').style.display = 'none';
@@ -566,7 +544,13 @@ function removeCoupon() {
   renderCoupons();
 }
 
-// --- MATH ---
+const originalDelete = deleteItem;
+deleteItem = function(index, subType) {
+    originalDelete(index, subType); 
+    renderCoupons();
+}
+
+// --- MATH & ACTIONS ---
 function calculateTotals() {
   let totalRaw = 0;
   cart.forEach(i => totalRaw += i.price);
@@ -589,18 +573,25 @@ function calculateTotals() {
   let forceFreeShip = false;
   
   if (activeCoupon) {
+    // FIX: Ensure minOrder is treated as number
+    const minOrderVal = Number(activeCoupon.minOrder) || 0;
+    
     if (activeCoupon.freeShip) forceFreeShip = true;
-    else if (subtotalAfterCombo >= activeCoupon.minOrder) {
+    else if (subtotalAfterCombo >= minOrderVal) {
       couponDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
     }
   }
 
   let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
+
+  const shipFee = Number(CONFIG.shipping_fee_default) || 80;
+  const freeShipThreshold = Number(CONFIG.free_shipping_above) || 399;
   
-  let shipping = SHIPPING_FEE;
-  if (forceFreeShip || (subtotalPostDiscount >= FREE_SHIPPING_THRESHOLD)) {
+  let shipping = shipFee;
+  if (forceFreeShip || (subtotalPostDiscount >= freeShipThreshold)) {
     shipping = 0;
   }
+  
   let finalTotal = subtotalPostDiscount + shipping;
 
   document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
@@ -623,11 +614,11 @@ function calculateTotals() {
   if (shipping === 0) {
     shipEl.textContent = 'FREE';
     shipEl.style.color = '#15803d';
-    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${FREE_SHIPPING_THRESHOLD})</span>`;
+    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${freeShipThreshold})</span>`;
   } else {
     shipEl.textContent = `Rs. ${shipping}`;
     shipEl.style.color = '#111';
-    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${FREE_SHIPPING_THRESHOLD})</span>`;
+    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${freeShipThreshold})</span>`;
   }
 
   document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
@@ -650,7 +641,7 @@ function deleteItem(index, subType = null) {
       cart[index] = newEarring;
     } 
     else if (subType === 'earrings') {
-      const bPrice = BASE_PRICE + (combo.bracelet.charms.length > 1 ? (combo.bracelet.charms.length - 1) * EXTRA_CHARM_PRICE : 0);
+      const bPrice = BASE_PRICE + (combo.bracelet.charms.length - 1) * EXTRA_CHARM_PRICE;
       const newBracelet = {
         id: Date.now(),
         type: 'Bracelet',
@@ -713,6 +704,7 @@ function saveCartState() {
     sessionStorage.removeItem('pyc_applied_coupon');
   }
 }
+
 function onCheckoutClick() {
   const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
   if (!hasSeenUpsell) {
@@ -723,11 +715,13 @@ function onCheckoutClick() {
     window.location.href = 'checkout.html';
   }
 }
+
 function forceCheckout() {
   document.getElementById('checkoutUpsellModal').style.display = 'none';
   saveCartState();
   window.location.href = 'checkout.html';
 }
+
 document.getElementById('checkoutUpsellModal').onclick = function(e) {
   if (e.target === this) {
     forceCheckout();
