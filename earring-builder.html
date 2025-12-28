@@ -135,8 +135,8 @@ h2 { margin: 8px 0 10px; text-align: center; }
 // --- UPDATED: Load from Google Sheet Data ---
 const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
 // Note: We use 'earring_base_price' here
-const BASE_PRICE = Number(CONFIG.earring_base_price) || 199; 
-const ALLOWANCE = Number(CONFIG.earring_base_charm_allowance) || 50;
+const BASE_PRICE = Number(CONFIG.earring_base_price) || 0; 
+const ALLOWANCE = Number(CONFIG.earring_base_charm_allowance) || 0;
 
 // Metadata for prices
 const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
@@ -274,14 +274,14 @@ function calculateCurrentPrice() {
   
   // Left Ear
   if (charms.left) {
-    const meta = CHARM_METADATA[charms.left] || { price: 50 };
+    const meta = CHARM_METADATA[charms.left] || { price: 0 };
     // Only pay the difference if charm price > 50
     total += Math.max(0, meta.price - ALLOWANCE);
   }
 
   // Right Ear
   if (charms.right) {
-    const meta = CHARM_METADATA[charms.right] || { price: 50 };
+    const meta = CHARM_METADATA[charms.right] || { price: 0 };
     // Only pay the difference if charm price > 50
     total += Math.max(0, meta.price - ALLOWANCE);
   }
@@ -401,13 +401,13 @@ cta.onclick = function() {
 
 function calculateBraceletPrice(bCharms) {
   // FIX: Explicitly use Bracelet Base Price (e.g., 249), NOT Earring Base Price (199)
-  const braceletBase = Number(CONFIG.bracelet_base_price) || 249;
-  const braceletAllow = Number(CONFIG.bracelet_base_charm_allowance) || 50;
+  const braceletBase = Number(CONFIG.bracelet_base_price) || 0;
+  const braceletAllow = Number(CONFIG.bracelet_base_charm_allowance) || 0;
   
   let total = braceletBase; 
 
   bCharms.forEach((file, index) => {
-    const meta = CHARM_METADATA[file] || { price: 50 };
+    const meta = CHARM_METADATA[file] || { price: 0 };
     // Apply allowance logic to the first charm
     if (index === 0) total += Math.max(0, meta.price - braceletAllow);
     else total += meta.price;
