@@ -1,5 +1,6 @@
 // ✅ URL UPDATED
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdvv7OsOR7zlwkQSCEpvm2o6m0IpDXmUuHI9wLmf6SzXQl9kwBv1HlIyBwYNmU4pEq/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdvv7OsOR7zlwkQSCEpvm2o6m0IpDXmUuHI9wLmf6SzXQl9kwBv1HlIyBwYNmU4pEq/exec";
+window.SCRIPT_URL = SCRIPT_URL; // Make it globally available
 
 async function fetchStoreData() {
   if (SCRIPT_URL.includes("PASTE_YOUR")) {
