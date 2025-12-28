@@ -520,8 +520,7 @@ function renderCoupons() {
       // Standard Percentage Calculation
       let calculatedRaw = Math.floor(currentTotal * (c.percent / 100));
       
-      // ✅ NEW: Apply Max Discount Cap (Zomato Style)
-      // If maxDiscount exists in sheet AND calculated savings > maxDiscount
+      // Apply Max Discount Cap (if defined in sheet)
       if (c.maxDiscount && Number(c.maxDiscount) > 0) {
         calculatedRaw = Math.min(calculatedRaw, Number(c.maxDiscount));
       }
@@ -548,6 +547,20 @@ function renderCoupons() {
     const isLocked = bestCoupon.isLocked;
     const diff = bestCoupon.missingAmount;
     
+    // --- NEW UI LOGIC FOR FEATURED CARD ---
+    let titleHTML = "";
+    let subHTML = "";
+
+    if (isLocked) {
+      // If Locked: Show Code + Description (Standard)
+      titleHTML = `<span class="featured-code">${bestCoupon.code}</span>`;
+      subHTML = `<div class="featured-desc">${bestCoupon.desc}</div>`;
+    } else {
+      // If Unlocked: Show "Save ₹X" + "with code Y" (User Request)
+      titleHTML = `<span class="featured-code">Save ₹${bestCoupon.currentSavings}</span>`;
+      subHTML = `<div class="featured-desc">with code <b>${bestCoupon.code}</b></div>`;
+    }
+
     const conditionLine = isLocked 
       ? `<div style="font-size:12px; color:#7D5C29; font-weight:600; margin-top:4px;">Add items worth ₹${diff} to avail</div>` 
       : ``;
@@ -561,8 +574,8 @@ function renderCoupons() {
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
       </div>
       <div class="featured-content">
-        <span class="featured-code">${bestCoupon.code}</span>
-        <div class="featured-desc">${bestCoupon.desc}</div>
+        ${titleHTML}
+        ${subHTML}
         ${conditionLine}
       </div>
       ${actionBtn}
@@ -571,19 +584,18 @@ function renderCoupons() {
     featuredCard.innerHTML = `<div style="padding:10px; color:#888; font-size:13px;">No coupons available for this order.</div>`;
   }
 
-  // 4. Render List
+  // 4. Render the rest of the list
   sortedCoupons.forEach(coupon => {
     if(String(coupon.active).toUpperCase() !== 'TRUE') return;
 
     const isLocked = coupon.isLocked;
     const diff = coupon.missingAmount;
     
-    // Smart Text
+    // List Item Text
     let benefitText = "";
     if (isLocked) {
        benefitText = coupon.freeShip ? 'Free Shipping' : `Save ${coupon.percent}%`;
     } else {
-       // Shows the actual capped amount (e.g., "Save ₹100 with this code")
        benefitText = `Save ₹${coupon.currentSavings} with this code`;
     }
     
