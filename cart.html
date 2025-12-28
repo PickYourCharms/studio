@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3.7">
   <link rel="stylesheet" href="desktop.css">
+  
   <script src="store_data.js"></script>
   <script src="desktop.js"></script>
   <script src="navigation.js"></script>
@@ -55,6 +56,7 @@
     <div id="cartItemsList" class="cart-list"></div>
 
     <div class="bill-summary">
+      
       <div id="couponSectionRaw" class="coupon-section-container">
         <div class="featured-coupon-card" id="featuredCouponCard"></div>
         <div class="view-more-coupons" onclick="openCouponDrawer()">
@@ -109,13 +111,31 @@
 </div>
 
 <script>
-// --- ROBUST CONFIG FROM SHEET ---
-const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
+// --- 1. SAFE CONFIG LOADING (Fixes White Screen) ---
+let CONFIG = {};
+let COUPONS_DB = [];
+try {
+  // Try to load from Google Sheet data
+  CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
+  COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
+} catch (e) {
+  console.log("Config load failed, using defaults");
+}
 
-// Extract Dynamic Pricing (With safe defaults if sheet fails)
-const BASE_PRICE_BRACELET = Number(CONFIG.bracelet_base_price) || 249;
-const BASE_PRICE_EARRING = Number(CONFIG.earring_base_price) || 199;
+// Fallback Coupons if Sheet is empty (Keeps your working code logic)
+if (COUPONS_DB.length === 0) {
+  COUPONS_DB = [
+    { code: "WELCOME10", percent: 10, minOrder: 299, desc: "Get 10% off on your first order", type: "10% OFF" },
+    { code: "CHARM20", percent: 20, minOrder: 999, desc: "20% off on orders above Rs. 999", type: "20% OFF" },
+    { code: "FREESHIP", percent: 0, minOrder: 499, desc: "Free Shipping on orders above 499", freeShip: true, type: "FREE SHIP" },
+    { code: "COMBO300", percent: 15, minOrder: 1500, desc: "Save big on bulk orders", type: "15% OFF" }
+  ];
+}
+
+// --- 2. DYNAMIC PRICING VARIABLES ---
+// We map the Sheet variables to your preferred variable names
+const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249; 
+const EARRING_BASE_PRICE = Number(CONFIG.earring_base_price) || 199;
 const EXTRA_CHARM_PRICE = 50; 
 const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
 const SHIPPING_FEE = Number(CONFIG.shipping_fee_default) || 80;
@@ -137,19 +157,29 @@ const emptyState = document.getElementById('emptyState');
 const cartContent = document.getElementById('cartContent');
 
 function init() {
-  cartCountBadge.textContent = cart.length;
-  document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
+  try {
+    cartCountBadge.textContent = cart.length;
+    document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
 
-  if (cart.length === 0) {
-    emptyState.style.display = 'flex';
-    cartContent.style.display = 'none';
-  } else {
-    emptyState.style.display = 'none';
-    cartContent.style.display = 'block';
-    renderItems();
-    renderCoupons();
-    calculateTotals();
+    if (cart.length === 0) {
+      emptyState.style.display = 'flex';
+      cartContent.style.display = 'none';
+    } else {
+      emptyState.style.display = 'none';
+      cartContent.style.display = 'block'; // This un-hides the white screen
+      renderItems();
+      renderCoupons();
+      calculateTotals();
+    }
+  } catch (error) {
+    console.error("Critical Cart Error:", error);
+    // Emergency Un-hide so user doesn't see white screen even if JS fails
+    if (cart.length > 0) {
+        emptyState.style.display = 'none';
+        cartContent.style.display = 'block';
+    }
   }
+
   setTimeout(() => {
     window.history.pushState(null, null, window.location.href);
   }, 100);
@@ -352,7 +382,6 @@ function renderItems() {
         img.style.objectFit = 'contain'; 
         img.style.width = '100%';
         img.style.height = '100%';
-        img.style.transform = 'none'; 
         img.style.top = '0';
         img.style.left = '0';
         
@@ -399,16 +428,15 @@ function renderItems() {
   });
 }
 
-// --- NEW COUPON SYSTEM LOGIC (FIXED) ---
+// --- COUPON & CALCULATION SYSTEM ---
 
 function getDiscountableAmount() {
   let bracelets = [];
   let earrings = [];
   let readyMadeTotal = 0; 
 
-  // --- FIXED CALCULATIONS using Sheet Config ---
-  const getBPrice = (b) => BASE_PRICE_BRACELET + (b.charms.length > 1 ? (b.charms.length - 1)*EXTRA_CHARM_PRICE : 0);
-  const getEPrice = () => BASE_PRICE_EARRING; // ✅ CORRECTED: Uses Earring Price, not Bracelet
+  const getBPrice = (b) => BASE_PRICE + (b.charms.length > 1 ? (b.charms.length-1)*EXTRA_CHARM_PRICE : 0);
+  const getEPrice = () => EARRING_BASE_PRICE; // Use correct variable
 
   cart.forEach(item => {
     if (item.isReadyMade) {
@@ -429,8 +457,6 @@ function getDiscountableAmount() {
   bracelets.sort((a,b) => a-b);
   earrings.sort((a,b) => a-b); 
   let comboDiscount = 0;
-  
-  // Use Config for Combo Percent
   const pairs = Math.min(bracelets.length, earrings.length);
   for(let i=0; i<pairs; i++) {
     comboDiscount += Math.floor((bracelets[i] + earrings[i]) * (COMBO_PERCENT / 100));
@@ -446,13 +472,7 @@ function renderCoupons() {
   
   drawerList.innerHTML = '';
   
-  // Safety check if coupons are loaded
-  if (!COUPONS_DB || COUPONS_DB.length === 0) {
-      document.getElementById('couponSectionRaw').style.display = 'none';
-      return;
-  } else {
-      document.getElementById('couponSectionRaw').style.display = 'block';
-  }
+  // No need for safety check here because we set Fallbacks at the top of the script
 
   let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
   
@@ -504,7 +524,7 @@ function renderCoupons() {
     card.className = 'swiss-coupon-card';
     card.innerHTML = `
       <div class="coupon-strip">
-        <span class="strip-text">${coupon.type}</span>
+        <span class="strip-text">${coupon.type || 'OFFER'}</span>
       </div>
       <div class="coupon-main">
         <div class="coupon-top-row">
@@ -525,12 +545,10 @@ function openCouponDrawer() {
   document.getElementById('couponDrawer').classList.add('active');
   renderCoupons();
 }
-
 function closeCouponDrawer() {
   document.getElementById('couponOverlay').classList.remove('active');
   document.getElementById('couponDrawer').classList.remove('active');
 }
-
 function selectCoupon(code) {
   const coupon = COUPONS_DB.find(c => c.code === code);
   activeCoupon = coupon;
@@ -540,7 +558,6 @@ function selectCoupon(code) {
   document.getElementById('appliedCouponText').textContent = `'${coupon.code}' applied`;
   calculateTotals();
 }
-
 function removeCoupon() {
   activeCoupon = null;
   document.getElementById('appliedCouponView').style.display = 'none';
@@ -549,13 +566,7 @@ function removeCoupon() {
   renderCoupons();
 }
 
-const originalDelete = deleteItem;
-deleteItem = function(index, subType) {
-    originalDelete(index, subType); 
-    renderCoupons();
-}
-
-// --- MATH & ACTIONS ---
+// --- MATH ---
 function calculateTotals() {
   let totalRaw = 0;
   cart.forEach(i => totalRaw += i.price);
@@ -586,12 +597,10 @@ function calculateTotals() {
 
   let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
   
-  // Use Config for Shipping
   let shipping = SHIPPING_FEE;
   if (forceFreeShip || (subtotalPostDiscount >= FREE_SHIPPING_THRESHOLD)) {
     shipping = 0;
   }
-  
   let finalTotal = subtotalPostDiscount + shipping;
 
   document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
@@ -635,13 +644,13 @@ function deleteItem(index, subType = null) {
         type: 'Earrings',
         metal: combo.earrings.metal,
         charms: combo.earrings.charms,
-        price: BASE_PRICE_EARRING, // ✅ Correctly uses earring price
+        price: EARRING_BASE_PRICE,
         image: `assets/bases/LeftHook_${combo.earrings.metal}.png`
       };
       cart[index] = newEarring;
     } 
     else if (subType === 'earrings') {
-      const bPrice = BASE_PRICE_BRACELET + (combo.bracelet.charms.length > 1 ? (combo.bracelet.charms.length - 1) * EXTRA_CHARM_PRICE : 0);
+      const bPrice = BASE_PRICE + (combo.bracelet.charms.length > 1 ? (combo.bracelet.charms.length - 1) * EXTRA_CHARM_PRICE : 0);
       const newBracelet = {
         id: Date.now(),
         type: 'Bracelet',
@@ -704,7 +713,6 @@ function saveCartState() {
     sessionStorage.removeItem('pyc_applied_coupon');
   }
 }
-
 function onCheckoutClick() {
   const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
   if (!hasSeenUpsell) {
@@ -715,13 +723,11 @@ function onCheckoutClick() {
     window.location.href = 'checkout.html';
   }
 }
-
 function forceCheckout() {
   document.getElementById('checkoutUpsellModal').style.display = 'none';
   saveCartState();
   window.location.href = 'checkout.html';
 }
-
 document.getElementById('checkoutUpsellModal').onclick = function(e) {
   if (e.target === this) {
     forceCheckout();
