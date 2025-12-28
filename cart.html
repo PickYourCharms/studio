@@ -684,85 +684,146 @@ function removeCoupon() {
 }
 
 // --- MATH & ACTIONS ---
+// ===================================
+// ✅ UPDATED MATH: Shows True Value & Combo Savings Explicitly
+// ===================================
+
 function calculateTotals() {
-  let totalRaw = 0;
-  cart.forEach(i => totalRaw += i.price);
+  let grossTotal = 0; // The price of all items IF bought individually
   
-  let singleBracelets = cart.filter(i => i.type === 'Bracelet').map(i => i.price);
-  let singleEarrings = cart.filter(i => i.type === 'Earrings').map(i => i.price);
-  singleBracelets.sort((a,b) => a-b);
-  singleEarrings.sort((a,b) => a-b);
-  
+  let allBracelets = [];
+  let allEarrings = [];
+
+  // 1. EXTRACT ALL ITEMS AT FULL SINGLE PRICE
+  cart.forEach(item => {
+    if (item.type.includes('Combo')) {
+      // If it's a combo, calculate the separate prices of its parts
+      const bPrice = getBPrice(item.bracelet);
+      const ePrice = getEPrice(item.earrings);
+      
+      grossTotal += (bPrice + ePrice);
+      
+      allBracelets.push(bPrice);
+      allEarrings.push(ePrice);
+    } 
+    else if (item.type === 'Bracelet') {
+      const price = getBPrice(item);
+      grossTotal += price;
+      allBracelets.push(price);
+    } 
+    else if (item.type === 'Earrings') {
+      const price = getEPrice(item);
+      grossTotal += price;
+      allEarrings.push(price);
+    }
+    // Note: ReadyMade items are added to total but don't count for combo logic
+    else if (item.isReadyMade) {
+      grossTotal += item.price;
+    }
+  });
+
+  // 2. CALCULATE COMBO SAVINGS
+  // We sort prices to match the most expensive/cheapest correctly if needed, 
+  // but usually, we just pair them up 1-to-1.
+  allBracelets.sort((a,b) => a-b);
+  allEarrings.sort((a,b) => a-b);
+
   let comboSavings = 0;
   const comboPercent = Number(CONFIG.combo_discount_percent) || 0;
   
-  const pairs = Math.min(singleBracelets.length, singleEarrings.length);
+  // Calculate savings for every Pair (Bracelet + Earring)
+  const pairs = Math.min(allBracelets.length, allEarrings.length);
+  
   for(let i=0; i<pairs; i++) {
-    comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (comboPercent / 100));
+    const pairSum = allBracelets[i] + allEarrings[i];
+    const discount = Math.floor(pairSum * (comboPercent / 100));
+    comboSavings += discount;
   }
 
-  const displayCartValue = totalRaw + comboSavings;
-  let subtotalAfterCombo = displayCartValue - comboSavings;
-  
+  // 3. CALCULATE SUBTOTAL (After Combo, Before Coupon)
+  let subtotalAfterCombo = grossTotal - comboSavings;
+
+  // 4. CALCULATE COUPON DISCOUNT
   let couponDisc = 0;
   let forceFreeShip = false;
-  
+
   if (activeCoupon) {
-    if (activeCoupon.freeShip) forceFreeShip = true;
+    if (activeCoupon.freeShip) {
+      forceFreeShip = true;
+    } 
+    // Check if minOrder condition is met by the Post-Combo value
     else if (subtotalAfterCombo >= activeCoupon.minOrder) {
-      
-      if (activeCoupon.flatAmount && Number(activeCoupon.flatAmount) > 0) {
+       if (activeCoupon.flatAmount && Number(activeCoupon.flatAmount) > 0) {
          couponDisc = Number(activeCoupon.flatAmount);
-      } else {
+       } else {
          let rawDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
          if (activeCoupon.maxDiscount && Number(activeCoupon.maxDiscount) > 0) {
            rawDisc = Math.min(rawDisc, Number(activeCoupon.maxDiscount));
          }
          couponDisc = rawDisc;
-      }
+       }
     }
   }
 
-  let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
-
+  // 5. CALCULATE SHIPPING
   const shipFee = Number(CONFIG.shipping_fee_default) || 0;
   const freeShipThreshold = Number(CONFIG.free_shipping_above) || 0;
   
+  // "Subtotal" in the UI usually means "What I have to pay before shipping"
+  let uiSubtotal = subtotalAfterCombo - couponDisc;
+
   let shipping = shipFee;
-  if (forceFreeShip || (subtotalPostDiscount >= freeShipThreshold)) {
+  if (forceFreeShip || (uiSubtotal >= freeShipThreshold)) {
     shipping = 0;
   }
-  
-  let finalTotal = subtotalPostDiscount + shipping;
 
-  // Render to UI
-  document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
+  let finalTotal = uiSubtotal + shipping;
+
+  // --- RENDER TO HTML ---
+
+  // Row 1: Cart Value (The high price crossed out in mind)
+  document.getElementById('cartValueVal').textContent = `Rs. ${grossTotal}`;
   
+  // Row 2: Combo Savings (Only show if > 0)
   const comboRow = document.getElementById('comboRow');
-  comboRow.style.display = comboSavings > 0 ? 'flex' : 'none';
-  document.getElementById('comboVal').textContent = `-Rs. ${comboSavings}`;
-
-  const couponRow = document.getElementById('couponRow');
-  couponRow.style.display = (couponDisc > 0 || forceFreeShip) ? 'flex' : 'none';
-  if(activeCoupon) {
-    document.getElementById('couponCodeLabel').textContent = `Coupon (${activeCoupon.code})`;
-    document.getElementById('couponVal').textContent = couponDisc > 0 ? `-Rs. ${couponDisc}` : 'Applied';
+  if (comboSavings > 0) {
+    comboRow.style.display = 'flex';
+    document.getElementById('comboVal').textContent = `- Rs. ${comboSavings}`;
+  } else {
+    comboRow.style.display = 'none';
   }
 
-  document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
+  // Row 3: Coupon Savings
+  const couponRow = document.getElementById('couponRow');
+  if (couponDisc > 0 || forceFreeShip) {
+    couponRow.style.display = 'flex';
+    document.getElementById('couponCodeLabel').textContent = `Coupon (${activeCoupon.code})`;
+    
+    if (forceFreeShip) {
+       document.getElementById('couponVal').textContent = 'Free Shipping';
+    } else {
+       document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`;
+    }
+  } else {
+    couponRow.style.display = 'none';
+  }
+
+  // Row 4: Subtotal (The math result)
+  document.getElementById('subtotalVal').textContent = `Rs. ${uiSubtotal}`;
+
+  // Row 5: Shipping
   const shipEl = document.getElementById('shippingVal');
   const shipLabel = document.querySelector('.math-row:nth-last-child(3) span:first-child'); 
   
   if (shipping === 0) {
     shipEl.textContent = 'FREE';
-    shipEl.style.color = '#15803d';
-    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${freeShipThreshold})</span>`;
+    shipEl.style.color = '#15803d'; // Green
   } else {
     shipEl.textContent = `Rs. ${shipping}`;
     shipEl.style.color = '#111';
-    if(shipLabel) shipLabel.innerHTML = `Shipping <span style="font-size:10px; color:#888; font-weight:400;">(Free above ₹${freeShipThreshold})</span>`;
   }
 
+  // Row 6: Final Total
   document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
 }
 
