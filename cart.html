@@ -9,10 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=3.7">
   <link rel="stylesheet" href="desktop.css">
+  
   <script src="store_data.js"></script>
   <script src="desktop.js"></script>
   <script src="navigation.js"></script>
-
 </head>
 
 <body>
@@ -25,9 +25,11 @@
       </svg>
     </button>
   </div>
+
   <div class="nav-center">
     <span style="font-weight: 700; font-size: 16px;">My Bag</span>
   </div>
+
   <div class="nav-right">
     <button id="navCartBtn" class="nav-btn" onclick="window.location.reload()">
       <div class="cart-badge-wrapper">
@@ -114,12 +116,13 @@ const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
 const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
 const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
 
-// Dynamic Base Prices from Sheet
+// Dynamic Base Prices from Sheet (Handling Fallbacks)
 const BASE_PRICE_BRACELET = Number(CONFIG.bracelet_base_price) || 249;
 const BASE_PRICE_EARRING = Number(CONFIG.earring_base_price) || 199;
 const ALLOWANCE_B = Number(CONFIG.bracelet_base_charm_allowance) || 50;
 const ALLOWANCE_E = Number(CONFIG.earring_base_charm_allowance) || 50;
 const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
+const EXTRA_CHARM_PRICE = 50; // Fallback charm price
 
 const REF_SIZE = 300; 
 const PHYSICS = { 
@@ -153,13 +156,9 @@ function init() {
       }
   } catch (err) {
       console.error("Cart Init Error:", err);
-      // Fallback to avoid white screen
-      emptyState.style.display = 'flex';
-      cartContent.style.display = 'none';
-      document.querySelector('.empty-state h3').textContent = "Something went wrong";
-      document.querySelector('.empty-state p').textContent = "Please try reloading.";
   }
 
+  // Hijack Back Button
   setTimeout(() => {
     window.history.pushState(null, null, window.location.href);
   }, 100);
@@ -176,6 +175,35 @@ window.addEventListener('pageshow', function(event) {
   }
 });
 
+// --- HELPER: Calculate Item Price (Replaces missing logic) ---
+function calculateItemPrice(type, metal, charms) {
+  let total = 0;
+  
+  if (type === 'Bracelet') {
+    total = BASE_PRICE_BRACELET;
+    if (Array.isArray(charms)) {
+      charms.forEach((file, index) => {
+        const meta = CHARM_METADATA[file] || { price: 50 };
+        // First charm might be free depending on allowance
+        if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
+        else total += meta.price;
+      });
+    }
+  } 
+  else if (type === 'Earrings') {
+    total = BASE_PRICE_EARRING;
+    if (charms.left) {
+      const meta = CHARM_METADATA[charms.left] || { price: 50 };
+      total += Math.max(0, meta.price - ALLOWANCE_E);
+    }
+    if (charms.right) {
+      const meta = CHARM_METADATA[charms.right] || { price: 50 };
+      total += Math.max(0, meta.price - ALLOWANCE_E);
+    }
+  }
+  return total;
+}
+
 // --- MINI BUILDERS ---
 function buildMiniBracelet(metal, charms) {
   const container = document.createElement('div');
@@ -189,7 +217,6 @@ function buildMiniBracelet(metal, charms) {
 
   const cx = REF_SIZE / 2;
   const cy = (REF_SIZE / 2) - 30; 
-
   const radius = REF_SIZE * 0.36;
   const angles = B_ANGLES[charms.length] || [];
 
@@ -217,13 +244,11 @@ function buildMiniEarrings(metal, charms) {
   const lHook = document.createElement('img');
   lHook.src = `assets/bases/LeftHook_${metal}.png`;
   lHook.className = 'mini-hook left';
-  lHook.style.position = 'absolute'; lHook.style.top='20px'; lHook.style.left='20px';
   container.appendChild(lHook);
 
   const rHook = document.createElement('img');
   rHook.src = `assets/bases/RightHook_${metal}.png`;
   rHook.className = 'mini-hook right';
-  rHook.style.position = 'absolute'; rHook.style.top='20px'; rHook.style.right='20px';
   container.appendChild(rHook);
 
   if (charms.left) {
@@ -245,6 +270,7 @@ function buildMiniEarrings(metal, charms) {
   return container;
 }
 
+// --- RENDERER ---
 function getComboTitle(bMetal, eMetal) {
   if (bMetal === eMetal) {
     return `${bMetal.charAt(0).toUpperCase() + bMetal.slice(1)} Combo Set`;
@@ -253,7 +279,6 @@ function getComboTitle(bMetal, eMetal) {
   }
 }
 
-// --- RENDERER ---
 function renderItems() {
   listContainer.innerHTML = '';
 
@@ -264,6 +289,7 @@ function renderItems() {
       const comboCard = document.createElement('div');
       comboCard.className = 'combo-card-group';
 
+      // 1. Header
       const header = document.createElement('div');
       header.className = 'combo-group-header';
       const title = getComboTitle(item.bracelet.metal, item.earrings.metal);
@@ -276,7 +302,7 @@ function renderItems() {
       `;
       comboCard.appendChild(header);
 
-      // Bracelet Row
+      // 2. Bracelet Row
       const bRow = document.createElement('div');
       bRow.className = 'combo-sub-item';
       const bWrapper = document.createElement('div');
@@ -310,7 +336,7 @@ function renderItems() {
       bRow.appendChild(bWrapper);
       comboCard.appendChild(bRow);
 
-      // Earring Row
+      // 3. Earring Row
       const eRow = document.createElement('div');
       eRow.className = 'combo-sub-item';
       const eWrapper = document.createElement('div');
@@ -351,6 +377,8 @@ function renderItems() {
       // === SINGLE CARD ===
       const card = document.createElement('div');
       card.className = 'cart-item-card';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'item-row-content';
       
       const thumbBox = document.createElement('div');
       thumbBox.className = 'item-thumb';
@@ -359,15 +387,22 @@ function renderItems() {
       let displayTitle = '';
       
       if (item.isReadyMade) {
+        // Curated Items
         const img = document.createElement('img');
         img.src = item.image;
+        img.className = 'mini-base'; 
         img.style.objectFit = 'contain'; 
         img.style.width = '100%';
         img.style.height = '100%';
+        img.style.transform = 'none'; 
+        img.style.top = '0';
+        img.style.left = '0';
+        
         thumbBox.appendChild(img);
-        displayTitle = item.title;
+        displayTitle = item.title; 
       } 
       else {
+        // Custom Builds
         if (item.type === 'Bracelet') {
           thumbBox.appendChild(buildMiniBracelet(item.metal, item.charms));
           charmCount = item.charms.length;
@@ -398,45 +433,16 @@ function renderItems() {
         <button class="icon-btn delete-btn" onclick="deleteItem(${index})">✕</button>
       `;
 
-      card.appendChild(thumbBox);
-      card.appendChild(details);
-      card.appendChild(actions);
+      wrapper.appendChild(thumbBox);
+      wrapper.appendChild(details);
+      wrapper.appendChild(actions);
+      card.appendChild(wrapper);
       listContainer.appendChild(card);
     }
   });
 }
 
-// --- COUPON & TOTALS LOGIC ---
-
-// 1. Calculate price accurately using Sheet Config
-function calculateItemPrice(type, metal, charms) {
-  let total = 0;
-  
-  if (type === 'Bracelet') {
-    total = BASE_PRICE_BRACELET;
-    if (Array.isArray(charms)) {
-      charms.forEach((file, index) => {
-        const meta = CHARM_METADATA[file] || { price: 50 };
-        if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
-        else total += meta.price;
-      });
-    }
-  } 
-  else if (type === 'Earrings') {
-    total = BASE_PRICE_EARRING;
-    if (charms.left) {
-      const meta = CHARM_METADATA[charms.left] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-    if (charms.right) {
-      const meta = CHARM_METADATA[charms.right] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-  }
-  return total;
-}
-
-// 2. Determine value eligible for coupons
+// --- COUPON LOGIC ---
 function getDiscountableAmount() {
   let bracelets = [];
   let earrings = [];
@@ -452,7 +458,7 @@ function getDiscountableAmount() {
     else if(item.type === 'Bracelet') bracelets.push(item.price);
     else if(item.type === 'Earrings') earrings.push(item.price);
     else if(item.type.includes('Combo')) {
-      // Split combo into component prices for eligibility calculation
+      // Split combo to calculate 'raw' value for coupons
       bracelets.push(getBPrice(item.bracelet));
       earrings.push(getEPrice(item.earrings));
     }
@@ -468,7 +474,7 @@ function getDiscountableAmount() {
   let comboDiscount = 0;
   const pairs = Math.min(bracelets.length, earrings.length);
   for(let i=0; i<pairs; i++) {
-    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * (COMBO_PERCENT/100));
+    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * (COMBO_PERCENT / 100));
   }
 
   return subtotal - comboDiscount;
@@ -480,16 +486,15 @@ function renderCoupons() {
   
   drawerList.innerHTML = '';
   featuredCard.innerHTML = ''; 
-  
+
+  // Safely check if coupons exist
   if (!COUPONS_DB || COUPONS_DB.length === 0) {
       document.getElementById('couponSectionRaw').style.display = 'none';
       return;
-  } else {
-      document.getElementById('couponSectionRaw').style.display = 'block';
   }
-  
-  const currentTotal = getDiscountableAmount();
+  document.getElementById('couponSectionRaw').style.display = 'block';
 
+  const currentTotal = getDiscountableAmount();
   let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
   
   if (bestCoupon) {
@@ -556,17 +561,16 @@ function renderCoupons() {
   });
 }
 
+// Drawer Controls
 function openCouponDrawer() {
   document.getElementById('couponOverlay').classList.add('active');
   document.getElementById('couponDrawer').classList.add('active');
   renderCoupons();
 }
-
 function closeCouponDrawer() {
   document.getElementById('couponOverlay').classList.remove('active');
   document.getElementById('couponDrawer').classList.remove('active');
 }
-
 function selectCoupon(code) {
   const coupon = COUPONS_DB.find(c => c.code === code);
   activeCoupon = coupon;
@@ -576,7 +580,6 @@ function selectCoupon(code) {
   document.getElementById('appliedCouponText').textContent = `'${coupon.code}' applied`;
   calculateTotals();
 }
-
 function removeCoupon() {
   activeCoupon = null;
   document.getElementById('appliedCouponView').style.display = 'none';
@@ -585,7 +588,7 @@ function removeCoupon() {
   renderCoupons();
 }
 
-// --- FINAL MATH ---
+// --- MATH & ACTIONS ---
 function calculateTotals() {
   let totalRaw = 0;
   
@@ -607,7 +610,7 @@ function calculateTotals() {
     comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (COMBO_PERCENT / 100));
   }
 
-  const displayCartValue = totalRaw; 
+  const displayCartValue = totalRaw;
   let subtotalPostDiscount = totalRaw - comboSavings;
 
   let couponDisc = 0;
@@ -644,9 +647,8 @@ function calculateTotals() {
   }
 
   document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
-  
   const shipEl = document.getElementById('shippingVal');
-  const shipLabel = document.querySelector('.math-row:nth-last-child(3) span:first-child');
+  const shipLabel = document.querySelector('.math-row:nth-last-child(3) span:first-child'); 
   
   if (shipping === 0) {
     shipEl.textContent = 'FREE';
@@ -734,7 +736,7 @@ function editItem(index, subType) {
   window.location.href = url;
 }
 
-// --- CHECKOUT LOGIC ---
+// --- CHECKOUT HANDLERS ---
 function saveCartState() {
   if (activeCoupon) {
     sessionStorage.setItem('pyc_applied_coupon', JSON.stringify(activeCoupon));
@@ -745,7 +747,6 @@ function saveCartState() {
 
 function onCheckoutClick() {
   const hasSeenUpsell = sessionStorage.getItem('pyc_upsell_seen');
-
   if (!hasSeenUpsell) {
     document.getElementById('checkoutUpsellModal').style.display = 'flex';
     sessionStorage.setItem('pyc_upsell_seen', 'true');
