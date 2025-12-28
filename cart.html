@@ -14,8 +14,9 @@
   <script src="navigation.js"></script>
 
 <style>
-/* === CRITICAL LAYOUT FIXES === */
-/* 1. Container for the Cart Card */
+/* === CRITICAL CSS FIXES (Prevents Broken Layout) === */
+
+/* 1. Flex Row for Cart Items */
 .cart-item-card, .combo-sub-item .item-row-content {
     display: flex;
     flex-direction: row;
@@ -30,7 +31,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.03);
 }
 
-/* 2. The Thumbnail Box - Fixed Size */
+/* 2. Fixed Thumbnail Size */
 .item-thumb {
     width: 80px;
     height: 80px;
@@ -38,78 +39,46 @@
     border-radius: 8px;
     position: relative;
     flex-shrink: 0;
-    overflow: hidden; /* This cuts off the overflow from the scaler */
+    overflow: hidden;
 }
 
-/* 3. SCALING THE MINI BUILDER */
-/* The builder creates a 300px image. We scale it to 0.26 (approx 80px) */
+/* 3. SCALING THE MINI BUILDER (Crucial) */
 .mini-canvas-scaler {
     width: 300px;
     height: 300px;
     position: absolute;
     top: 0;
     left: 0;
-    transform-origin: 0 0; /* Scale from top-left */
-    transform: scale(0.266); 
+    transform-origin: 0 0;
+    transform: scale(0.266); /* Scales 300px down to 80px */
     pointer-events: none;
 }
 
-/* 4. Base Images inside the Scaler */
-.mini-base {
-    position: absolute;
-    width: 100%;
-    left: 0;
-    /* top is handled by JS logic (40%) */
-}
-
-/* 5. Charms inside the Scaler */
+/* 4. Mini Builder Elements */
+.mini-base { position: absolute; width: 100%; left: 0; }
 .mini-charm {
-    position: absolute;
-    width: 45px; 
-    height: auto;
+    position: absolute; width: 45px; height: auto;
     filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.2));
 }
 
-/* 6. Badge Fix */
+/* 5. Badge */
 .charm-badge {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    background: #000;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    position: absolute; bottom: 4px; right: 4px;
+    background: #000; color: #fff; font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; z-index: 10;
 }
 
-/* 7. Text Layout */
-.item-details {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-}
+/* 6. Text Layout */
+.item-details { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
 .item-title, .sub-item-name { font-size: 14px; font-weight: 700; color: #111; margin: 0; }
 .item-price { font-size: 14px; color: #555; }
 .sub-item-meta { font-size: 12px; color: #888; }
 
-/* 8. Coupon Styling */
+/* 7. Coupon Card Styling */
 .featured-coupon-card {
-    background: #fff;
-    border: 1px dashed #d1d5db;
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 50px;
+    background: #fff; border: 1px dashed #d1d5db; border-radius: 8px;
+    padding: 12px; display: flex; align-items: center; gap: 12px; min-height: 50px;
 }
 .featured-coupon-card:empty { display: none; }
 .featured-icon { color: #d6b066; width: 24px; height: 24px; flex-shrink:0; }
@@ -121,29 +90,19 @@
     padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer;
 }
 
-/* Combo Group Styling */
+/* 8. Combo Group */
 .combo-card-group {
-    background: #f8fcf8;
-    border: 1px solid #c6e6c6;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    overflow: hidden;
+    background: #f8fcf8; border: 1px solid #c6e6c6; border-radius: 12px;
+    margin-bottom: 16px; overflow: hidden;
 }
 .combo-group-header {
-    background: #eef7ee;
-    padding: 10px 12px;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #dcfce7;
+    background: #eef7ee; padding: 10px 12px;
+    display: flex; justify-content: space-between; border-bottom: 1px solid #dcfce7;
 }
 .combo-header-title { font-size: 13px; font-weight: 700; color: #166534; }
 .combo-sub-item .item-row-content {
-    border: none;
-    border-bottom: 1px solid #f0f0f0;
-    border-radius: 0;
-    margin-bottom: 0;
-    box-shadow: none;
-    background: transparent;
+    border: none; border-bottom: 1px solid #f0f0f0;
+    border-radius: 0; margin-bottom: 0; box-shadow: none; background: transparent;
 }
 </style>
 </head>
@@ -242,18 +201,17 @@
 </div>
 
 <script>
-// --- LOAD CONFIG ---
+// --- ROBUST CONFIG LOADING ---
 const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
 const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
+const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
 
-// Dynamic Base Prices
+// Dynamic Base Prices from Sheet
 const BASE_PRICE_BRACELET = Number(CONFIG.bracelet_base_price) || 249;
 const BASE_PRICE_EARRING = Number(CONFIG.earring_base_price) || 199;
 const ALLOWANCE_B = Number(CONFIG.bracelet_base_charm_allowance) || 50;
 const ALLOWANCE_E = Number(CONFIG.earring_base_charm_allowance) || 50;
 const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
-
-const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
 
 const REF_SIZE = 300; 
 const PHYSICS = { 
@@ -271,18 +229,27 @@ const emptyState = document.getElementById('emptyState');
 const cartContent = document.getElementById('cartContent');
 
 function init() {
-  cartCountBadge.textContent = cart.length;
-  document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
+  try {
+      cartCountBadge.textContent = cart.length;
+      document.getElementById('navCartBtn').style.display = cart.length > 0 ? 'block' : 'none';
 
-  if (cart.length === 0) {
-    emptyState.style.display = 'flex';
-    cartContent.style.display = 'none';
-  } else {
-    emptyState.style.display = 'none';
-    cartContent.style.display = 'block';
-    renderItems();
-    renderCoupons(); // If this crashes, totals remain 0
-    calculateTotals();
+      if (cart.length === 0) {
+        emptyState.style.display = 'flex';
+        cartContent.style.display = 'none';
+      } else {
+        emptyState.style.display = 'none';
+        cartContent.style.display = 'block';
+        renderItems();
+        renderCoupons();
+        calculateTotals();
+      }
+  } catch (err) {
+      console.error("Cart Init Error:", err);
+      // Fallback to avoid white screen
+      emptyState.style.display = 'flex';
+      cartContent.style.display = 'none';
+      document.querySelector('.empty-state h3').textContent = "Something went wrong";
+      document.querySelector('.empty-state p').textContent = "Please try reloading.";
   }
 
   setTimeout(() => {
@@ -301,7 +268,7 @@ window.addEventListener('pageshow', function(event) {
   }
 });
 
-// --- MINI BUILDERS (SCALED BY CSS) ---
+// --- MINI BUILDERS ---
 function buildMiniBracelet(metal, charms) {
   const container = document.createElement('div');
   container.className = 'mini-canvas-scaler';
@@ -389,7 +356,6 @@ function renderItems() {
       const comboCard = document.createElement('div');
       comboCard.className = 'combo-card-group';
 
-      // 1. Header
       const header = document.createElement('div');
       header.className = 'combo-group-header';
       const title = getComboTitle(item.bracelet.metal, item.earrings.metal);
@@ -402,7 +368,7 @@ function renderItems() {
       `;
       comboCard.appendChild(header);
 
-      // 2. Bracelet Row
+      // Bracelet Row
       const bRow = document.createElement('div');
       bRow.className = 'combo-sub-item';
       const bWrapper = document.createElement('div');
@@ -436,7 +402,7 @@ function renderItems() {
       bRow.appendChild(bWrapper);
       comboCard.appendChild(bRow);
 
-      // 3. Earring Row
+      // Earring Row
       const eRow = document.createElement('div');
       eRow.className = 'combo-sub-item';
       const eWrapper = document.createElement('div');
@@ -532,14 +498,42 @@ function renderItems() {
   });
 }
 
-// --- COUPON SYSTEM LOGIC (FIXED) ---
+// --- COUPON & TOTALS LOGIC ---
 
+// 1. Calculate price accurately using Sheet Config
+function calculateItemPrice(type, metal, charms) {
+  let total = 0;
+  
+  if (type === 'Bracelet') {
+    total = BASE_PRICE_BRACELET;
+    if (Array.isArray(charms)) {
+      charms.forEach((file, index) => {
+        const meta = CHARM_METADATA[file] || { price: 50 };
+        if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
+        else total += meta.price;
+      });
+    }
+  } 
+  else if (type === 'Earrings') {
+    total = BASE_PRICE_EARRING;
+    if (charms.left) {
+      const meta = CHARM_METADATA[charms.left] || { price: 50 };
+      total += Math.max(0, meta.price - ALLOWANCE_E);
+    }
+    if (charms.right) {
+      const meta = CHARM_METADATA[charms.right] || { price: 50 };
+      total += Math.max(0, meta.price - ALLOWANCE_E);
+    }
+  }
+  return total;
+}
+
+// 2. Determine value eligible for coupons
 function getDiscountableAmount() {
   let bracelets = [];
   let earrings = [];
   let readyMadeTotal = 0; 
 
-  // FIX: Using calculateItemPrice instead of undefined variables
   const getBPrice = (b) => calculateItemPrice('Bracelet', b.metal, b.charms);
   const getEPrice = (e) => calculateItemPrice('Earrings', e.metal, e.charms);
 
@@ -550,10 +544,7 @@ function getDiscountableAmount() {
     else if(item.type === 'Bracelet') bracelets.push(item.price);
     else if(item.type === 'Earrings') earrings.push(item.price);
     else if(item.type.includes('Combo')) {
-      // For combos, we need to decompose the price to check for eligibility correctly
-      // taking the discounted combo price and splitting it by ratio, OR
-      // just using the RAW value of the components for the sake of coupon eligibility.
-      // Let's use the COMPONENTS price for eligibility check.
+      // Split combo into component prices for eligibility calculation
       bracelets.push(getBPrice(item.bracelet));
       earrings.push(getEPrice(item.earrings));
     }
@@ -563,13 +554,13 @@ function getDiscountableAmount() {
   bracelets.forEach(p => subtotal += p);
   earrings.forEach(p => subtotal += p);
 
-  // Recalculate Combo Savings locally
+  // Minus Combo Savings
   bracelets.sort((a,b) => a-b);
   earrings.sort((a,b) => a-b); 
   let comboDiscount = 0;
   const pairs = Math.min(bracelets.length, earrings.length);
   for(let i=0; i<pairs; i++) {
-    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * 0.10);
+    comboDiscount += Math.floor((bracelets[i] + earrings[i]) * (COMBO_PERCENT/100));
   }
 
   return subtotal - comboDiscount;
@@ -582,7 +573,6 @@ function renderCoupons() {
   drawerList.innerHTML = '';
   featuredCard.innerHTML = ''; 
   
-  // Safety check if coupons failed to load
   if (!COUPONS_DB || COUPONS_DB.length === 0) {
       document.getElementById('couponSectionRaw').style.display = 'none';
       return;
@@ -592,7 +582,6 @@ function renderCoupons() {
   
   const currentTotal = getDiscountableAmount();
 
-  // 1. Logic to find the best "Featured" coupon
   let bestCoupon = COUPONS_DB.find(c => currentTotal >= c.minOrder) || COUPONS_DB[0];
   
   if (bestCoupon) {
@@ -620,7 +609,6 @@ function renderCoupons() {
     `;
   }
 
-  // 2. Render Drawer List
   COUPONS_DB.forEach(coupon => {
     const isLocked = currentTotal < coupon.minOrder;
     const diff = coupon.minOrder - currentTotal;
@@ -689,7 +677,7 @@ function removeCoupon() {
   renderCoupons();
 }
 
-// --- MATH & ACTIONS ---
+// --- FINAL MATH ---
 function calculateTotals() {
   let totalRaw = 0;
   
@@ -711,7 +699,7 @@ function calculateTotals() {
     comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (COMBO_PERCENT / 100));
   }
 
-  const displayCartValue = totalRaw; // Standard approach: Subtotal is raw sum
+  const displayCartValue = totalRaw; 
   let subtotalPostDiscount = totalRaw - comboSavings;
 
   let couponDisc = 0;
@@ -734,7 +722,6 @@ function calculateTotals() {
 
   let finalTotal = subtotalPostDiscount + shipping;
 
-  // Render
   document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
   
   const comboRow = document.getElementById('comboRow');
@@ -770,9 +757,7 @@ function deleteItem(index, subType = null) {
   if (subType === null) {
     cart.splice(index, 1);
   } else {
-    // We are splitting a Combo. Recalculate prices.
     const combo = cart[index];
-    
     if (subType === 'bracelet') {
       const newPrice = calculateItemPrice('Earrings', combo.earrings.metal, combo.earrings.charms);
       const newEarring = {
@@ -873,34 +858,6 @@ document.getElementById('checkoutUpsellModal').onclick = function(e) {
     forceCheckout();
   }
 };
-
-// --- RE-CALCULATE PRICE HELPERS ---
-function calculateItemPrice(type, metal, charms) {
-  let total = 0;
-  
-  if (type === 'Bracelet') {
-    total = BASE_PRICE_BRACELET;
-    if (Array.isArray(charms)) {
-      charms.forEach((file, index) => {
-        const meta = CHARM_METADATA[file] || { price: 50 };
-        if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
-        else total += meta.price;
-      });
-    }
-  } 
-  else if (type === 'Earrings') {
-    total = BASE_PRICE_EARRING;
-    if (charms.left) {
-      const meta = CHARM_METADATA[charms.left] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-    if (charms.right) {
-      const meta = CHARM_METADATA[charms.right] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-  }
-  return total;
-}
 
 init();
 </script>
