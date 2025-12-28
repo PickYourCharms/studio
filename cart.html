@@ -504,21 +504,29 @@ function renderCoupons() {
   // 1. Get Config Values
   const shipFee = Number(CONFIG.shipping_fee_default) || 0;
   const freeShipThreshold = Number(CONFIG.free_shipping_above) || 0;
-  
-  // Check if the user ALREADY qualifies for automatic free shipping
   const alreadyHasFreeShipping = currentTotal >= freeShipThreshold;
 
   // 2. Filter & Sort Coupons
   const sortedCoupons = COUPONS_DB.filter(c => {
-    // LOGIC: If user already has free shipping, HIDE "Free Shipping" coupons
+    // Hide "Free Ship" coupons if user already has automatic free shipping
     if (alreadyHasFreeShipping && c.freeShip) return false;
     return true;
   }).map(c => {
     let savings = 0;
+    
     if (c.freeShip) {
       savings = shipFee;
     } else {
-      savings = Math.floor(currentTotal * (c.percent / 100));
+      // Standard Percentage Calculation
+      let calculatedRaw = Math.floor(currentTotal * (c.percent / 100));
+      
+      // ✅ NEW: Apply Max Discount Cap (Zomato Style)
+      // If maxDiscount exists in sheet AND calculated savings > maxDiscount
+      if (c.maxDiscount && Number(c.maxDiscount) > 0) {
+        calculatedRaw = Math.min(calculatedRaw, Number(c.maxDiscount));
+      }
+      
+      savings = calculatedRaw;
     }
     
     return {
@@ -560,7 +568,6 @@ function renderCoupons() {
       ${actionBtn}
     `;
   } else {
-    // If no coupons are left (e.g., only had free ship coupons and they are hidden), hide featured card content
     featuredCard.innerHTML = `<div style="padding:10px; color:#888; font-size:13px;">No coupons available for this order.</div>`;
   }
 
@@ -571,11 +578,12 @@ function renderCoupons() {
     const isLocked = coupon.isLocked;
     const diff = coupon.missingAmount;
     
-    // Smart Text: "Save ₹Amount" vs "Save %"
+    // Smart Text
     let benefitText = "";
     if (isLocked) {
        benefitText = coupon.freeShip ? 'Free Shipping' : `Save ${coupon.percent}%`;
     } else {
+       // Shows the actual capped amount (e.g., "Save ₹100 with this code")
        benefitText = `Save ₹${coupon.currentSavings} with this code`;
     }
     
@@ -673,7 +681,15 @@ function calculateTotals() {
   if (activeCoupon) {
     if (activeCoupon.freeShip) forceFreeShip = true;
     else if (subtotalAfterCombo >= activeCoupon.minOrder) {
-      couponDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
+      // Calculate Percent Discount
+      let rawDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
+      
+      // ✅ NEW: Apply Max Discount Cap
+      if (activeCoupon.maxDiscount && Number(activeCoupon.maxDiscount) > 0) {
+        rawDisc = Math.min(rawDisc, Number(activeCoupon.maxDiscount));
+      }
+      
+      couponDisc = rawDisc;
     }
   }
 
