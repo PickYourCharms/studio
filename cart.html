@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,16 +109,13 @@
 </div>
 
 <script>
-// --- UPDATED: Load ALL Config from Sheet ---
+// --- UPDATED CONSTANTS ---
+// --- UPDATED: Load Config & Coupons from Sheet ---
 const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
-
-// Dynamic Base Prices
-const BASE_PRICE_BRACELET = Number(CONFIG.bracelet_base_price) || 249;
-const BASE_PRICE_EARRING = Number(CONFIG.earring_base_price) || 199;
-const ALLOWANCE_B = Number(CONFIG.bracelet_base_charm_allowance) || 50;
-const ALLOWANCE_E = Number(CONFIG.earring_base_charm_allowance) || 50;
-const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
+const BASE_PRICE = Number(CONFIG.bracelet_base_price) || 249;
+// ✅ NEW: Add Earring Base Price
+const EARRING_BASE_PRICE = Number(CONFIG.earring_base_price) || 199; 
+const EXTRA_CHARM_PRICE = 50;
 
 const COUPONS_DB = JSON.parse(localStorage.getItem('pyc_coupons') || "[]");
 
@@ -593,64 +589,39 @@ deleteItem = function(index, subType) {
 // --- MATH & ACTIONS ---
 function calculateTotals() {
   let totalRaw = 0;
+  cart.forEach(i => totalRaw += i.price);
   
-  // 1. Separate items to calculate Combo Discount
-  let singleBracelets = [];
-  let singleEarrings = [];
-  
-  cart.forEach(item => {
-    totalRaw += item.price; // Add everything to raw total first
-    
-    if (item.type === 'Bracelet' && !item.isReadyMade) singleBracelets.push(item.price);
-    if (item.type === 'Earrings' && !item.isReadyMade) singleEarrings.push(item.price);
-  });
-  
+  // Recalculate combo savings
+  let singleBracelets = cart.filter(i => i.type === 'Bracelet').map(i => i.price);
+  let singleEarrings = cart.filter(i => i.type === 'Earrings').map(i => i.price);
   singleBracelets.sort((a,b) => a-b);
   singleEarrings.sort((a,b) => a-b);
   
-  // 2. Calculate Combo Savings (Lever: combo_discount_percent)
   let comboSavings = 0;
+  // Use Config for Discount Percent (default 10%)
+  const comboPercent = Number(CONFIG.combo_discount_percent) || 10;
+  
   const pairs = Math.min(singleBracelets.length, singleEarrings.length);
   for(let i=0; i<pairs; i++) {
-    comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (COMBO_PERCENT / 100));
+    comboSavings += Math.floor((singleBracelets[i] + singleEarrings[i]) * (comboPercent / 100));
   }
 
-  const displayCartValue = totalRaw + comboSavings; // Show value BEFORE discount
-  let subtotalAfterCombo = totalRaw; // Effectively raw - 0 (already deducted in logic?) 
-  // Wait, totalRaw is what user PAYS. displayCartValue is the "Crossed out" higher price.
-  // Actually, standard e-com way: Subtotal is Sum of Prices. Discount is subtracted.
-  // Let's stick to your UI flow:
+  const displayCartValue = totalRaw + comboSavings;
+  let subtotalAfterCombo = displayCartValue - comboSavings;
   
-  // Re-adjust logic for your specific UI:
-  // displayCartValue = Sum of all individual item prices (without combo discount)
-  // But 'totalRaw' from cart items ALREADY includes the combo discount if they were added as a combo...
-  // WAIT. In your builder, you add a "Combo Product" with a pre-discounted price.
-  // BUT here in cart, we re-calculate combo savings for *singles* that form a pair too.
-  // This logic is tricky. Let's simplify:
-  
-  // "Combo Savings" in Cart only applies to items that are NOT already Combos (since Combos are already cheap).
-  // OR, does your cart break combos into individual lines? 
-  // Your code keeps Combos as a specific type 'Combo (Bracelet + Earrings)'.
-  // If they are already a Combo Type, the price is FIXED at creation. 
-  // We should NOT apply discount again.
-  
-  // Fix: Only apply dynamic combo logic to 'Singles' that match up.
-  // Note: Your current code applies it to singles.
-  
-  let subtotalPostDiscount = totalRaw - comboSavings;
-
-  // 3. Coupon Logic
   let couponDisc = 0;
   let forceFreeShip = false;
+  
   if (activeCoupon) {
     if (activeCoupon.freeShip) forceFreeShip = true;
-    else if (subtotalPostDiscount >= activeCoupon.minOrder) {
-      couponDisc = Math.floor(subtotalPostDiscount * (activeCoupon.percent / 100));
+    else if (subtotalAfterCombo >= activeCoupon.minOrder) {
+      couponDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
     }
   }
-  subtotalPostDiscount = subtotalPostDiscount - couponDisc;
 
-  // 4. Shipping Logic (Levers: shipping_fee_default, free_shipping_above)
+  let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
+
+  // --- UPDATED SHIPPING LOGIC FROM SHEET CONFIG ---
   const shipFee = Number(CONFIG.shipping_fee_default) || 80;
   const freeShipThreshold = Number(CONFIG.free_shipping_above) || 399;
   
@@ -658,10 +629,10 @@ function calculateTotals() {
   if (forceFreeShip || (subtotalPostDiscount >= freeShipThreshold)) {
     shipping = 0;
   }
-
+  
   let finalTotal = subtotalPostDiscount + shipping;
 
-  // Render
+  // Render to UI
   document.getElementById('cartValueVal').textContent = `Rs. ${displayCartValue}`;
   
   const comboRow = document.getElementById('comboRow');
@@ -676,9 +647,8 @@ function calculateTotals() {
   }
 
   document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
-  
   const shipEl = document.getElementById('shippingVal');
-  const shipLabel = document.querySelector('.math-row:nth-last-child(3) span:first-child');
+  const shipLabel = document.querySelector('.math-row:nth-last-child(3) span:first-child'); 
   
   if (shipping === 0) {
     shipEl.textContent = 'FREE';
@@ -697,35 +667,29 @@ function deleteItem(index, subType = null) {
   if (subType === null) {
     cart.splice(index, 1);
   } else {
-    // We are splitting a Combo. We must recalculate the remaining item's price accurately.
     const combo = cart[index];
     
+    // CASE 1: User deletes Bracelet from Combo -> Keep Earrings
     if (subType === 'bracelet') {
-      // User deleted Bracelet, keep Earrings
-      // Recalculate Earring Price based on current Config
-      const newPrice = calculateItemPrice('Earrings', combo.earrings.metal, combo.earrings.charms);
-      
       const newEarring = {
         id: Date.now(),
         type: 'Earrings',
         metal: combo.earrings.metal,
         charms: combo.earrings.charms,
-        price: newPrice, // ✅ Calculated dynamically
+        price: EARRING_BASE_PRICE, // ✅ FIX: Use Earring Price (199), not Base/Bracelet Price (249)
         image: `assets/bases/LeftHook_${combo.earrings.metal}.png`
       };
       cart[index] = newEarring;
     } 
+    // CASE 2: User deletes Earrings from Combo -> Keep Bracelet
     else if (subType === 'earrings') {
-      // User deleted Earrings, keep Bracelet
-      // Recalculate Bracelet Price based on current Config
-      const newPrice = calculateItemPrice('Bracelet', combo.bracelet.metal, combo.bracelet.charms);
-
+      const bPrice = BASE_PRICE + (combo.bracelet.charms.length > 1 ? (combo.bracelet.charms.length - 1) * EXTRA_CHARM_PRICE : 0);
       const newBracelet = {
         id: Date.now(),
         type: 'Bracelet',
         metal: combo.bracelet.metal,
         charms: combo.bracelet.charms,
-        price: newPrice, // ✅ Calculated dynamically
+        price: bPrice,
         image: `assets/bases/bracelet_base_${combo.bracelet.metal}.png`
       };
       cart[index] = newBracelet;
@@ -848,35 +812,6 @@ document.getElementById('checkoutUpsellModal').onclick = function(e) {
     forceCheckout();
   }
 };
-// Helper: Re-calculate price accurately using Sheet Metadata
-function calculateItemPrice(type, metal, charms) {
-  let total = 0;
-  
-  if (type === 'Bracelet') {
-    total = BASE_PRICE_BRACELET;
-    // Bracelet Logic: First charm gets allowance deduction
-    if (Array.isArray(charms)) {
-      charms.forEach((file, index) => {
-        const meta = CHARM_METADATA[file] || { price: 50 };
-        if (index === 0) total += Math.max(0, meta.price - ALLOWANCE_B);
-        else total += meta.price;
-      });
-    }
-  } 
-  else if (type === 'Earrings') {
-    total = BASE_PRICE_EARRING;
-    // Earring Logic: Allowance per ear
-    if (charms.left) {
-      const meta = CHARM_METADATA[charms.left] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-    if (charms.right) {
-      const meta = CHARM_METADATA[charms.right] || { price: 50 };
-      total += Math.max(0, meta.price - ALLOWANCE_E);
-    }
-  }
-  return total;
-}
 </script>
 
  <div id="checkoutUpsellModal" class="upsell-modal-overlay">
