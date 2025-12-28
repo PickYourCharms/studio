@@ -685,6 +685,9 @@
   }
 
   function proceedToWhatsApp() {
+    // 1. Retrieve First-Touch Data from Local Storage
+  // If nothing exists (user came direct every time), we default to empty object
+  const firstTouchData = JSON.parse(localStorage.getItem('pyc_first_touch_utm') || "{}");
     // 1. Validation 
     let isValid = true;
     let firstError = null;
@@ -760,8 +763,10 @@
       final_amount: document.getElementById('finalTotal').textContent,
       
       device_type: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-      utm_source: "direct", 
-      utm_campaign: ""
+      // ✅ UPDATE THESE LINES TO USE 'firstTouchData'
+    utm_source: firstTouchData.source || "direct", 
+    utm_campaign: firstTouchData.campaign || "",
+    utm_medium: firstTouchData.medium || "",
     };
 
     // 3. Send to Google Sheet
