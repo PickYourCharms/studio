@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -382,7 +381,6 @@ function calculateTotals() {
     let totalRaw = 0;
     cart.forEach(i => totalRaw += i.price);
 
-    // Dynamic Combo Savings (Sheet Lever)
     const COMBO_PERCENT = Number(CONFIG.combo_discount_percent) || 10;
     
     let singleBracelets = cart.filter(i => i.type === 'Bracelet').map(i => i.price);
@@ -407,15 +405,18 @@ function calculateTotals() {
         freeShip = true;
       } 
       else if (subtotalAfterCombo >= appliedCoupon.minOrder) {
-        // 1. Calculate Standard % Discount
-        let rawDisc = Math.floor(subtotalAfterCombo * (appliedCoupon.percent / 100));
         
-        // 2. ✅ NEW: Apply Max Cap (Zomato Style)
-        if (appliedCoupon.maxDiscount && Number(appliedCoupon.maxDiscount) > 0) {
-           rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
+        // ✅ NEW: Flat Amount Check in Checkout
+        if (appliedCoupon.flatAmount && Number(appliedCoupon.flatAmount) > 0) {
+           couponDisc = Number(appliedCoupon.flatAmount);
+        } else {
+           // Standard % Logic
+           let rawDisc = Math.floor(subtotalAfterCombo * (appliedCoupon.percent / 100));
+           if (appliedCoupon.maxDiscount && Number(appliedCoupon.maxDiscount) > 0) {
+              rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
+           }
+           couponDisc = rawDisc;
         }
-        
-        couponDisc = rawDisc;
       }
     }
     
@@ -432,7 +433,6 @@ function calculateTotals() {
 
     let shipping = defaultFee;
     
-    // Logic: Free shipping if coupon says so OR cart value is high enough
     if (freeShip || (subtotalPostDiscount >= freeThreshold)) {
       shipping = 0; 
       msg.textContent = "Free shipping applied! ✨"; 
