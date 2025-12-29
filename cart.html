@@ -164,6 +164,8 @@ function init() {
   if (cart.length === 0) {
     emptyState.style.display = 'flex';
     cartContent.style.display = 'none';
+    activeCoupon = null;
+    sessionStorage.removeItem('pyc_applied_coupon');
   } else {
     emptyState.style.display = 'none';
     cartContent.style.display = 'block';
