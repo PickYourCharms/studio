@@ -385,6 +385,52 @@ cta.onclick = function() {
     comboStack.appendChild(bCanvas);
     comboStack.appendChild(canvas);
     builderSurface.insertBefore(comboStack, builderSurface.firstChild);
+      // ---------------------------------------------------------
+    // FIX: Render Bracelet Charms & Price Pill in Frozen State
+    // ---------------------------------------------------------
+
+    // 1. Add the Bracelet's OWN Price Pill
+    const bPill = document.createElement('div');
+    bPill.className = 'price-pill show';
+    // 'bPrice' is already calculated at the start of this function
+    bPill.textContent = 'Rs. ' + bPrice; 
+    bCanvas.appendChild(bPill);
+
+    // 2. Render the Bracelet Charms onto the Preview Canvas
+    // We must do this AFTER appending to DOM so getBoundingClientRect works
+    const bRect = bCanvas.getBoundingClientRect();
+    const bCx = bRect.width / 2;
+    const bCy = bRect.height / 2;
+    const bRadius = bRect.width * 0.36; // Matches the ratio used in Builder.html
+    
+    const bList = braceletData.charms || [];
+    const bAngles = B_ANGLES[bList.length] || []; // Uses B_ANGLES defined at top of file
+
+    bList.forEach((file, i) => {
+      // Standard radial math from Builder.html
+      const a = bAngles[bAngles.length - 1 - i];
+      const rad = a * Math.PI / 180;
+      
+      // Calculate X/Y based on B_PHYSICS constants defined at top of file
+      const x = bCx + bRadius * Math.cos(rad);
+      const y = bCy + bRadius * Math.sin(rad) + B_PHYSICS.attachOffset;
+
+      const charmDiv = document.createElement('div');
+      charmDiv.className = 'charm'; 
+      
+      // Apply positioning
+      charmDiv.style.left = (x - B_PHYSICS.anchorX) + 'px';
+      charmDiv.style.top = (y - B_PHYSICS.anchorY) + 'px';
+      charmDiv.style.transform = 'rotate(' + (a - 90) + 'deg)';
+      charmDiv.style.pointerEvents = 'none'; // Prevent clicking/removing in frozen state
+
+      const img = document.createElement('img');
+      img.src = 'assets/charms/' + file;
+      img.style.width = B_PHYSICS.size + 'px'; // Force size to 46px per config
+      
+      charmDiv.appendChild(img);
+      bCanvas.appendChild(charmDiv);
+    });
 
   } else {
     const product = {
