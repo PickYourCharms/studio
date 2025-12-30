@@ -339,6 +339,26 @@ body.frozen-state .post-actions-container { display: flex; }
 }
 .remove-coupon-btn { background: none; border: none; font-size: 18px; color: #15803d; cursor: pointer; }
 
+/* Update the existing button style to transition smoothly */
+.coupon-input-wrapper button {
+  background: #fff;
+  border: none;
+  border-left: 1px solid #ddd;
+  color: #ccc; /* Default 'disabled' look */
+  padding: 0 16px;
+  font-weight: 600;
+  cursor: default;
+  transition: all 0.2s ease;
+}
+
+/* Add this NEW class for when text is entered */
+.coupon-input-wrapper button.ready {
+  color: #15803d; /* Brand Green */
+  cursor: pointer;
+  background-color: #f0fdf4; /* Slight green tint */
+  font-weight: 700;
+}
+
 /* === CHECKOUT ELEMENTS === */
 .checkout-pill {
   position: fixed; bottom: 24px; left: 16px; right: 16px;
