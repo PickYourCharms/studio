@@ -724,18 +724,33 @@
     currentOrderID = orderID;
     
     // Clean up Cart Items for Sheet
-    const itemsClean = cart.map(item => {
-      // Basic fields
-      let cleanItem = {
+const itemsClean = cart.map(item => {
+      
+      // 1. HANDLE COMBO ITEMS (Preserve nested structure)
+      if (item.type.includes('Combo')) {
+        return {
+          type: item.type,
+          price: item.price,
+          // Extract specific details for the Combo parts
+          bracelet_details: {
+            metal: item.bracelet.metal,
+            charms: item.bracelet.charms
+          },
+          earrings_details: {
+            metal: item.earrings.metal,
+            charms: item.earrings.charms
+          }
+        };
+      }
+
+      // 2. HANDLE REGULAR ITEMS (Standard structure)
+      return {
         type: item.type,
-        metal: item.metal || (item.bracelet ? item.bracelet.metal : ''),
+        metal: item.metal || '',
         price: item.price,
         charms: item.charms || [], 
         title: item.title || ''
       };
-      // Note: We send the 'item.price' which is the individual price (discounted if it's a combo stored that way, 
-      // but strictly speaking, the backend just needs to know WHAT was ordered).
-      return cleanItem;
     });
 
     const payload = {
