@@ -718,6 +718,7 @@ function calculateTotals() {
   let allBracelets = [];
   let allEarrings = [];
 
+  // 1. EXTRACT PRICES
   cart.forEach(item => {
     if (item.type.includes('Combo')) {
       const bPrice = getBPrice(item.bracelet);
@@ -741,6 +742,7 @@ function calculateTotals() {
     }
   });
 
+  // 2. COMBO SAVINGS
   allBracelets.sort((a,b) => a-b);
   allEarrings.sort((a,b) => a-b);
   let comboSavings = 0;
@@ -752,18 +754,37 @@ function calculateTotals() {
 
   let subtotalAfterCombo = grossTotal - comboSavings;
 
+  // 3. DETERMINE NATURAL SHIPPING COST
   const shipFee = Number(CONFIG.shipping_fee_default) || 0;
   const freeThreshold = Number(CONFIG.free_shipping_above) || 0;
   let naturalShipping = shipFee;
-  if (subtotalAfterCombo >= freeThreshold) naturalShipping = 0;
+  if (subtotalAfterCombo >= freeThreshold) {
+    naturalShipping = 0;
+  }
 
+  // 4. COUPON LOGIC & AUTO-REMOVAL
   let couponDisc = 0;
+  
   if (activeCoupon) {
-    if (activeCoupon.freeShip) {
-      couponDisc = 0; 
+    // 🚨 NEW CHECK: Is the coupon still valid for this total?
+    if (subtotalAfterCombo < activeCoupon.minOrder) {
+       // ❌ Coupon is no longer valid: Remove it!
+       activeCoupon = null;
+       sessionStorage.removeItem('pyc_applied_coupon');
+       
+       // UI: Hide "Applied" Banner, Show "Best Coupon" List
+       document.getElementById('appliedCouponView').style.display = 'none';
+       document.getElementById('couponSectionRaw').style.display = 'block';
+       
+       // Trigger logic to find the next best coupon
+       renderCoupons();
     } 
-    else if (subtotalAfterCombo >= activeCoupon.minOrder) {
-       if (activeCoupon.flatAmount && Number(activeCoupon.flatAmount) > 0) {
+    else {
+       // ✅ Valid: Calculate Discount
+       if (activeCoupon.freeShip) {
+         couponDisc = 0; 
+       } 
+       else if (activeCoupon.flatAmount && Number(activeCoupon.flatAmount) > 0) {
          couponDisc = Number(activeCoupon.flatAmount);
        } else {
          let rawDisc = Math.floor(subtotalAfterCombo * (activeCoupon.percent / 100));
@@ -775,13 +796,18 @@ function calculateTotals() {
     }
   }
 
+  // 5. CALCULATE FINAL SHIPPING
   let finalShipping = naturalShipping;
-  if (activeCoupon && activeCoupon.freeShip) finalShipping = 0; 
-  else if (subtotalAfterCombo >= freeThreshold) finalShipping = 0;
+  if (activeCoupon && activeCoupon.freeShip) {
+    finalShipping = 0; 
+  } else if (subtotalAfterCombo >= freeThreshold) {
+    finalShipping = 0; 
+  }
 
   let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
   const finalTotal = subtotalPostDiscount + finalShipping;
 
+  // --- RENDER ---
   document.getElementById('cartValueVal').textContent = `Rs. ${grossTotal}`;
   
   const comboEl = document.getElementById('comboRow');
@@ -796,13 +822,17 @@ function calculateTotals() {
   if (activeCoupon) { 
     coupEl.style.display = 'flex'; 
     document.getElementById('couponCodeLabel').textContent = `Coupon (${activeCoupon.code})`;
-    if (activeCoupon.freeShip) document.getElementById('couponVal').textContent = "Free Shipping";
-    else document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+    if (activeCoupon.freeShip) {
+        document.getElementById('couponVal').textContent = "Free Shipping";
+    } else {
+        document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+    }
   } else {
     coupEl.style.display = 'none';
   }
 
   document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
+  
   const shipEl = document.getElementById('shippingVal');
   if (finalShipping === 0) {
     shipEl.textContent = 'FREE';
@@ -811,6 +841,7 @@ function calculateTotals() {
     shipEl.textContent = `Rs. ${finalShipping}`;
     shipEl.style.color = '#111';
   }
+
   document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
 }
 
