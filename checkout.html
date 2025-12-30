@@ -704,10 +704,10 @@ function calculateTotals() {
     return `PYC-${typeCode}-${dd}${mm}${yyyy}-${HH}${MM}-${rand}`;
   }
 
-  function proceedToWhatsApp() {
+function proceedToWhatsApp() {
     // 1. Retrieve First-Touch Data from Local Storage
-  // If nothing exists (user came direct every time), we default to empty object
-  const firstTouchData = JSON.parse(localStorage.getItem('pyc_first_touch_utm') || "{}");
+    const firstTouchData = JSON.parse(localStorage.getItem('pyc_first_touch_utm') || "{}");
+    
     // 1. Validation 
     let isValid = true;
     let firstError = null;
@@ -742,26 +742,15 @@ function calculateTotals() {
     currentOrderID = orderID;
     
     // Clean up Cart Items for Sheet
-const itemsClean = cart.map(item => {
-      
-      // 1. HANDLE COMBO ITEMS (Preserve nested structure)
+    const itemsClean = cart.map(item => {
       if (item.type.includes('Combo')) {
         return {
           type: item.type,
           price: item.price,
-          // Extract specific details for the Combo parts
-          bracelet_details: {
-            metal: item.bracelet.metal,
-            charms: item.bracelet.charms
-          },
-          earrings_details: {
-            metal: item.earrings.metal,
-            charms: item.earrings.charms
-          }
+          bracelet_details: { metal: item.bracelet.metal, charms: item.bracelet.charms },
+          earrings_details: { metal: item.earrings.metal, charms: item.earrings.charms }
         };
       }
-
-      // 2. HANDLE REGULAR ITEMS (Standard structure)
       return {
         type: item.type,
         metal: item.metal || '',
@@ -789,21 +778,17 @@ const itemsClean = cart.map(item => {
       occasion: data.occasion,
       gift_message: data.giftMessage,
       items_json: itemsClean,
-      
-      // Pass the EXACT values shown on screen
       combo_applied: document.getElementById('comboRow').style.display !== 'none',
-      subtotal: document.getElementById('subtotalVal').textContent, // Post-discount
+      subtotal: document.getElementById('subtotalVal').textContent, 
       combo_discount: document.getElementById('comboVal').textContent,
       coupon_code: appliedCoupon ? appliedCoupon.code : "",
       coupon_discount: document.getElementById('couponVal').textContent,
       shipping_fee: document.getElementById('shippingVal').textContent,
       final_amount: document.getElementById('finalTotal').textContent,
-      
       device_type: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-      // ✅ UPDATE THESE LINES TO USE 'firstTouchData'
-    utm_source: firstTouchData.source || "direct", 
-    utm_campaign: firstTouchData.campaign || "",
-    utm_medium: firstTouchData.medium || "",
+      utm_source: firstTouchData.source || "direct", 
+      utm_campaign: firstTouchData.campaign || "",
+      utm_medium: firstTouchData.medium || "",
     };
 
     // 3. Send to Google Sheet
@@ -822,11 +807,31 @@ const itemsClean = cart.map(item => {
         if(item.type === 'Bracelet') desc += ` (${item.charms.length} charms)`;
         else if(item.type.includes('Combo')) desc += ` (Combo)`;
         else if(item.isReadyMade) desc += ` (${item.title})`;
-        
         itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
       });
       
-      let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${data.name}\n\n*Items:*${itemsStr}\n\n*Total:* ${payload.final_amount}`;
+      // ✅ MODIFIED: Gift Logic Starts Here
+      let giftDetailsStr = "";
+      if (data.isGift) {
+        giftDetailsStr = `\n\n🎁 *GIFT DETAILS*`;
+        // Mandatory fields for gifts (Validation ensures these exist)
+        giftDetailsStr += `\n*Receiver:* ${data.receiverName}`;
+        giftDetailsStr += `\n*Phone:* ${data.receiverPhone}`;
+        
+        // Optional fields - only add if they have text
+        if (data.relation && data.relation.trim() !== "") {
+          giftDetailsStr += `\n*Relation:* ${data.relation}`;
+        }
+        if (data.occasion && data.occasion.trim() !== "") {
+          giftDetailsStr += `\n*Occasion:* ${data.occasion}`;
+        }
+        if (data.giftMessage && data.giftMessage.trim() !== "") {
+          giftDetailsStr += `\n*Note:* ${data.giftMessage}`;
+        }
+      }
+      // ✅ Gift Logic Ends Here
+
+      let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${data.name}\n\n*Items:*${itemsStr}${giftDetailsStr}\n\n*Total:* ${payload.final_amount}`;
       
       const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
