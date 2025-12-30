@@ -28,40 +28,19 @@ h2 { margin: 8px 0 10px; text-align: center; }
 .price-pill.show { opacity: 1; transform: translateY(0); }
 .reset-row { text-align: right; margin: 6px auto 10px; max-width: 360px; }
 .reset-row button { background: none; border: none; font-size: 14px; color: #777; cursor: pointer; }
-/* === UPDATED TRAY STYLES (Grid System) === */
-    .tray-surface { 
-      background: #ffffff; 
-      border-radius: 22px; 
-      padding: 16px 12px; /* Increased padding for multi-rows */
-      margin: 14px auto 0; 
-      max-width: 420px; 
-      box-shadow: 0 12px 28px rgba(0,0,0,0.05); 
-    }
-
-    .tray { 
-      display: grid; 
-      grid-template-columns: repeat(5, 1fr); /* Forces exactly 5 columns */
-      gap: 16px 8px; /* 16px vertical gap, 8px horizontal gap */
-      justify-items: center;
-      align-items: center;
-    }
-
-    .tray img { 
-      width: 100%; 
-      max-width: 48px; /* Prevents icons from getting too huge */
-      aspect-ratio: 1 / 1; 
-      object-fit: contain; 
-      cursor: pointer; 
-      transition: transform 0.1s;
-    }
-    
-    .tray img:active { transform: scale(0.9); }
+.tray-surface { background: #fff; border-radius: 22px; padding: 14px 10px; margin: 14px auto 0; max-width: 420px; box-shadow: 0 12px 28px rgba(0,0,0,0.05); }
+.tray { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px 8px; justify-items: center; align-items: center; }
+.tray img { width: 100%; max-width: 48px; aspect-ratio: 1 / 1; object-fit: contain; cursor: pointer; transition: transform 0.1s; }
+.tray img:active { transform: scale(0.9); }
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 999; }
 .modal-card { background: #fff; border-radius: 18px; padding: 20px; width: 86%; max-width: 320px; text-align: center;}
 .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
 .modal-actions button { flex: 1; padding: 12px; border-radius: 999px; border: none; cursor: pointer; }
 .primary { background: #000; color: #fff; }
 .secondary { background: #eee; }
+.builder-surface { position: relative; }
+.premium-toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: transparent; color: #559e66; padding: 0; font-size: 12px; font-weight: 700; white-space: nowrap; opacity: 0; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none; z-index: 10; letter-spacing: 0.3px; }
+.premium-toast.show { opacity: 1; bottom: 45px; }
 </style>
 </head>
 
@@ -75,13 +54,11 @@ h2 { margin: 8px 0 10px; text-align: center; }
       </svg>
     </button>
   </div>
-
   <div class="nav-center">
     <a href="index.html" class="logo-link">
       <img src="assets/home/PYC_LOGO_TEXT.png" class="logo-img" alt="PickYourCharms">
     </a>
   </div>
-
   <div class="nav-right">
     <button id="navCartBtn" class="nav-btn" onclick="window.location.href='cart.html'">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,43 +106,12 @@ h2 { margin: 8px 0 10px; text-align: center; }
     </div>
   </div>
 </div>
-<div id="premiumToast" class="premium-toast">💫 Premium Charm Added</div>
-<style>
-.builder-surface { position: relative; }
 
-.premium-toast {
-  position: absolute;
-  bottom: 40px; 
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  color: #559e66; /* Soft green */
-  padding: 0;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  pointer-events: none;
-  z-index: 10;
-  letter-spacing: 0.3px;
-}
-
-.premium-toast.show {
-  opacity: 1;
-  bottom: 45px; 
-}
-</style>
 <script>
-// --- UPDATED: Load from Google Sheet Data ---
 const CONFIG = JSON.parse(localStorage.getItem('pyc_config') || "{}");
-// Note: We use 'earring_base_price' here
 const BASE_PRICE = Number(CONFIG.earring_base_price) || 0; 
 const ALLOWANCE = Number(CONFIG.earring_base_charm_allowance) || 0;
-
-// Metadata for prices
 const CHARM_METADATA = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
-
 const CHARMS = {
   gold: JSON.parse(localStorage.getItem('pyc_charms_gold') || "[]"),
   silver: JSON.parse(localStorage.getItem('pyc_charms_silver') || "[]")
@@ -192,6 +138,15 @@ const premiumToast = document.getElementById('premiumToast');
 const urlParams = new URLSearchParams(window.location.search);
 const isCombo = urlParams.get('mode') === 'combo';
 const isResume = urlParams.get('resume') === 'true';
+
+// ✅ HELPER: Get Image Filename from ID
+function getCharmImg(id) {
+  if (!id) return null;
+  if (CHARM_METADATA[id] && CHARM_METADATA[id].image) {
+    return CHARM_METADATA[id].image;
+  }
+  return id;
+}
 
 function init() {
   const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
@@ -241,19 +196,14 @@ function goBack() {
 }
 
 function loadTray() {
-  // 1. Re-fetch data from storage to ensure we have the latest
   const latestGold = JSON.parse(localStorage.getItem('pyc_charms_gold') || "[]");
   const latestSilver = JSON.parse(localStorage.getItem('pyc_charms_silver') || "[]");
 
-  if (CHARMS) {
-    CHARMS.gold = latestGold;
-    CHARMS.silver = latestSilver;
-  }
+  if (CHARMS) { CHARMS.gold = latestGold; CHARMS.silver = latestSilver; }
 
   const list = CHARMS[metal];
   tray.innerHTML = '';
 
-  // 2. Auto-Retry if data hasn't arrived from Sheet yet
   if (!list || list.length === 0) {
     console.log("Data not ready... retrying in 500ms");
     tray.innerHTML = '<div style="font-size:12px; color:#888; width:100%; text-align:center; padding:20px;">Loading charms...</div>';
@@ -261,24 +211,23 @@ function loadTray() {
     return;
   }
 
-  // 3. Render
-  list.forEach(file => {
+  list.forEach(id => {
     const img = document.createElement('img');
-    img.src = 'assets/charms/' + file;
-    img.onclick = () => addCharm(file);
+    // ✅ FIX: Image Lookup
+    img.src = 'assets/charms/' + getCharmImg(id);
+    img.onclick = () => addCharm(id);
     tray.appendChild(img);
   });
 }
 
-// === FIX: Corrected Add Charm Logic for Earrings ===
-function addCharm(file){
-  if(!charms.left) charms.left=file;
-  else if(!charms.right) charms.right=file;
-  else return; // Both full
+function addCharm(id){
+  if(!charms.left) charms.left=id;
+  else if(!charms.right) charms.right=id;
+  else return; 
   
   render();
   
-  const meta = CHARM_METADATA[file];
+  const meta = CHARM_METADATA[id];
   if(meta && meta.isPremium) {
     showPremiumToast();
   }
@@ -288,29 +237,19 @@ function addCharm(file){
 function showPremiumToast() {
   premiumToast.classList.add('show');
   if(window.premiumTimer) clearTimeout(window.premiumTimer);
-  window.premiumTimer = setTimeout(() => {
-    premiumToast.classList.remove('show');
-  }, 2000);
+  window.premiumTimer = setTimeout(() => { premiumToast.classList.remove('show'); }, 2000);
 }
 
-// === FIX: New Pricing Logic (Base + Difference) ===
 function calculateCurrentPrice() {
   let total = BASE_PRICE;
-  
-  // Left Ear
   if (charms.left) {
     const meta = CHARM_METADATA[charms.left] || { price: 0 };
-    // Only pay the difference if charm price > 50
     total += Math.max(0, meta.price - ALLOWANCE);
   }
-
-  // Right Ear
   if (charms.right) {
     const meta = CHARM_METADATA[charms.right] || { price: 0 };
-    // Only pay the difference if charm price > 50
     total += Math.max(0, meta.price - ALLOWANCE);
   }
-
   return total;
 }
 
@@ -339,7 +278,8 @@ function drawCharm(side){
   w.style.left=(h.left-c.left+PHYSICS[side].x-PHYSICS.charmSize/2)+'px';
   w.style.top=(h.top-c.top+PHYSICS[side].y)+'px';
   const img=document.createElement('img');
-  img.src='assets/charms/'+charms[side];
+  // ✅ FIX: Image Lookup
+  img.src='assets/charms/'+getCharmImg(charms[side]);
   img.style.width=PHYSICS.charmSize+'px';
   w.appendChild(img);
   w.onclick=()=>{
@@ -410,48 +350,39 @@ cta.onclick = function() {
     comboStack.appendChild(bCanvas);
     comboStack.appendChild(canvas);
     builderSurface.insertBefore(comboStack, builderSurface.firstChild);
-      // ---------------------------------------------------------
-    // FIX: Render Bracelet Charms & Price Pill in Frozen State
-    // ---------------------------------------------------------
 
     // 1. Add the Bracelet's OWN Price Pill
     const bPill = document.createElement('div');
     bPill.className = 'price-pill show';
-    // 'bPrice' is already calculated at the start of this function
     bPill.textContent = 'Rs. ' + bPrice; 
     bCanvas.appendChild(bPill);
 
-    // 2. Render the Bracelet Charms onto the Preview Canvas
-    // We must do this AFTER appending to DOM so getBoundingClientRect works
+    // 2. Render Bracelet Charms Preview
     const bRect = bCanvas.getBoundingClientRect();
     const bCx = bRect.width / 2;
     const bCy = bRect.height / 2;
-    const bRadius = bRect.width * 0.36; // Matches the ratio used in Builder.html
+    const bRadius = bRect.width * 0.36; 
     
     const bList = braceletData.charms || [];
-    const bAngles = B_ANGLES[bList.length] || []; // Uses B_ANGLES defined at top of file
+    const bAngles = B_ANGLES[bList.length] || []; 
 
-    bList.forEach((file, i) => {
-      // Standard radial math from Builder.html
+    bList.forEach((id, i) => {
       const a = bAngles[bAngles.length - 1 - i];
       const rad = a * Math.PI / 180;
-      
-      // Calculate X/Y based on B_PHYSICS constants defined at top of file
       const x = bCx + bRadius * Math.cos(rad);
       const y = bCy + bRadius * Math.sin(rad) + B_PHYSICS.attachOffset;
 
       const charmDiv = document.createElement('div');
       charmDiv.className = 'charm'; 
-      
-      // Apply positioning
       charmDiv.style.left = (x - B_PHYSICS.anchorX) + 'px';
       charmDiv.style.top = (y - B_PHYSICS.anchorY) + 'px';
       charmDiv.style.transform = 'rotate(' + (a - 90) + 'deg)';
-      charmDiv.style.pointerEvents = 'none'; // Prevent clicking/removing in frozen state
+      charmDiv.style.pointerEvents = 'none';
 
       const img = document.createElement('img');
-      img.src = 'assets/charms/' + file;
-      img.style.width = B_PHYSICS.size + 'px'; // Force size to 46px per config
+      // ✅ FIX: Image Lookup for frozen bracelet preview
+      img.src = 'assets/charms/' + getCharmImg(id);
+      img.style.width = B_PHYSICS.size + 'px'; 
       
       charmDiv.appendChild(img);
       bCanvas.appendChild(charmDiv);
@@ -471,15 +402,11 @@ cta.onclick = function() {
 };
 
 function calculateBraceletPrice(bCharms) {
-  // FIX: Explicitly use Bracelet Base Price (e.g., 249), NOT Earring Base Price (199)
   const braceletBase = Number(CONFIG.bracelet_base_price) || 0;
   const braceletAllow = Number(CONFIG.bracelet_base_charm_allowance) || 0;
-  
   let total = braceletBase; 
-
-  bCharms.forEach((file, index) => {
-    const meta = CHARM_METADATA[file] || { price: 0 };
-    // Apply allowance logic to the first charm
+  bCharms.forEach((id, index) => {
+    const meta = CHARM_METADATA[id] || { price: 0 };
     if (index === 0) total += Math.max(0, meta.price - braceletAllow);
     else total += meta.price;
   });
