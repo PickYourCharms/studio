@@ -1,3 +1,7 @@
+// ✅ URL UPDATED
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt-6YixCAHAFsb23MBd79YW7YcAvzlUPbotCRbwzapkIaxqcifJP9TqlBkxQ0lqKnE/exec";
+window.SCRIPT_URL = SCRIPT_URL; // Make it globally available
+
 async function fetchStoreData() {
   if (SCRIPT_URL.includes("PASTE_YOUR")) {
     console.error("❌ Google Script URL is missing in store_data.js");
