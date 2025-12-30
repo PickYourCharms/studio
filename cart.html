@@ -766,10 +766,11 @@ function calculateTotals() {
   let couponDisc = 0;
   
   if (activeCoupon) {
-if (activeCoupon.freeShip) {
-  couponDisc = 0; // Do not deduct from subtotal
-  finalShipping = 0; // Just remove shipping cost
-}
+    if (activeCoupon.freeShip) {
+      // ✅ FIX: Do NOT deduct shipping from the subtotal.
+      // The benefit is applied strictly in step 5 (finalShipping = 0).
+      couponDisc = 0; 
+    } 
     else if (subtotalAfterCombo >= activeCoupon.minOrder) {
        if (activeCoupon.flatAmount && Number(activeCoupon.flatAmount) > 0) {
          couponDisc = Number(activeCoupon.flatAmount);
@@ -784,13 +785,11 @@ if (activeCoupon.freeShip) {
   }
 
   // 5. CALCULATE FINAL SHIPPING
-  // If Free Ship Coupon is active, Shipping is 0 ("FREE")
-  // If Natural Threshold met, Shipping is 0 ("FREE")
   let finalShipping = naturalShipping;
   if (activeCoupon && activeCoupon.freeShip) {
-    finalShipping = 0;
+    finalShipping = 0; // The coupon sets shipping to 0
   } else if (subtotalAfterCombo >= freeThreshold) {
-    finalShipping = 0;
+    finalShipping = 0; // The order value sets shipping to 0
   }
 
   let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
@@ -811,8 +810,13 @@ if (activeCoupon.freeShip) {
   if (activeCoupon) { 
     coupEl.style.display = 'flex'; 
     document.getElementById('couponCodeLabel').textContent = `Coupon (${activeCoupon.code})`;
-    // ✅ SHOWS "- Rs. 80" INSTEAD OF "FREE SHIPPING" TEXT
-    document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+    
+    // UI TWEAK: If it's free shipping, show text instead of "- Rs. 0"
+    if (activeCoupon.freeShip) {
+        document.getElementById('couponVal').textContent = "Free Shipping";
+    } else {
+        document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+    }
   } else {
     coupEl.style.display = 'none';
   }
