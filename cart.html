@@ -255,7 +255,13 @@ function buildMiniBracelet(metal, charms) {
   const radius = REF_SIZE * 0.36;
   const angles = B_ANGLES[charms.length] || [];
 
-  charms.forEach((file, i) => {
+  charms.forEach((charmId, i) => {
+    const meta = CHARM_METADATA[charmId];
+    if (!meta) {
+      console.warn(`Missing metadata for charm: ${charmId}`);
+      return;
+    }
+    
     const a = angles[angles.length - 1 - i];
     const rad = a * Math.PI / 180;
     const x = cx + radius * Math.cos(rad);
@@ -263,7 +269,7 @@ function buildMiniBracelet(metal, charms) {
     
     const img = document.createElement('img');
     img.className = 'mini-charm';
-    img.src = `assets/charms/${file}`;
+    img.src = `assets/charms/${meta.imageFile}`; // ✅ USE IMAGE FILE
     img.style.left = (x - PHYSICS.bracelet.anchorX) + 'px';
     img.style.top = (y - PHYSICS.bracelet.anchorY) + 'px';
     img.style.transform = `rotate(${a - 90}deg)`;
@@ -287,20 +293,27 @@ function buildMiniEarrings(metal, charms) {
   container.appendChild(rHook);
 
   if (charms.left) {
-    const c = document.createElement('img');
-    c.className = 'mini-charm';
-    c.src = `assets/charms/${charms.left}`;
-    c.style.left = (PHYSICS.earrings.leftX - 23) + 'px';
-    c.style.top = PHYSICS.earrings.y + 'px';
-    container.appendChild(c);
+    const meta = CHARM_METADATA[charms.left];
+    if (meta) {
+      const c = document.createElement('img');
+      c.className = 'mini-charm';
+      c.src = `assets/charms/${meta.imageFile}`; // ✅ USE IMAGE FILE
+      c.style.left = (PHYSICS.earrings.leftX - 23) + 'px';
+      c.style.top = PHYSICS.earrings.y + 'px';
+      container.appendChild(c);
+    }
   }
+  
   if (charms.right) {
-    const c = document.createElement('img');
-    c.className = 'mini-charm';
-    c.src = `assets/charms/${charms.right}`;
-    c.style.left = (PHYSICS.earrings.rightX - 23) + 'px';
-    c.style.top = PHYSICS.earrings.y + 'px';
-    container.appendChild(c);
+    const meta = CHARM_METADATA[charms.right];
+    if (meta) {
+      const c = document.createElement('img');
+      c.className = 'mini-charm';
+      c.src = `assets/charms/${meta.imageFile}`; // ✅ USE IMAGE FILE
+      c.style.left = (PHYSICS.earrings.rightX - 23) + 'px';
+      c.style.top = PHYSICS.earrings.y + 'px';
+      container.appendChild(c);
+    }
   }
   return container;
 }
