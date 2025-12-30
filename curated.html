@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=2.4">
-   <link rel="stylesheet" href="desktop.css">
+  <link rel="stylesheet" href="desktop.css">
   <script src="store_data.js"></script>
-<script src="desktop.js"></script>
+  <script src="desktop.js"></script>
   <script src="navigation.js"></script>
   <style>
     /* === INTERNAL STYLES FOR BROWSE PAGE === */
@@ -57,16 +57,67 @@
 
     .pdp-scroll-content { overflow-y: auto; flex: 1; padding-bottom: 20px; }
 
+    /* === CAROUSEL STYLES === */
     .pdp-image-container {
       width: 100%; height: 340px; background: #f4f4f4;
       position: relative; flex-shrink: 0;
     }
-    .pdp-main-img { width: 100%; height: 100%; object-fit: cover; }
+
+    .carousel-container {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none; /* Firefox */
+      width: 100%;
+      height: 100%;
+    }
+    .carousel-container::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+
+    .carousel-slide {
+      flex: 0 0 100%; /* Each slide takes full width */
+      scroll-snap-align: center;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Dots Indicator */
+    .carousel-dots {
+      position: absolute;
+      bottom: 16px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transition: background 0.2s;
+    }
+
+    .dot.active {
+      background: #ffffff;
+      transform: scale(1.2);
+    }
+
     .close-pdp-btn {
       position: absolute; top: 16px; right: 16px; width: 36px; height: 36px;
       background: rgba(255,255,255,0.9); border-radius: 50%; border: none;
       display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 2;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 12;
     }
 
     .pdp-details { padding: 20px; }
@@ -103,7 +154,7 @@
     }
     /* States */
     .btn-hidden { display: none; }
-.filter-bar {
+    .filter-bar {
       display: flex; gap: 8px; padding: 0 16px 16px; overflow-x: auto;
       scrollbar-width: none;
     }
@@ -113,6 +164,7 @@
       background: #fff; border: 1px solid #e5e5e5; color: #555; white-space: nowrap; cursor: pointer;
     }
     .filter-chip.active { background: #000; color: #fff; border-color: #000; }    
+    .filter-divider { width: 1px; height: 20px; background: #eee; margin: 0 4px; flex-shrink: 0; }
   </style>
 </head>
 
@@ -160,18 +212,18 @@
   <button class="filter-chip" id="btnSet" onclick="toggleFilter('type', 'Set')">Set</button>
 </div>
 
-<style>
-  /* Add this to your styles or inside <style> tag */
-  .filter-divider { width: 1px; height: 20px; background: #eee; margin: 0 4px; flex-shrink: 0; }
-</style>
 <div id="productGrid" class="product-grid"></div>
 
 <div id="pdpOverlay" class="pdp-overlay" onclick="closeDrawer()"></div>
 <div id="pdpDrawer" class="pdp-drawer">
   
   <div class="pdp-scroll-content">
+    
     <div class="pdp-image-container">
-      <img id="drawerImg" src="" class="pdp-main-img">
+      <div id="carouselTrack" class="carousel-container">
+        </div>
+      <div id="carouselDots" class="carousel-dots">
+        </div>
       <button class="close-pdp-btn" onclick="closeDrawer()">✕</button>
     </div>
 
@@ -212,18 +264,16 @@
     <button id="viewCartBtn" class="primary-action-btn btn-hidden" onclick="window.location.href='cart.html'">View Cart</button>
   </div>
 </div>
+
 <script>
   // === DATA ===
- // --- UPDATED: Load Products from Google Sheet ---
-const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
-
+  const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
   const IMG_PATH = "assets/readymade/"; 
   let activeProduct = null;
   
-  // State for filters
   let activeFilters = {
-    metal: null, // 'Gold' or 'Silver'
-    type: null   // 'Bracelet' or 'Earring'
+    metal: null,
+    type: null
   };
 
   function init() {
@@ -232,7 +282,6 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
   }
 
   function toggleFilter(category, value) {
-    // Toggle logic: if clicking active, turn off. If clicking new, switch.
     if (activeFilters[category] === value) {
       activeFilters[category] = null;
     } else {
@@ -249,14 +298,10 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
   }
 
   function updateFilterUI() {
-    // Reset all
     document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-    
-    // Check if everything is null (All active)
     if (!activeFilters.metal && !activeFilters.type) {
       document.getElementById('filterAll').classList.add('active');
     } else {
-      // Highlight active buttons
       if (activeFilters.metal === 'Gold') document.getElementById('btnGold').classList.add('active');
       if (activeFilters.metal === 'Silver') document.getElementById('btnSilver').classList.add('active');
       if (activeFilters.type === 'Bracelet') document.getElementById('btnBracelet').classList.add('active');
@@ -264,15 +309,20 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
     }
   }
 
+  // Helper to ensure path is correct
+  function getFullImgPath(rawStr) {
+    if (!rawStr) return "assets/home/curated_teaser.png";
+    const cleanStr = rawStr.trim();
+    return cleanStr.startsWith('assets') ? cleanStr : (IMG_PATH + cleanStr);
+  }
+
   function renderGrid() {
     const grid = document.getElementById('productGrid');
     grid.innerHTML = '';
     
-    // Filter Logic
     const filtered = PRODUCTS.filter(p => {
       const matchMetal = activeFilters.metal ? p.metal === activeFilters.metal : true;
       const matchType = activeFilters.type ? p.type === activeFilters.type : true;
-      // Only show active products
       const isActive = String(p.active).toLowerCase() === 'true'; 
       return matchMetal && matchType && isActive;
     });
@@ -283,19 +333,22 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
     }
 
     filtered.forEach(p => {
-      // ✅ FIX: Handle Image Path Smartly
-      // If sheet has "assets/readymade/img.png", use it. If just "img.png", prepend folder.
-      let rawImg = p.image || p.src || ""; // Check both keys
-      let finalImg = rawImg.startsWith('assets') ? rawImg : (IMG_PATH + rawImg);
+      // 1. SPLIT IMAGES: Handle comma separated lists
+      const rawImageString = p.image || p.src || "";
+      const imageArray = rawImageString.split(','); 
+      
+      // 2. HERO IMAGE: Take the first one for the grid
+      const heroImg = getFullImgPath(imageArray[0]);
 
       const card = document.createElement('div');
       card.className = 'prod-card';
-      // Pass finalImg to openDrawer so it matches
-      card.onclick = () => openDrawer({...p, finalImg: finalImg});
+      
+      // Pass the FULL ARRAY string to openDrawer
+      card.onclick = () => openDrawer({...p, imageArray: imageArray});
       
       card.innerHTML = `
         <div class="prod-img-wrapper">
-          <img src="${finalImg}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
+          <img src="${heroImg}" class="prod-img" onerror="this.src='assets/home/curated_teaser.png'"> 
         </div>
         <div class="prod-info">
           <h3 class="prod-title">${p.title}</h3>
@@ -307,47 +360,95 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
     });
   }
 
-  // ... (Keep existing openDrawer, closeDrawer, addToBag, updateCartIcon functions EXACTLY as they were) ...
-  // --- UPDATE openDrawer TO USE THE FIXED IMAGE ---
   function openDrawer(product) {
     activeProduct = product;
+    
+    // UI Resets
     document.getElementById('addToBagBtn').classList.remove('btn-hidden');
     document.getElementById('addToBagBtn').textContent = "Add to Bag";
+    document.getElementById('addToBagBtn').style.background = "#000"; 
     document.getElementById('shopMoreBtn').classList.add('btn-hidden');
     document.getElementById('viewCartBtn').classList.add('btn-hidden');
     
     document.getElementById('drawerTitle').textContent = product.title;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
     document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
+
+    // === CAROUSEL LOGIC ===
+    const track = document.getElementById('carouselTrack');
+    const dotsContainer = document.getElementById('carouselDots');
     
-    // Use the fixed image path we calculated in renderGrid
-    document.getElementById('drawerImg').src = product.finalImg || product.image; 
-    
+    track.innerHTML = '';
+    dotsContainer.innerHTML = '';
+
+    // Loop through all images in the array
+    product.imageArray.forEach((imgStr, index) => {
+        // 1. Create Slide
+        const fullPath = getFullImgPath(imgStr);
+        const slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        slide.innerHTML = `<img src="${fullPath}" draggable="false">`;
+        track.appendChild(slide);
+
+        // 2. Create Dot (Only if more than 1 image)
+        if (product.imageArray.length > 1) {
+            const dot = document.createElement('div');
+            dot.className = index === 0 ? 'dot active' : 'dot';
+            dotsContainer.appendChild(dot);
+        }
+    });
+
+    // 3. Scroll Listener to update active dot
+    if (product.imageArray.length > 1) {
+        track.onscroll = () => {
+            const scrollLeft = track.scrollLeft;
+            const width = track.offsetWidth;
+            const activeIndex = Math.round(scrollLeft / width);
+            
+            // Update dots
+            Array.from(dotsContainer.children).forEach((d, i) => {
+                d.classList.toggle('active', i === activeIndex);
+            });
+        };
+    }
+
+    // Open Drawer
     document.getElementById('pdpOverlay').classList.add('active');
     document.getElementById('pdpDrawer').classList.add('active');
     window.history.pushState({ drawer: true }, null, "");
   }
+
   function closeDrawer() {
     if(window.history.state && window.history.state.drawer) window.history.back();
-    else { document.getElementById('pdpOverlay').classList.remove('active'); document.getElementById('pdpDrawer').classList.remove('active'); activeProduct = null; }
+    else { 
+      document.getElementById('pdpOverlay').classList.remove('active'); 
+      document.getElementById('pdpDrawer').classList.remove('active'); 
+      activeProduct = null; 
+    }
   }
+
   window.onpopstate = function(event) {
     if (document.getElementById('pdpDrawer').classList.contains('active')) {
-      document.getElementById('pdpOverlay').classList.remove('active'); document.getElementById('pdpDrawer').classList.remove('active'); activeProduct = null;
-    } else { window.location.href = 'index.html'; }
+      document.getElementById('pdpOverlay').classList.remove('active'); 
+      document.getElementById('pdpDrawer').classList.remove('active'); 
+      activeProduct = null;
+    } else { 
+      window.location.href = 'index.html'; 
+    }
   };
+
   function addToBag() {
     if(!activeProduct) return;
     
-    // Use the fixed image path
-    const imgUrl = activeProduct.finalImg || activeProduct.image;
+    // Use the first image for the cart thumbnail
+    const heroImg = getFullImgPath(activeProduct.imageArray[0]);
     
     const cartItem = { 
       id: Date.now(), 
       type: "Ready-Made", 
       metal: activeProduct.metal, 
       price: Number(activeProduct.price), 
-      image: imgUrl, 
+      image: heroImg, 
       title: activeProduct.title, 
       charms: [], 
       isReadyMade: true 
@@ -367,11 +468,13 @@ const PRODUCTS = JSON.parse(localStorage.getItem('pyc_products') || "[]");
       document.getElementById('viewCartBtn').classList.remove('btn-hidden');
     }, 600);
   }
+
   function updateCartIcon() {
     const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
     const btn = document.getElementById('navCartBtn');
     if(cart.length > 0) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
   }
+
   init();
 </script>
 </body>
