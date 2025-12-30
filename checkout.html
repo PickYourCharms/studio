@@ -190,12 +190,20 @@
 
   <h3 class="section-title" style="margin-top: 30px;">Contact Info</h3>
   
-  <div class="form-group">
-    <label class="form-label">Full Name <span class="required-star">*</span></label>
-    <input type="text" id="customerName" class="premium-input" placeholder="e.g. Ananya Singh" 
-           autocomplete="name" 
+<div class="form-row">
+  <div class="form-col">
+    <label class="form-label">First Name <span class="required-star">*</span></label>
+    <input type="text" id="customerFirstName" class="premium-input" placeholder="e.g. Ananya" 
+           autocomplete="given-name" 
            oninput="validateInput(this); saveDraft()">
   </div>
+  <div class="form-col">
+    <label class="form-label">Last Name <span class="required-star">*</span></label>
+    <input type="text" id="customerLastName" class="premium-input" placeholder="Singh" 
+           autocomplete="family-name" 
+           oninput="validateInput(this); saveDraft()">
+  </div>
+</div>
 
   <div class="form-group">
     <label class="form-label">Phone Number <span class="required-star">*</span></label>
@@ -586,15 +594,22 @@ function calculateTotals() {
     else { sec.style.display = 'none'; }
     saveDraft();
   }
-  function copyContactDetails() {
+function copyContactDetails() {
     if(document.getElementById('copyDetails').checked) {
-      document.getElementById('receiverName').value = document.getElementById('customerName').value;
+      // ✅ CHANGED: Combine First + Last name
+      const fName = document.getElementById('customerFirstName').value;
+      const lName = document.getElementById('customerLastName').value;
+      document.getElementById('receiverName').value = (fName + " " + lName).trim();
+      
       const phone = document.getElementById('customerPhone').value;
       document.getElementById('receiverPhone').value = phone;
+      
       validateInput(document.getElementById('receiverName'));
-      const e = { inputType: 'insertText' }; handlePhoneInput(e, document.getElementById('receiverPhone')); 
+      const e = { inputType: 'insertText' }; 
+      handlePhoneInput(e, document.getElementById('receiverPhone')); 
     } else {
-      document.getElementById('receiverName').value = ''; document.getElementById('receiverPhone').value = '';
+      document.getElementById('receiverName').value = ''; 
+      document.getElementById('receiverPhone').value = '';
     }
     saveDraft();
   }
@@ -625,9 +640,12 @@ function calculateTotals() {
   function validateInput(el) { if(el.value.trim() !== "") el.classList.remove('input-error'); }
 
   // --- STORAGE ---
-  function saveDraft() {
+function saveDraft() {
     const data = {
-      name: document.getElementById('customerName').value,
+      // ✅ CHANGED: Saving split names
+      firstName: document.getElementById('customerFirstName').value,
+      lastName: document.getElementById('customerLastName').value,
+      
       phone: document.getElementById('customerPhone').value,
       email: document.getElementById('customerEmail').value,
       addressLine1: document.getElementById('addressLine1').value,
@@ -651,7 +669,11 @@ function calculateTotals() {
   function restoreDraft() {
     const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
     if(!data) return;
-    document.getElementById('customerName').value = data.name || '';
+    
+    // ✅ CHANGED: Restoring split names
+    document.getElementById('customerFirstName').value = data.firstName || '';
+    document.getElementById('customerLastName').value = data.lastName || '';
+    
     document.getElementById('customerPhone').value = data.phone || '';
     document.getElementById('customerEmail').value = data.email || '';
     document.getElementById('addressLine1').value = data.addressLine1 || '';
@@ -660,12 +682,14 @@ function calculateTotals() {
     document.getElementById('city').value = data.city || '';
     document.getElementById('state').value = data.state || '';
     document.getElementById('pincode').value = data.pincode || '';
+    
     if(data.vibe) {
       document.querySelectorAll('.vibe-chip').forEach(c => {
         if(c.textContent.includes(data.vibe)) selectVibe(c, data.vibe);
       });
       if(data.vibe === 'Other') document.getElementById('vibeText').value = data.vibeText || '';
     }
+    
     if(data.isGift) {
       document.getElementById('isGift').checked = true;
       toggleGiftSection();
@@ -676,7 +700,6 @@ function calculateTotals() {
       document.getElementById('giftMessage').value = data.giftMessage || '';
     }
   }
-
   function generateOrderID() {
     const now = new Date();
     const dd = String(now.getDate()).padStart(2, '0');
@@ -705,13 +728,16 @@ function calculateTotals() {
   }
 
 function proceedToWhatsApp() {
-    // 1. Retrieve First-Touch Data from Local Storage
+    // 1. Retrieve First-Touch Data
     const firstTouchData = JSON.parse(localStorage.getItem('pyc_first_touch_utm') || "{}");
     
     // 1. Validation 
     let isValid = true;
     let firstError = null;
-    const mandatoryIds = ['customerName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
+    
+    // ✅ CHANGED: Validating new IDs
+    const mandatoryIds = ['customerFirstName', 'customerLastName', 'customerPhone', 'customerEmail', 'addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
+    
     if(document.getElementById('isGift').checked) mandatoryIds.push('receiverName', 'receiverPhone');
     
     mandatoryIds.forEach(id => {
@@ -729,7 +755,6 @@ function proceedToWhatsApp() {
 
     saveDraft(); 
     
-    // Show Loading State
     const btn = document.querySelector('.whatsapp-btn');
     const originalText = btn.innerHTML;
     btn.innerHTML = "Processing Order... ↻";
@@ -738,10 +763,9 @@ function proceedToWhatsApp() {
     // 2. Prepare Data
     const data = JSON.parse(localStorage.getItem('checkout_draft_persistent'));
     const orderID = generateOrderID(); 
-    
     currentOrderID = orderID;
     
-    // Clean up Cart Items for Sheet
+    // Clean up Cart Items
     const itemsClean = cart.map(item => {
       if (item.type.includes('Combo')) {
         return {
@@ -760,11 +784,17 @@ function proceedToWhatsApp() {
       };
     });
 
+    // ✅ Helper: Create full name for message
+    const fullNameCombined = (data.firstName + " " + data.lastName).trim();
+
     const payload = {
       order_id: orderID,
       order_type: "WhatsApp Checkout",
+      
+      // ✅ These now map correctly because saveDraft() saves them
       customer_first_name: data.firstName,
       customer_last_name: data.lastName,
+      
       customer_phone: data.phone,
       customer_email: data.email,
       shipping_address: data.addressLine1 + ", " + data.addressLine2 + (data.landmark ? ", " + data.landmark : ""),
@@ -792,7 +822,6 @@ function proceedToWhatsApp() {
       utm_medium: firstTouchData.medium || "",
     };
 
-    // 3. Send to Google Sheet
     fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify(payload)
@@ -801,7 +830,6 @@ function proceedToWhatsApp() {
     .then(result => {
       console.log("Order Saved:", result);
       
-      // Construct WhatsApp Message
       let itemsStr = "";
       cart.forEach((item, i) => {
         let desc = item.type;
@@ -811,15 +839,12 @@ function proceedToWhatsApp() {
         itemsStr += `\n${i+1}. ${desc} - Rs. ${item.price}`;
       });
       
-      // ✅ MODIFIED: Gift Logic Starts Here
       let giftDetailsStr = "";
       if (data.isGift) {
         giftDetailsStr = `\n\n🎁 *GIFT DETAILS*`;
-        // Mandatory fields for gifts (Validation ensures these exist)
         giftDetailsStr += `\n*Receiver:* ${data.receiverName}`;
         giftDetailsStr += `\n*Phone:* ${data.receiverPhone}`;
         
-        // Optional fields - only add if they have text
         if (data.relation && data.relation.trim() !== "") {
           giftDetailsStr += `\n*Relation:* ${data.relation}`;
         }
@@ -830,15 +855,14 @@ function proceedToWhatsApp() {
           giftDetailsStr += `\n*Note:* ${data.giftMessage}`;
         }
       }
-      // ✅ Gift Logic Ends Here
 
-      let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${data.name}\n\n*Items:*${itemsStr}${giftDetailsStr}\n\n*Total:* ${payload.final_amount}`;
+      // ✅ CHANGED: Used fullNameCombined instead of data.name (which is now undefined)
+      let msg = `Hey PickYourCharms!✨\nI’ve just placed an order! 💌\n\n*Order ID:* ${orderID}\n*Name:* ${fullNameCombined}\n\n*Items:*${itemsStr}${giftDetailsStr}\n\n*Total:* ${payload.final_amount}`;
       
       const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
       
       document.getElementById('orderConfirmationModal').style.display = 'flex';
-      
       btn.innerHTML = originalText;
       btn.disabled = false;
     })
