@@ -419,137 +419,129 @@
   // ✅ UPDATED MATH: Shows True Value & Combo Savings Explicitly
   // ===================================
 
-  function calculateTotals() {
-    let grossTotal = 0; // The price of all items IF bought individually
-    
-    let allBracelets = [];
-    let allEarrings = [];
+function calculateTotals() {
+  let grossTotal = 0; 
+  let allBracelets = [];
+  let allEarrings = [];
 
-    // 1. EXTRACT ALL ITEMS AT FULL SINGLE PRICE
-    cart.forEach(item => {
-      if (item.type.includes('Combo')) {
-        const bPrice = getBPrice(item.bracelet);
-        const ePrice = getEPrice(item.earrings);
-        
-        grossTotal += (bPrice + ePrice);
-        
-        allBracelets.push(bPrice);
-        allEarrings.push(ePrice);
-      } 
-      else if (item.type === 'Bracelet') {
-        const price = getBPrice(item);
-        grossTotal += price;
-        allBracelets.push(price);
-      } 
-      else if (item.type === 'Earrings') {
-        const price = getEPrice(item);
-        grossTotal += price;
-        allEarrings.push(price);
-      }
-      else if (item.isReadyMade) {
-        grossTotal += item.price;
-      }
-    });
-
-    // 2. CALCULATE COMBO SAVINGS
-    allBracelets.sort((a,b) => a-b);
-    allEarrings.sort((a,b) => a-b);
-
-    let comboSavings = 0;
-    const comboPercent = Number(CONFIG.combo_discount_percent) || 0;
-    
-    const pairs = Math.min(allBracelets.length, allEarrings.length);
-    for(let i=0; i<pairs; i++) {
-      comboSavings += Math.floor((allBracelets[i] + allEarrings[i]) * (comboPercent / 100));
+  cart.forEach(item => {
+    if (item.type.includes('Combo')) {
+      const bPrice = getBPrice(item.bracelet);
+      const ePrice = getEPrice(item.earrings);
+      grossTotal += (bPrice + ePrice);
+      allBracelets.push(bPrice);
+      allEarrings.push(ePrice);
+    } 
+    else if (item.type === 'Bracelet') {
+      const price = getBPrice(item);
+      grossTotal += price;
+      allBracelets.push(price);
+    } 
+    else if (item.type === 'Earrings') {
+      const price = getEPrice(item);
+      grossTotal += price;
+      allEarrings.push(price);
     }
-
-    // 3. CALCULATE SUBTOTAL (After Combo, Before Coupon)
-    let subtotalAfterCombo = grossTotal - comboSavings;
-
-    // 4. CALCULATE COUPON DISCOUNT
-    let couponDisc = 0;
-    let forceFreeShip = false;
-
-    if (appliedCoupon) {
-      if (appliedCoupon.freeShip) {
-        forceFreeShip = true;
-      } 
-      else if (subtotalAfterCombo >= appliedCoupon.minOrder) {
-         if (appliedCoupon.flatAmount && Number(appliedCoupon.flatAmount) > 0) {
-           couponDisc = Number(appliedCoupon.flatAmount);
-         } else {
-           let rawDisc = Math.floor(subtotalAfterCombo * (appliedCoupon.percent / 100));
-           if (appliedCoupon.maxDiscount && Number(appliedCoupon.maxDiscount) > 0) {
-             rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
-           }
-           couponDisc = rawDisc;
-         }
-      }
+    else if (item.isReadyMade) {
+      grossTotal += item.price;
     }
+  });
 
-    let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
-
-    // 5. CALCULATE SHIPPING
-    // Use Pincode logic if available, otherwise default
-    const pincode = document.getElementById('pincode').value;
-    const msg = document.getElementById('pincodeMsg');
-    
-    const defaultFee = Number(CONFIG.shipping_fee_default) || 80;
-    const localFee = Number(CONFIG.shipping_fee_local) || 50;
-    const freeThreshold = Number(CONFIG.free_shipping_above) || 399;
-    const localPrefix = String(CONFIG.local_pincode_prefix || "560");
-
-    let shipping = defaultFee;
-    let shippingText = "";
-    let shippingColor = "#111";
-
-    if (forceFreeShip || (subtotalPostDiscount >= freeThreshold)) {
-      shipping = 0; 
-      shippingText = "Free shipping applied! ✨"; 
-      shippingColor = "#15803d";
-    } else if (pincode && pincode.startsWith(localPrefix)) {
-      shipping = localFee; 
-      shippingText = `Local delivery: Rs. ${localFee} 🛵`; 
-      shippingColor = "#15803d";
-    } else {
-      shippingText = `Standard Shipping: Rs. ${defaultFee}`; 
-      shippingColor = "#666";
-    }
-    
-    if(msg) {
-      msg.textContent = shippingText;
-      msg.style.color = shippingColor;
-    }
-
-    const finalTotal = subtotalPostDiscount + shipping;
-
-    // --- RENDER TO HTML ---
-    document.getElementById('cartValueVal').textContent = `Rs. ${grossTotal}`;
-    
-    const comboEl = document.getElementById('comboRow');
-    if(comboSavings > 0) { 
-      comboEl.style.display = 'flex'; 
-      document.getElementById('comboVal').textContent = `- Rs. ${comboSavings}`; 
-    } else {
-      comboEl.style.display = 'none';
-    }
-
-    const coupEl = document.getElementById('couponRow');
-    if(couponDisc > 0 || forceFreeShip) { 
-      coupEl.style.display = 'flex'; 
-      if (forceFreeShip) {
-         document.getElementById('couponVal').textContent = 'Free Shipping';
-      } else {
-         document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
-      }
-    } else {
-      coupEl.style.display = 'none';
-    }
-
-    document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
-    document.getElementById('shippingVal').textContent = shipping === 0 ? "FREE" : `Rs. ${shipping}`;
-    document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
+  allBracelets.sort((a,b) => a-b);
+  allEarrings.sort((a,b) => a-b);
+  let comboSavings = 0;
+  const comboPercent = Number(CONFIG.combo_discount_percent) || 0;
+  const pairs = Math.min(allBracelets.length, allEarrings.length);
+  for(let i=0; i<pairs; i++) {
+    comboSavings += Math.floor((allBracelets[i] + allEarrings[i]) * (comboPercent / 100));
   }
+  let subtotalAfterCombo = grossTotal - comboSavings;
+
+  // 3. DETERMINE NATURAL SHIPPING (Based on Pincode/Config)
+  const pincode = document.getElementById('pincode').value;
+  const msg = document.getElementById('pincodeMsg');
+  
+  const defaultFee = Number(CONFIG.shipping_fee_default) || 80;
+  const localFee = Number(CONFIG.shipping_fee_local) || 50;
+  const freeThreshold = Number(CONFIG.free_shipping_above) || 399;
+  const localPrefix = String(CONFIG.local_pincode_prefix || "560");
+
+  let naturalShipping = defaultFee;
+  let naturalText = `Standard Shipping: Rs. ${defaultFee}`;
+  let naturalColor = "#666";
+
+  if (subtotalAfterCombo >= freeThreshold) {
+    naturalShipping = 0;
+    naturalText = "Free shipping applied! ✨";
+    naturalColor = "#15803d";
+  } else if (pincode && pincode.startsWith(localPrefix)) {
+    naturalShipping = localFee;
+    naturalText = `Local delivery: Rs. ${localFee} 🛵`;
+    naturalColor = "#15803d";
+  }
+
+  // 4. COUPON LOGIC
+  let couponDisc = 0;
+  
+  if (appliedCoupon) {
+    if (appliedCoupon.freeShip) {
+      // ✅ Coupon deducts the cost of shipping from Subtotal
+      couponDisc = naturalShipping; 
+    } 
+    else if (subtotalAfterCombo >= appliedCoupon.minOrder) {
+       if (appliedCoupon.flatAmount && Number(appliedCoupon.flatAmount) > 0) {
+         couponDisc = Number(appliedCoupon.flatAmount);
+       } else {
+         let rawDisc = Math.floor(subtotalAfterCombo * (appliedCoupon.percent / 100));
+         if (appliedCoupon.maxDiscount && Number(appliedCoupon.maxDiscount) > 0) {
+           rawDisc = Math.min(rawDisc, Number(appliedCoupon.maxDiscount));
+         }
+         couponDisc = rawDisc;
+       }
+    }
+  }
+
+  // 5. FINAL SHIPPING LOGIC
+  // If Free Ship Coupon is active, user pays 0 for shipping
+  let finalShipping = naturalShipping;
+  if (appliedCoupon && appliedCoupon.freeShip) {
+    finalShipping = 0;
+    naturalText = "Free shipping applied! ✨";
+    naturalColor = "#15803d";
+  }
+
+  let subtotalPostDiscount = subtotalAfterCombo - couponDisc;
+  const finalTotal = subtotalPostDiscount + finalShipping;
+
+  // --- RENDER ---
+  if(msg) {
+    msg.textContent = naturalText;
+    msg.style.color = naturalColor;
+  }
+
+  document.getElementById('cartValueVal').textContent = `Rs. ${grossTotal}`;
+  
+  const comboEl = document.getElementById('comboRow');
+  if(comboSavings > 0) { 
+    comboEl.style.display = 'flex'; 
+    document.getElementById('comboVal').textContent = `- Rs. ${comboSavings}`; 
+  } else {
+    comboEl.style.display = 'none';
+  }
+
+  const coupEl = document.getElementById('couponRow');
+  if(appliedCoupon) { 
+    coupEl.style.display = 'flex'; 
+    // ✅ SHOWS "- Rs. 80" INSTEAD OF TEXT
+    document.getElementById('couponVal').textContent = `- Rs. ${couponDisc}`; 
+  } else {
+    coupEl.style.display = 'none';
+  }
+
+  document.getElementById('subtotalVal').textContent = `Rs. ${subtotalPostDiscount}`;
+  document.getElementById('shippingVal').textContent = finalShipping === 0 ? "FREE" : `Rs. ${finalShipping}`;
+  document.getElementById('finalTotal').textContent = `Rs. ${finalTotal}`;
+}
 
   // ===================================
   // ✅ EXISTING UI HANDLERS (Unchanged)
