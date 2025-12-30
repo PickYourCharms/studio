@@ -197,6 +197,14 @@ function init() {
   const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   navCartBtn.style.display = cart.length > 0 ? 'block' : 'none';
 
+  console.log('=== DEBUGGING CHARM DATA ===');
+  console.log('CHARMS object:', CHARMS);
+  console.log('CHARM_METADATA:', CHARM_METADATA);
+  console.log('Gold charms from storage:', localStorage.getItem('pyc_charms_gold'));
+  console.log('Silver charms from storage:', localStorage.getItem('pyc_charms_silver'));
+  console.log('Metadata from storage:', localStorage.getItem('pyc_charm_metadata'));
+  console.log('=== END DEBUG ===');
+
   if (isResume) {
     const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
     if (draft && draft.data) { metal = draft.data.metal; charms = draft.data.charms; }
@@ -228,10 +236,18 @@ function goBack() {
 function loadTray() {
   const latestGold = JSON.parse(localStorage.getItem('pyc_charms_gold') || "[]");
   const latestSilver = JSON.parse(localStorage.getItem('pyc_charms_silver') || "[]");
+   const latestMetadata = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
+
+  console.log(`Loading ${metal} charms:`, metal === 'gold' ? latestGold : latestSilver);
+  console.log('Metadata available:', Object.keys(latestMetadata).length, 'charms');
 
   if (CHARMS) {
     CHARMS.gold = latestGold;
     CHARMS.silver = latestSilver;
+  }
+
+   if (Object.keys(latestMetadata).length > 0) {
+    Object.assign(CHARM_METADATA, latestMetadata);
   }
 
   const list = CHARMS[metal];
@@ -244,25 +260,37 @@ function loadTray() {
     return;
   }
 
-  // ✅ FIXED: Get image filename from metadata
-  list.forEach(charmId => {
+list.forEach(charmId => {
     const meta = CHARM_METADATA[charmId];
+    
     if (!meta) {
-      console.warn(`Missing metadata for charm: ${charmId}`);
+      console.error(`❌ Missing metadata for charm ID: ${charmId}`);
+      console.log('Available metadata keys:', Object.keys(CHARM_METADATA));
       return;
     }
     
+    if (!meta.imageFile) {
+      console.error(`❌ Missing imageFile for charm: ${charmId}`, meta);
+      return;
+    }
+    
+    console.log(`✅ Rendering charm: ${charmId} → ${meta.imageFile}`);
+    
     const img = document.createElement('img');
     img.src = 'assets/charms/' + meta.imageFile;
+    img.alt = meta.name || charmId;
+    
     img.onerror = function() {
-      console.error(`Failed to load image: ${this.src}`);
-      this.src = 'assets/charms/placeholder.png'; // Optional fallback
+      console.error(`❌ Failed to load image: ${this.src}`);
+      this.style.border = '2px solid red';
     };
+    
     img.onclick = () => addCharm(charmId);
     tray.appendChild(img);
   });
+  
+  console.log(`✅ Loaded ${list.length} charms into tray`);
 }
-
 function addCharm(file){
   if(charms.length>=5) return;
   charms.push(file);
