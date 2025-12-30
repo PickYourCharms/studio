@@ -197,14 +197,6 @@ function init() {
   const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   navCartBtn.style.display = cart.length > 0 ? 'block' : 'none';
 
-  console.log('=== DEBUGGING CHARM DATA ===');
-  console.log('CHARMS object:', CHARMS);
-  console.log('CHARM_METADATA:', CHARM_METADATA);
-  console.log('Gold charms from storage:', localStorage.getItem('pyc_charms_gold'));
-  console.log('Silver charms from storage:', localStorage.getItem('pyc_charms_silver'));
-  console.log('Metadata from storage:', localStorage.getItem('pyc_charm_metadata'));
-  console.log('=== END DEBUG ===');
-
   if (isResume) {
     const draft = JSON.parse(sessionStorage.getItem('pyc_draft'));
     if (draft && draft.data) { metal = draft.data.metal; charms = draft.data.charms; }
@@ -234,63 +226,39 @@ function goBack() {
 }
 
 function loadTray() {
+  // 1. Always try to get the latest data from storage
+  // (This fixes the empty tray issue if data arrives late)
   const latestGold = JSON.parse(localStorage.getItem('pyc_charms_gold') || "[]");
   const latestSilver = JSON.parse(localStorage.getItem('pyc_charms_silver') || "[]");
-   const latestMetadata = JSON.parse(localStorage.getItem('pyc_charm_metadata') || "{}");
 
-  console.log(`Loading ${metal} charms:`, metal === 'gold' ? latestGold : latestSilver);
-  console.log('Metadata available:', Object.keys(latestMetadata).length, 'charms');
-
+  // Update our global variable
   if (CHARMS) {
     CHARMS.gold = latestGold;
     CHARMS.silver = latestSilver;
   }
 
-   if (Object.keys(latestMetadata).length > 0) {
-    Object.assign(CHARM_METADATA, latestMetadata);
-  }
-
+  // 2. Check if we have data for the selected metal
   const list = CHARMS[metal];
-  tray.innerHTML = '';
+  
+  tray.innerHTML = ''; // Clear current tray
 
+  // 3. SAFETY: If data is missing, wait 0.5 seconds and try again automatically
   if (!list || list.length === 0) {
-    console.log("Data not ready... retrying in 500ms");
+    console.log("Data not ready yet... retrying in 500ms");
     tray.innerHTML = '<div style="font-size:12px; color:#888; width:100%; text-align:center; padding:20px;">Loading charms...</div>';
     setTimeout(loadTray, 500); 
     return;
   }
 
-list.forEach(charmId => {
-    const meta = CHARM_METADATA[charmId];
-    
-    if (!meta) {
-      console.error(`❌ Missing metadata for charm ID: ${charmId}`);
-      console.log('Available metadata keys:', Object.keys(CHARM_METADATA));
-      return;
-    }
-    
-    if (!meta.imageFile) {
-      console.error(`❌ Missing imageFile for charm: ${charmId}`, meta);
-      return;
-    }
-    
-    console.log(`✅ Rendering charm: ${charmId} → ${meta.imageFile}`);
-    
+  // 4. Render the charms
+  list.forEach(file => {
     const img = document.createElement('img');
-    img.src = 'assets/charms/' + meta.imageFile;
-    img.alt = meta.name || charmId;
-    
-    img.onerror = function() {
-      console.error(`❌ Failed to load image: ${this.src}`);
-      this.style.border = '2px solid red';
-    };
-    
-    img.onclick = () => addCharm(charmId);
+    img.src = 'assets/charms/' + file;
+    img.onclick = () => addCharm(file);
     tray.appendChild(img);
   });
-  
-  console.log(`✅ Loaded ${list.length} charms into tray`);
 }
+
 function addCharm(file){
   if(charms.length>=5) return;
   charms.push(file);
@@ -357,10 +325,7 @@ function render(){
   const radius=rect.width*0.36;
   const angles=SLOT_ANGLES[charms.length];
 
-  charms.forEach((charmId,i)=>{
-    const meta = CHARM_METADATA[charmId];
-    if (!meta) return;
-    
+  charms.forEach((file,i)=>{
     const a=angles[angles.length-1-i];
     const rad=a*Math.PI/180;
     const x=cx+radius*Math.cos(rad);
@@ -373,7 +338,7 @@ function render(){
     w.style.transform='rotate('+(a-90)+'deg)';
     
     const img=document.createElement('img');
-    img.src='assets/charms/' + meta.imageFile; // ✅ USE IMAGE FILE FROM METADATA
+    img.src='assets/charms/'+file;
     w.appendChild(img);
     w.onclick=()=>{
       if(document.body.classList.contains('frozen-state')) return;
