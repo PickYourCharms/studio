@@ -337,20 +337,10 @@ function drawCharm(side){
   w.className='charm';
   w.style.left=(h.left-c.left+PHYSICS[side].x-PHYSICS.charmSize/2)+'px';
   w.style.top=(h.top-c.top+PHYSICS[side].y)+'px';
-  
-  // ✅ FIXED: Get image from metadata
-  const charmId = charms[side];
-  const meta = CHARM_METADATA[charmId];
-  if (!meta) {
-    console.error(`Missing metadata for charm: ${charmId}`);
-    return;
-  }
-  
   const img=document.createElement('img');
-  img.src='assets/charms/' + meta.imageFile;
+  img.src='assets/charms/'+charms[side];
   img.style.width=PHYSICS.charmSize+'px';
   w.appendChild(img);
-  
   w.onclick=()=>{
     if(document.body.classList.contains('frozen-state')) return;
     charms[side]=null;render();saveDraft();
