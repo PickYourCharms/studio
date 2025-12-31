@@ -32,6 +32,29 @@
       background-color: #f0fdf4; /* Slight green tint */
       font-weight: 700;
     }
+
+    /* ✅ STOCK ERROR HIGHLIGHTS */
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); border-color: #dc2626; }
+      70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); border-color: #dc2626; }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); border-color: #dc2626; }
+    }
+    
+    .stock-issue-btn {
+      color: #dc2626 !important;
+      background: #fef2f2 !important;
+      border: 1px solid #dc2626 !important;
+      animation: pulse-red 1.5s infinite;
+    }
+    
+    .stock-error-text {
+      color: #dc2626;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
+      display: block;
+      line-height: 1.4;
+    }
   </style>
 </head>
 
@@ -218,6 +241,9 @@ function init() {
     renderItems();
     renderCoupons();
     calculateTotals();
+    
+    // ✅ CHECK FOR STOCK ERRORS FROM CHECKOUT
+    checkStockErrors();
   }
 
   // Force scroll restore
@@ -236,6 +262,87 @@ window.addEventListener('pageshow', function(event) {
     init();
   }
 });
+
+// ===================================
+// ✅ STOCK ERROR HANDLING (UPDATED)
+// ===================================
+function checkStockErrors() {
+  const errorLog = sessionStorage.getItem('pyc_stock_error_log');
+  if (!errorLog) return;
+
+  const cartList = document.getElementById('cartItemsList');
+  
+  // Clean helper to format filename to Name
+  const formatName = (fid) => {
+      let n = fid.split('/').pop().split('.')[0];
+      n = n.replace(/_/g, ' ').replace(/-/g, ' ');
+      return n.charAt(0).toUpperCase() + n.slice(1);
+  };
+
+  Array.from(cartList.children).forEach((card, index) => {
+    const item = cart[index];
+    
+    const findBad = (list) => {
+        let bad = [];
+        const check = (id) => { if(id && errorLog.includes(id)) bad.push(id); };
+        if(Array.isArray(list)) list.forEach(check); 
+        else if (typeof list === 'object') { check(list.left); check(list.right); }
+        return bad;
+    };
+
+    if (item.type.includes('Combo')) {
+        const bBad = findBad(item.bracelet.charms);
+        if(bBad.length > 0) highlightRow(card.querySelectorAll('.combo-sub-item')[0], bBad);
+        
+        const eBad = findBad(item.earrings.charms);
+        if(eBad.length > 0) highlightRow(card.querySelectorAll('.combo-sub-item')[1], eBad);
+
+    } else {
+        let bad = [];
+        if (item.isReadyMade) {
+            // === READYMADE LOGIC: Highlight DELETE Button ===
+            if (errorLog.includes(item.sheetId)) {
+                const delBtn = card.querySelector('.delete-btn');
+                if(delBtn) delBtn.classList.add('stock-issue-btn');
+                
+                const det = card.querySelector('.item-details');
+                // Avoid Duplicate text
+                if(det && !det.innerHTML.includes("Sold Out")) {
+                    det.innerHTML += `<div class="stock-error-text">Sold Out! Please remove.</div>`;
+                }
+            }
+        } else {
+            // === CUSTOM LOGIC: Highlight EDIT Button ===
+            bad = findBad(item.charms);
+            if (bad.length > 0) highlightRow(card, bad);
+        }
+    }
+  });
+  
+  // Clear after showing
+  sessionStorage.removeItem('pyc_stock_error_log');
+}
+
+function highlightRow(rowElement, badItems) {
+    // Highlight Edit Button for Custom Items
+    const editBtn = rowElement.querySelector('.edit-btn');
+    if(editBtn) editBtn.classList.add('stock-issue-btn');
+    
+    const detailsDiv = rowElement.querySelector('.item-details');
+    
+    // Format names
+    const names = badItems.map(fid => {
+        let n = fid.split('/').pop().split('.')[0];
+        n = n.replace(/_/g, ' ').replace(/-/g, ' ');
+        return n.charAt(0).toUpperCase() + n.slice(1);
+    });
+    
+    const msg = document.createElement('div');
+    msg.className = 'stock-error-text';
+    msg.innerHTML = `⚠️ Replace: ${names.join(", ")}`;
+    
+    if(detailsDiv) detailsDiv.appendChild(msg);
+}
 
 // ===================================
 // ✅ MINI BUILDERS
