@@ -30,6 +30,7 @@ async function fetchStoreData() {
       data.charms.forEach(c => {
         charmMeta[c.id] = { 
             price: c.price, 
+            name: c.name,
             isPremium: c.is_premium,
             stock: Number(c.stock) || 0,
             // ✅ CAPTURE TYPE (Defaults to 'both' if empty)
