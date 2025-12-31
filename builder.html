@@ -105,7 +105,7 @@ h2 { margin: 8px 0 10px; text-align: center; }
     
     <div id="premiumToast" class="premium-toast">💫 Premium Charm Added</div>
     
-    <div class="helper">Tap a charm to add • Tap charm to remove</div>
+    <div class="helper">Tap to add/remove charm • Max 5 charms • 1 per kind</div>
   </div>
 
   <div class="tray-surface"> <div class="tray" id="tray"></div> </div>
@@ -128,7 +128,6 @@ h2 { margin: 8px 0 10px; text-align: center; }
   </div>
 </div>
 
-<div id="premiumToast" class="premium-toast">💫 Premium Charm Added</div>
 <style>
 .builder-surface {
   position: relative; /* Ensure toast positions relative to this box */
@@ -185,6 +184,7 @@ const cta = document.getElementById('cta');
 const modal = document.getElementById('modal');
 const modalText = document.getElementById('modalText');
 const modalConfirm = document.getElementById('modalConfirm');
+const modalSecondaryBtn = document.querySelector('#modal .secondary'); // Grab cancel btn to toggle it
 const navCartBtn = document.getElementById('navCartBtn');
 const pageTitle = document.getElementById('pageTitle');
 const premiumToast = document.getElementById('premiumToast');
@@ -258,11 +258,9 @@ function getDynamicStock(charmId) {
   if (!meta) return 0;
 
   const totalStock = meta.stock || 0;
-  // NOTE: getCartUsage is defined in store_data.js and globally available
   const cartUsed = typeof getCartUsage === 'function' ? getCartUsage(charmId) : 0; 
   
   let stagedUsed = 0;
-  // If we are building a bracelet, check if there are "Staged" earrings (Combo flow)
   const stagedEarrings = sessionStorage.getItem('combo_earring_data');
   if (stagedEarrings) {
     const eData = JSON.parse(stagedEarrings);
@@ -272,24 +270,26 @@ function getDynamicStock(charmId) {
     }
   }
 
-  // Effective Stock = Total - (Cart + Staged)
   return Math.max(0, totalStock - cartUsed - stagedUsed);
 }
 
 // === UPDATED ADD FUNCTION ===
 function addCharm(file){
-  if(charms.length >= 5) return;
-  
-  // 1. DUPLICATE CHECK
-  if(charms.includes(file)) {
-    alert("You've already added this charm. You can only add each charm once for bracelets.");
+  if(charms.length >= 5) {
+    showAlert("Add upto 5 charms only.");
     return;
   }
   
-  // 2. STOCK CHECK
+  // 1. DUPLICATE CHECK (In-App Pop-up)
+  if(charms.includes(file)) {
+    showAlert("One charm can be added only once.");
+    return;
+  }
+  
+  // 2. STOCK CHECK (In-App Pop-up)
   const available = getDynamicStock(file);
   if(available <= 0) {
-     alert("Sorry! This charm is out of stock (checked against your cart/design).");
+     showAlert("Uh-oh! We just ran out of stock");
      return;
   }
 
@@ -305,9 +305,7 @@ function addCharm(file){
 
 function showPremiumToast() {
   premiumToast.classList.add('show');
-  
   if(window.premiumTimer) clearTimeout(window.premiumTimer);
-  
   window.premiumTimer = setTimeout(() => {
     premiumToast.classList.remove('show');
   }, 2000);
@@ -434,11 +432,24 @@ function addToCart(item) {
   pageTitle.textContent = "Added to Bag ✨";
 }
 
+// === ALERT FUNCTION (Only OKAY) ===
+function showAlert(text) {
+  modalText.textContent = text;
+  modalSecondaryBtn.style.display = 'none'; // Hide cancel
+  modalConfirm.textContent = 'Okay';
+  modalConfirm.onclick = () => { closeModal(); };
+  modal.style.display = 'flex';
+}
+
+// === CONFIRM MODAL (Cancel + Confirm) ===
 function showModal(text,confirmFn){
-  modalText.textContent=text;
+  modalText.textContent = text;
+  modalSecondaryBtn.style.display = 'block'; // Show cancel
+  modalConfirm.textContent = 'Confirm';
   modalConfirm.onclick=()=>{ closeModal(); confirmFn(); };
   modal.style.display='flex';
 }
+
 function closeModal(){ modal.style.display='none'; }
 
 init();
