@@ -332,9 +332,16 @@ function highlightRow(rowElement, badItems) {
     
     // Format names
     const names = badItems.map(fid => {
-        let n = fid.split('/').pop().split('.')[0];
-        n = n.replace(/_/g, ' ').replace(/-/g, ' ');
-        return n.charAt(0).toUpperCase() + n.slice(1);
+        // 1. Look up the charm in metadata
+        const meta = CHARM_METADATA[fid];
+        
+        // 2. If found, use the official name from Google Sheet
+        if (meta && meta.name) {
+            return meta.name;
+        }
+        
+        // 3. Fallback: If for some reason metadata is missing, use ID
+        return "Unknown Item"; 
     });
     
     const msg = document.createElement('div');
