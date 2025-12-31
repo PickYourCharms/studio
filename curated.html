@@ -246,26 +246,8 @@
       </div>
       <div id="drawerMetal" class="pdp-metal-tag"></div>
 
-      <div class="desc-section">
-        <h4>The Inspiration</h4>
-        <p>Made for fluttery giggles and happy twirls. This little butterfly bracelet is her tiny ticket to fairyland!</p>
-
-        <h4>The Design</h4>
-        <p>This silver kids bracelet features a butterfly motif. One side of the wings is coated with violet enamel, and the other side is studded with zircons.</p>
-        
-        <ul>
-          <li>925 Silver</li>
-          <li>Perfect for kids' sensitive skin</li>
-          <li>Charm: 0.75 x 1 cm</li>
-          <li>Length of chain: 13 cm + 2.5 cm Adjustable</li>
-          <li>Comes with the GIVA Jewellery kit and authenticity certificate</li>
-          <li>Content: Bracelet</li>
-          <li>Net Qty- 1 unit</li>
-        </ul>
-
-        <h4>Styling Tip</h4>
-        <p>Pair this with butterfly-inspired studs.</p>
-      </div>
+      <div class="desc-section" id="drawerDescription">
+        </div>
     </div>
   </div>
 
@@ -298,8 +280,27 @@
   };
 
   function init() {
+    checkFilterVisibility(); // ✅ NEW LOGIC
     renderGrid();
     updateCartIcon();
+  }
+
+  // ✅ HIDE EMPTY FILTERS
+  function checkFilterVisibility() {
+    const activeProducts = PRODUCTS.filter(p => String(p.active).toLowerCase() === 'true');
+
+    // Helper to hide/show
+    const setVis = (id, exists) => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = exists ? 'inline-block' : 'none';
+    };
+
+    setVis('btnGold', activeProducts.some(p => p.metal === 'Gold'));
+    setVis('btnSilver', activeProducts.some(p => p.metal === 'Silver'));
+    
+    setVis('btnBracelet', activeProducts.some(p => p.type === 'Bracelet'));
+    setVis('btnEarring', activeProducts.some(p => p.type === 'Earring')); 
+    setVis('btnSet', activeProducts.some(p => p.type === 'Set'));
   }
 
   function toggleFilter(category, value) {
@@ -393,6 +394,14 @@
     document.getElementById('drawerTitle').textContent = product.title;
     document.getElementById('drawerPrice').textContent = `Rs. ${product.price}`;
     document.getElementById('drawerMetal').textContent = `${product.metal} Base`;
+
+    // === DYNAMIC DESCRIPTION ===
+    const descHTML = `
+        ${product.description_inspiration ? `<h4>The Inspiration</h4><p>${product.description_inspiration}</p>` : ''}
+        ${product.description_design ? `<h4>The Design</h4><p>${product.description_design}</p>` : ''}
+        ${product.description_styling ? `<h4>Styling Tip</h4><p>${product.description_styling}</p>` : ''}
+    `;
+    document.getElementById('drawerDescription').innerHTML = descHTML || '<p>No details available.</p>';
 
     // === STOCK DISPLAY ===
     const stockEl = document.getElementById('drawerStock');
