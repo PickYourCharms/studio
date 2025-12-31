@@ -123,6 +123,7 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
     .modal h3 { margin: 0 0 8px; font-size: 18px; }
+    .modal-text { font-size: 14px; color: #444; margin-bottom: 20px; line-height: 1.5; }
     .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
     .modal-actions button { flex: 1; padding: 14px; border-radius: 999px; border: none; cursor: pointer; font-weight: 600; font-size: 14px;}
     .primary { background: #000; color: #fff; }
@@ -310,10 +311,10 @@
 <div id="confirmBackModal" class="modal">
   <div class="modal-card">
     <h3>Go back to cart?</h3>
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">Your details are saved.</p>
+    <p class="modal-text">Your details are saved.</p>
     <div class="modal-actions">
       <button class="secondary" onclick="confirmGoBack()">Go Back</button>
-      <button class="primary" onclick="closeModal()">Stay Here</button>
+      <button class="primary" onclick="closeModal('confirmBackModal')">Stay Here</button>
     </div>
   </div>
 </div>
@@ -321,10 +322,20 @@
 <div id="orderConfirmationModal" class="modal">
   <div class="modal-card">
     <h3>Did you place the order?</h3>
-    <p style="color:#666; font-size:14px; margin-bottom:20px;">Help us update your cart status.</p>
+    <p class="modal-text">Help us update your cart status.</p>
     <div class="modal-actions">
       <button class="secondary" onclick="dismissOrderConfirmation()">No, I didn't</button>
       <button class="primary" onclick="confirmOrderPlaced()">Yes, Placed!</button>
+    </div>
+  </div>
+</div>
+
+<div id="outOfStockModal" class="modal">
+  <div class="modal-card">
+    <h3>Uh-oh!</h3>
+    <p class="modal-text" id="stockErrorMsg">Some items in your cart just went out of stock.</p>
+    <div class="modal-actions">
+      <button class="primary" onclick="closeModal('outOfStockModal')">Okay</button>
     </div>
   </div>
 </div>
@@ -753,12 +764,13 @@ function proceedToWhatsApp() {
     .then(response => response.json())
     .then(result => {
       
-      // === NEW: HANDLE STOCK ERROR ===
+      // === NEW: HANDLE OUT OF STOCK ===
       if(result.result === "error" && result.type === "out_of_stock") {
-         alert("Order Failed: " + result.message + "\n\nPlease go back to cart and remove the out-of-stock items.");
+         document.getElementById('stockErrorMsg').textContent = result.message;
+         document.getElementById('outOfStockModal').style.display = 'flex'; // SHOW MODAL
          btn.innerHTML = originalText;
          btn.disabled = false;
-         return; // STOP execution
+         return; 
       }
       // ==============================
 
@@ -813,9 +825,9 @@ function proceedToWhatsApp() {
     document.getElementById('confirmBackModal').style.display = 'flex';
   }
 
-  function closeModal() { 
-    document.getElementById('confirmBackModal').style.display = 'none'; 
-    if(isDeviceBack) {
+  function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+    if(id === 'confirmBackModal' && isDeviceBack) {
       window.history.pushState({ page: 'checkout' }, null, window.location.href);
       isDeviceBack = false;
     }
