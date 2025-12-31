@@ -264,7 +264,7 @@ window.addEventListener('pageshow', function(event) {
 });
 
 // ===================================
-// ✅ STOCK ERROR HANDLING (UPDATED)
+// ✅ STOCK ERROR HANDLING
 // ===================================
 function checkStockErrors() {
   const errorLog = sessionStorage.getItem('pyc_stock_error_log');
@@ -710,6 +710,7 @@ function checkManualCode() {
   document.querySelector('.coupon-input-wrapper button').classList.remove('ready');
 }
 
+// ✅ UPDATED SORTING LOGIC FOR BEST COUPON
 function renderCoupons() {
   const currentTotal = getDiscountableAmount();
   const drawerList = document.getElementById('drawerList');
@@ -738,8 +739,17 @@ function renderCoupons() {
     }
     return { ...c, currentSavings: savings, isLocked: currentTotal < c.minOrder, missingAmount: c.minOrder - currentTotal };
   }).sort((a, b) => {
+    // 1. Prioritize Unlocked (isLocked = false) over Locked
     if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1;
-    return b.currentSavings - a.currentSavings;
+    
+    // 2. If both are Unlocked, prioritize Max Savings
+    if (!a.isLocked) {
+        return b.currentSavings - a.currentSavings;
+    } 
+    // 3. If both are Locked, prioritize Smallest Missing Amount (Closest to unlock)
+    else {
+        return a.missingAmount - b.missingAmount;
+    }
   });
 
   let bestCoupon = sortedCoupons[0];
