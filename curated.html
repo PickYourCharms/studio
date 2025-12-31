@@ -306,7 +306,6 @@
       if (activeFilters.metal === 'Silver') document.getElementById('btnSilver').classList.add('active');
       if (activeFilters.type === 'Bracelet') document.getElementById('btnBracelet').classList.add('active');
       if (activeFilters.type === 'Earring') document.getElementById('btnEarring').classList.add('active');
-      // ✅ ADDED THIS LINE FOR SET
       if (activeFilters.type === 'Set') document.getElementById('btnSet').classList.add('active');
     }
   }
@@ -343,7 +342,8 @@
       const card = document.createElement('div');
       card.className = 'prod-card';
       
-      card.onclick = () => openDrawer({...p, imageArray: imageArray});
+      // ✅ FIX: Saving 'p.id' as 'sheetId'
+      card.onclick = () => openDrawer({...p, imageArray: imageArray, sheetId: p.id});
       
       card.innerHTML = `
         <div class="prod-img-wrapper">
@@ -380,16 +380,13 @@
     track.innerHTML = '';
     dotsContainer.innerHTML = '';
 
-    // Loop through all images in the array
     product.imageArray.forEach((imgStr, index) => {
-        // 1. Create Slide
         const fullPath = getFullImgPath(imgStr);
         const slide = document.createElement('div');
         slide.className = 'carousel-slide';
         slide.innerHTML = `<img src="${fullPath}" draggable="false">`;
         track.appendChild(slide);
 
-        // 2. Create Dot (Only if more than 1 image)
         if (product.imageArray.length > 1) {
             const dot = document.createElement('div');
             dot.className = index === 0 ? 'dot active' : 'dot';
@@ -397,21 +394,17 @@
         }
     });
 
-    // 3. Scroll Listener to update active dot
     if (product.imageArray.length > 1) {
         track.onscroll = () => {
             const scrollLeft = track.scrollLeft;
             const width = track.offsetWidth;
             const activeIndex = Math.round(scrollLeft / width);
-            
-            // Update dots
             Array.from(dotsContainer.children).forEach((d, i) => {
                 d.classList.toggle('active', i === activeIndex);
             });
         };
     }
 
-    // Open Drawer
     document.getElementById('pdpOverlay').classList.add('active');
     document.getElementById('pdpDrawer').classList.add('active');
     window.history.pushState({ drawer: true }, null, "");
@@ -439,6 +432,31 @@
   function addToBag() {
     if(!activeProduct) return;
     
+    // === NEW: STOCK CHECK LOGIC ===
+    const currentStock = Number(activeProduct.stock) || 0;
+    const cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
+    
+    // Count how many of this product (by Sheet ID) are ALREADY in the cart
+    const inCartCount = cart.filter(item => item.sheetId === activeProduct.id).length;
+
+    // Check if adding one more would exceed stock
+    if (inCartCount + 1 > currentStock) {
+       const addBtn = document.getElementById('addToBagBtn');
+       const originalText = addBtn.textContent;
+       const originalColor = addBtn.style.background;
+       
+       addBtn.textContent = `Only ${currentStock} available!`;
+       addBtn.style.background = "#dc2626"; // Error Red
+       
+       // Revert button after 2 seconds
+       setTimeout(() => {
+         addBtn.textContent = originalText;
+         addBtn.style.background = originalColor;
+       }, 2000);
+       return; 
+    }
+    // ===============================
+
     const heroImg = getFullImgPath(activeProduct.imageArray[0]);
     
     const cartItem = { 
@@ -449,10 +467,10 @@
       image: heroImg, 
       title: activeProduct.title, 
       charms: [], 
-      isReadyMade: true 
+      isReadyMade: true,
+      sheetId: activeProduct.sheetId 
     };
     
-    let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
     cart.push(cartItem);
     localStorage.setItem('pyc_cart', JSON.stringify(cart));
     updateCartIcon();
