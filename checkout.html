@@ -335,7 +335,7 @@
     <h3>Uh-oh!</h3>
     <p class="modal-text" id="stockErrorMsg">Some items in your cart just went out of stock.</p>
     <div class="modal-actions">
-      <button class="primary" onclick="closeModal('outOfStockModal')">Okay</button>
+      <button class="primary" onclick="redirectToCart()">Okay</button>
     </div>
   </div>
 </div>
@@ -766,8 +766,11 @@ function proceedToWhatsApp() {
       
       // === NEW: HANDLE OUT OF STOCK ===
       if(result.result === "error" && result.type === "out_of_stock") {
-         document.getElementById('stockErrorMsg').textContent = result.message;
-         document.getElementById('outOfStockModal').style.display = 'flex'; // SHOW MODAL
+         // SAVE ERROR LOG FOR CART TO READ
+         sessionStorage.setItem('pyc_stock_error_log', result.message);
+         
+         document.getElementById('stockErrorMsg').textContent = "Some items are out of stock. Please fix your cart.";
+         document.getElementById('outOfStockModal').style.display = 'flex';
          btn.innerHTML = originalText;
          btn.disabled = false;
          return; 
@@ -831,6 +834,10 @@ function proceedToWhatsApp() {
       window.history.pushState({ page: 'checkout' }, null, window.location.href);
       isDeviceBack = false;
     }
+  }
+  
+  function redirectToCart() {
+    window.location.href = 'cart.html';
   }
 
   function confirmGoBack() { 
