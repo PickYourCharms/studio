@@ -611,10 +611,18 @@ function renderItems() {
 
       const actions = document.createElement('div');
       actions.className = 'item-actions';
-      actions.innerHTML = `
-        <button class="icon-btn edit-btn" onclick="editItem(${index})">✎</button>
-        <button class="icon-btn delete-btn" onclick="deleteItem(${index})">✕</button>
-      `;
+
+      // ✅ FIX: Hide Edit button for Ready-Made (Curated) items
+      if (item.isReadyMade) {
+         actions.innerHTML = `
+           <button class="icon-btn delete-btn" onclick="deleteItem(${index})">✕</button>
+         `;
+      } else {
+         actions.innerHTML = `
+           <button class="icon-btn edit-btn" onclick="editItem(${index})">✎</button>
+           <button class="icon-btn delete-btn" onclick="deleteItem(${index})">✕</button>
+         `;
+      }
 
       wrapper.appendChild(thumbBox);
       wrapper.appendChild(details);
