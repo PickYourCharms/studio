@@ -245,6 +245,14 @@ function loadTray() {
   }
 
   list.forEach(file => {
+    // === NEW: Filter by Type ===
+    const meta = CHARM_METADATA[file];
+    const type = (meta && meta.type) ? meta.type : 'both';
+    
+    // In Bracelet Builder, hide charms meant ONLY for Earrings
+    if (type === 'earring') return; 
+    // ===========================
+
     const img = document.createElement('img');
     img.src = 'assets/charms/' + file;
     img.onclick = () => addCharm(file);
