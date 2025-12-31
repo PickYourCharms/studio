@@ -25,14 +25,15 @@ async function fetchStoreData() {
         return m === 'silver' || m === 'both';
       }).map(c => c.id);
 
-      // 2. Process Metadata (Prices, Premium & STOCK)
-      // ✅ FIXED: This logic is now inside the success block where 'data' exists
+      // 2. Process Metadata (Prices, Premium, STOCK & TYPE)
       const charmMeta = {};
       data.charms.forEach(c => {
         charmMeta[c.id] = { 
             price: c.price, 
             isPremium: c.is_premium,
-            stock: Number(c.stock) || 0 // <--- CAPTURE STOCK HERE
+            stock: Number(c.stock) || 0,
+            // ✅ CAPTURE TYPE (Defaults to 'both' if empty)
+            type: c.type ? String(c.type).toLowerCase().trim() : 'both' 
         };
       });
 
