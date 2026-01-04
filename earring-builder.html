@@ -441,7 +441,15 @@ cta.onclick = function() {
       price: Math.floor((bPrice + ePrice) * (1 - (Number(CONFIG.combo_discount_percent) || 0) / 100)),
       image: 'assets/home/model_combo_mobile.png'
     };
-    
+    if(typeof fbq !== 'undefined') {
+      fbq('track', 'AddToCart', {
+        content_name: 'Bracelet + Earring Combo',
+        content_ids: ['combo_set'], 
+        content_type: 'product',
+        value: Number(product.price),
+        currency: 'INR'
+      });
+    }
     let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
     cart.push(product);
     localStorage.setItem('pyc_cart', JSON.stringify(cart));
@@ -538,6 +546,15 @@ function calculateBraceletPrice(bCharms) {
 }
 
 function addToCart(item) {
+    if(typeof fbq !== 'undefined') {
+    fbq('track', 'AddToCart', {
+      content_name: 'Custom Earrings (' + item.metal + ')',
+      content_ids: ['custom_earrings_' + item.metal], 
+      content_type: 'product',
+      value: Number(item.price),
+      currency: 'INR'
+    });
+  }
   window.history.pushState({ page: 'frozen' }, null, window.location.href);
   let cart = JSON.parse(localStorage.getItem('pyc_cart') || '[]');
   cart.push(item);
